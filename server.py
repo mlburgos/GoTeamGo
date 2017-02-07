@@ -104,11 +104,39 @@ def handle_new_workout():
     db.session.commit()
 
     flash("User %s added." % email)
-    return redirect("/log_new_workout")
+    return redirect("/users/<int:user_id>")
 
 
+@app.route('/logout')
+def logout():
+    """Log out."""
+
+    del session["user_id"]
+    flash("Logged Out.")
+    return redirect("/")
 
 
+@app.route('/users/<int:user_id>')
+def user_profile(user_id):
+    pass
+
+
+@app.route('/groups/<int:group_id>')
+def group_profile(group_id):
+    pass
+
+
+@app.route('/group_mates')
+def show_user_group_mates():
+    pass
+
+
+@app.route('/groups')
+def show_user_groups():
+    pass
+
+
+##############################################################################
 
 
 if __name__ == "__main__":
