@@ -89,6 +89,7 @@ class Group(db.Model):
                          )
     group_name = db.Column(db.String(64),
                            nullable=False,
+                           unique=True,
                            )
 
     # Defining relationships.

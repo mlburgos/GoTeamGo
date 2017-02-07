@@ -46,6 +46,12 @@ def handle_login():
     return redirect("/users/%s" % user.user_id)
 
 
+@app.route('/register')
+def registration():
+
+    return render_template("user-registration.html")
+
+
 @app.route('/register', methods=['POST'])
 def register_process():
     """Process registration."""
