@@ -53,8 +53,8 @@ def register_process():
     # Get form variables
     email = request.form["email"]
     password = request.form["password"]
-    first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
+    first_name = request.form["first-name"]
+    last_name = request.form["last-name"]
 
     new_user = User(email=email,
                     password=password,
@@ -70,26 +70,34 @@ def register_process():
 
 
 @app.route('/log_new_workout')
-def register_process():
+def new_workout():
     """Workout form."""
 
     return render_template("new-workout-form.html")
 
 
 @app.route('/log_new_workout', methods=['POST'])
-def register_process():
-    """Process registration."""
+def handle_new_workout():
+    """Process new workout."""
+
+    # Get user_id from session
+    user_id = session.get("user_id")
 
     # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
-    first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
+    exercise_type = request.form["exercise-type"]
+    workout_time = request.form["workout-time"]
+    performance_rating = request.form["performance-rating"]
+    distance = request.form["distance"]
+    distance_unit = request.form["distance-unit"]
+    description = request.form["description"]
 
-    new_user = User(email=email,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name,
+    new_user = User(user_id=user_id,
+                    exercise_type=exercise_type,
+                    workout_time=workout_time,
+                    performance_rating=performance_rating,
+                    distance=distance,
+                    distance_unit=distance_unit,
+                    description=description,
                     )
 
     db.session.add(new_user)
