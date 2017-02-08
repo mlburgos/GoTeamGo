@@ -126,6 +126,42 @@ def add_sample_likes(num_workouts, num_users):
             db.session.commit()
 
 
+def add_sample_goals():
+
+    # Defines the group_id: admin's user_id
+    group_admin = {1: 3,
+                   2: 1,
+                   3: 2,
+                   }
+
+    # Defines the [Day component of datetime obj, goal in terms of number of
+    # workouts].
+    # The first two are set for mondays, and the third is a wednesday. I will be
+    # implementing logic to have the wednesday goal declaration apply from the
+    # most recent monday. In this case that will be 1/16/2017. I will also want
+    # this goal to apply for all subsequent weeks until it is updated again.
+    days_and_goals = {1: [2, 4],
+                      2: [9, 8],
+                      3: [18, 4],
+                      }
+
+    for day_and_goal in days_and_goals.values():
+        for group in group_admin:
+            group_id = group
+            user_id = group_admin[group]
+            date_iniciated = datetime(2017, 1, day_and_goal[0])
+            goal = day_and_goal[1]
+
+            new_goal = Goal(group_id=group_id,
+                            user_id=user_id,
+                            date_iniciated=date_iniciated,
+                            goal=goal,
+                            )
+
+            print new_goal
+            db.session.add(new_goal)
+            db.session.commit()
+
 if __name__ == '__main__':
 
     from server import app
@@ -142,3 +178,4 @@ if __name__ == '__main__':
     assign_group_admins(users_to_add)
     add_sample_workouts(workouts_to_add, users_to_add)
     add_sample_likes(workouts_to_add, users_to_add)
+    add_sample_goals()
