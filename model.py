@@ -144,9 +144,6 @@ class GroupAdmin(db.Model):
                   )
 
 
-
-
-
 class Goal(db.Model):
     """Define and update group goals
 
@@ -255,6 +252,31 @@ class Like(db.Model):
 
         return "<Like like_id=%s workout_id=%s user_id=%s>"\
                % (self.like_id, self.workout_id, self.user_id)
+
+
+class Photo(db.Model):
+    """Stores user photos"""
+
+    __tablename__ = "photos"
+
+    photo_id = db.Column(db.Integer,
+                         autoincrement=True,
+                         primary_key=True,
+                         )
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False,
+                        )
+    photo_url = db.Column(db.String(350),
+                          nullable=False,
+                          )
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<Photo photo_id=%s user_id=%s>"\
+               % (self.photo_id, self.user_id)
+
 
 
 ##############################################################################

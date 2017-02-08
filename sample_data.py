@@ -162,6 +162,18 @@ def add_sample_goals():
             db.session.add(new_goal)
             db.session.commit()
 
+
+def add_my_photo():
+    """Adds my photo to User1"""
+
+    my_photo = Photo(user_id=1,
+                     photo_url="http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg",
+                     )
+
+    print my_photo
+    db.session.add(my_photo)
+    db.session.commit()
+
 if __name__ == '__main__':
 
     from server import app
@@ -179,3 +191,4 @@ if __name__ == '__main__':
     add_sample_workouts(workouts_to_add, users_to_add)
     add_sample_likes(workouts_to_add, users_to_add)
     add_sample_goals()
+    add_my_photo()

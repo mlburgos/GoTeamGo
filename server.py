@@ -136,7 +136,13 @@ def logout():
 
 @app.route('/users/<int:user_id>')
 def user_profile(user_id):
-    pass
+    
+
+    
+
+    return render_template("user-profile.html",
+                           user_photo=user_photo)
+
 
 
 @app.route('/groups/<int:group_id>')
