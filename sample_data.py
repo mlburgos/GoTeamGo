@@ -57,20 +57,27 @@ def assign_group_users(num):
 
 
 def assign_group_admins(num):
+    """Manually created this to ensure that the user_id and group_id match"""
 
-    x = 0
-    for i in range(1, num + 1):
-        if i % 5 == 0:
-            x += 1
-            user_id = i
-            group_id = x
+    new_group_admin1 = GroupAdmin(user_id=3,
+                                  group_id=1,
+                                  )
+    new_group_admin2 = GroupAdmin(user_id=1,
+                                  group_id=2,
+                                  )
+    new_group_admin3 = GroupAdmin(user_id=2,
+                                  group_id=3,
+                                  )
 
-            new_group_admin = GroupAdmin(user_id=user_id,
-                                         group_id=group_id,
-                                         )
-            print new_group_admin
-            db.session.add(new_group_admin)
-            db.session.commit()
+    print new_group_admin1
+    print new_group_admin2
+    print new_group_admin3
+
+    db.session.add(new_group_admin1,
+                   new_group_admin2,
+                   new_group_admin3,
+                   )
+    db.session.commit()
 
 
 def add_sample_workouts(num_workouts, num_users):
