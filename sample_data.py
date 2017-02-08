@@ -57,7 +57,9 @@ def assign_group_users(num):
 
 
 def assign_group_admins(num):
-    """Manually created this to ensure that the user_id and group_id match"""
+    """Manually created this to ensure that the user_id and group_id match
+
+    This will break if you change the number of groups_to_add"""
 
     new_group_admin1 = GroupAdmin(user_id=3,
                                   group_id=1,
@@ -73,10 +75,9 @@ def assign_group_admins(num):
     print new_group_admin2
     print new_group_admin3
 
-    db.session.add(new_group_admin1,
-                   new_group_admin2,
-                   new_group_admin3,
-                   )
+    db.session.add(new_group_admin1)
+    db.session.add(new_group_admin2)
+    db.session.add(new_group_admin3)
     db.session.commit()
 
 
@@ -109,6 +110,20 @@ def add_sample_workouts(num_workouts, num_users):
             db.session.commit()
 
 
+def add_sample_likes(num_workouts, num_users):
+    """User1 is liking every fifth workout that is in the db."""
+
+    for j in range(1, num_users*num_workouts + 1):
+        if j % 5 == 0:
+            new_like = Like(workout_id=j,
+                            user_id=1,
+                            )
+
+            if (j % 15 == 0):
+                print new_like
+
+            db.session.add(new_like)
+            db.session.commit()
 
 
 if __name__ == '__main__':
@@ -126,3 +141,4 @@ if __name__ == '__main__':
     assign_group_users(users_to_add)
     assign_group_admins(users_to_add)
     add_sample_workouts(workouts_to_add, users_to_add)
+    add_sample_likes(workouts_to_add, users_to_add)
