@@ -146,6 +146,7 @@ class GroupAdmin(db.Model):
 
 
 
+
 class Goal(db.Model):
     """Define and update group goals
 
