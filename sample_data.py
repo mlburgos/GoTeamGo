@@ -1,4 +1,4 @@
-from model import User, GroupUser, Group, GroupAdmin, Goal, Workout, Like, db, connect_to_db
+from model import User, GroupUser, Group, GroupAdmin, Goal, Workout, Like, Photo, db, connect_to_db
 from datetime import datetime
 import math
 import random

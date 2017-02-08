@@ -5,7 +5,7 @@ from flask import (Flask, jsonify, render_template, redirect, request, flash,
 
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import User, GroupUser, Group, GroupAdmin, Goal, Workout, Like, db, connect_to_db
+from model import User, GroupUser, Group, GroupAdmin, Goal, Workout, Like, Photo, db, connect_to_db
 
 app = Flask(__name__)
 
@@ -16,13 +16,13 @@ app.secret_key = "ABC"
 app.jinja_env.undefined = StrictUndefined
 
 
-@app.route('/')
+@app.route('/login')
 def homepage():
 
     return render_template("user-login.html")
 
 
-@app.route('/', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def handle_login():
     """Process Login"""
 
@@ -44,7 +44,7 @@ def handle_login():
     session["user_name"] = user.first_name
 
     flash("Logged in")
-    return redirect("/log_new_workout")
+    return redirect("/")
 
 
 @app.route('/register')
@@ -73,27 +73,30 @@ def register_process():
     db.session.commit()
 
     flash("User %s added." % email)
-    return redirect("/log_new_workout")
+    return redirect("/")
 
 
-@app.route('/log_new_workout')
+@app.route('/')
 def new_workout():
     """Workout form."""
 
-    user_id = session.get("user_id")
+    if 'user_id' in session:
+        user_id = session.get("user_id")
 
-    # Get all previously logged workout types
-    distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
+        # Get all previously logged workout types
+        distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
 
-    types_units = distinct_workouts.filter_by(user_id=user_id).all()
+        types_units = distinct_workouts.filter_by(user_id=user_id).all()
 
-    print "types_units:", types_units
-    return render_template("new-workout-form.html",
-                           types_units=types_units,
-                           )
+        print "types_units:", types_units
+        return render_template("new-workout-form.html",
+                               types_units=types_units,
+                               )
+    else:
+        return redirect("/login")
 
 
-@app.route('/log_new_workout', methods=['POST'])
+@app.route('/', methods=['POST'])
 def handle_new_workout():
     """Process new workout."""
 
@@ -134,14 +137,25 @@ def logout():
     return redirect("/")
 
 
-@app.route('/users/<int:user_id>')
+@app.route('/users/<user_id>')
 def user_profile(user_id):
-    
 
-    
+    user_photo_obj = Photo.query.filter_by(user_id=user_id).first()
+    if user_photo_obj is None:
+        user_photo = ""
+    else:
+        user_photo = user_photo_obj.photo_url
+
+    user = User.query.filter_by(user_id=user_id).first()
+    first_name = user.first_name
 
     return render_template("user-profile.html",
-                           user_photo=user_photo)
+                           user_photo=user_photo,
+                           first_name=first_name,
+                           )
+
+
+
 
 
 

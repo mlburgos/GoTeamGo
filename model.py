@@ -266,6 +266,7 @@ class Photo(db.Model):
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.user_id'),
                         nullable=False,
+                        unique=True,
                         )
     photo_url = db.Column(db.String(350),
                           nullable=False,
