@@ -84,12 +84,13 @@ def new_workout():
     user_id = session.get("user_id")
 
     # Get all previously logged workout types
-    distinct_workouts =  Workout.query.with_entities(Workout.exercise_type.distinct())
+    distinct_workouts =  Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
 
-    types= distinct_workouts.filter_by(user_id=user_id).all()
+    types_units = distinct_workouts.filter_by(user_id=user_id).all()
     
+    print "types_units:", types_units
     return render_template("new-workout-form.html",
-                           types=types,
+                           types_units=types_units,
                            )
 
 

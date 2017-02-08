@@ -3,34 +3,19 @@
 <div class="" style="width:40%;">
 <div>
   <h1>Log a Workout</h1>
-  <form action="/register" method="POST">
+
+    <div class="rating">
+      <span id="one-star">☆</span><span id="two-star">☆</span><span id="three-star">☆</span><span id="four-star">☆</span><span id="five-star">☆</span>
+    </div>
+  
+  <form action="/log_new_workout" method="POST">
 
     <div class="form-group">
       <label>Exercise Type:
-        <input type="text" name="exercise-type" required class="form-control">
-      </label>
-      <div class="dropdown">
-        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-          Dropdown
-          <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-          <li><a href="#">Action</a></li>
-          <li><a href="#">Another action</a></li>
-          <li><a href="#">Something else here</a></li>
-          <li role="separator" class="divider"></li>
-          <li><a href="#">Separated link</a></li>
-        </ul>
-      </div>
-    </div>
-
-    
-    <div class="form-group">
-      <label>Exercise Type2:
         <input type="text" name="exercise-type" required class="form-control" list="exercise-types">
         <datalist id="exercise-types">
 
-          {% for (exercise_type,) in types %}
+          {% for exercise_type, units in types_units %}
           <option value="{{ exercise_type }}"></option>
           {% endfor %}
       </label>
@@ -45,14 +30,41 @@
     </div>
     
     <div class="form-group">
-      <label>Email:
-        <input type="email" name="email" required class="form-control">
+      <label>Performance Rating:
+        <div class="radio">
+          <label><input type="radio" name="performance-rating">1 Star: Showed up</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" name="performance-rating">2 Stars</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" name="performance-rating">3 Stars: Stuck it out</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" name="performance-rating">4 Stars</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" name="performance-rating">5 Stars: Totally crushed it</label>
+        </div>
+      </label>
+    </div>
+    
+
+
+    <div class="form-group">
+      <label>Distance:
+        <input type="number" name="distance" required class="form-control">
       </label>
     </div>
 
     <div class="form-group">
-      <label>Password:
-        <input type="password" name="password" required class="form-control">
+      <label>Distance Unit:
+        <input type="text" name="distance-unit" required class="form-control" list="distance-units">
+        <datalist id="distance-units">
+
+          {% for exercise_type, units in types_units %}
+          <option value="{{ units }}"></option>
+          {% endfor %}
       </label>
     </div>
 
@@ -64,4 +76,5 @@
 
 </div>
 </div>
+
 {% endblock %}
