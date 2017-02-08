@@ -56,6 +56,23 @@ def assign_group_users(num):
         db.session.commit()
 
 
+def assign_group_admins(num):
+
+    x = 0
+    for i in range(1, num + 1):
+        if i % 5 == 0:
+            x += 1
+            user_id = i
+            group_id = x
+
+            new_group_admin = GroupAdmin(user_id=user_id,
+                                         group_id=group_id,
+                                         )
+            print new_group_admin
+            db.session.add(new_group_admin)
+            db.session.commit()
+
+
 def add_sample_workouts(num_workouts, num_users):
     """"""
 
@@ -100,4 +117,5 @@ if __name__ == '__main__':
     add_sample_users(users_to_add)
     add_sample_groups(groups_to_add)
     assign_group_users(users_to_add)
+    assign_group_admins(users_to_add)
     add_sample_workouts(workouts_to_add, users_to_add)
