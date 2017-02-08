@@ -41,6 +41,7 @@ def handle_login():
         return redirect("/")
 
     session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
 
     flash("Logged in")
     return redirect("/log_new_workout")
@@ -103,6 +104,7 @@ def handle_new_workout():
 
     # Get form variables
     exercise_type = request.form["exercise-type"].lower()
+
     workout_time = request.form["workout-time"]
     performance_rating = request.form["performance-rating"]
     distance = request.form["distance"]
