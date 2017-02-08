@@ -34,16 +34,16 @@ def handle_login():
 
     if not user:
         flash("Email address not found")
-        return redirect("/login")
+        return redirect("/")
 
     if user.password != password:
         flash("Incorrect password")
-        return redirect("/login")
+        return redirect("/")
 
     session["user_id"] = user.user_id
 
     flash("Logged in")
-    return redirect("/users/%s" % user.user_id)
+    return redirect("/log_new_workout")
 
 
 @app.route('/register')
@@ -71,6 +71,8 @@ def register_process():
     db.session.add(new_user)
     db.session.commit()
 
+
+
     flash("User %s added." % email)
     return redirect("/log_new_workout")
 
@@ -79,7 +81,16 @@ def register_process():
 def new_workout():
     """Workout form."""
 
-    return render_template("new-workout-form.html")
+    user_id = session.get("user_id")
+
+    # Get all previously logged workout types
+    distinct_workouts =  Workout.query.with_entities(Workout.exercise_type.distinct())
+
+    types= distinct_workouts.filter_by(user_id=user_id).all()
+    
+    return render_template("new-workout-form.html",
+                           types=types,
+                           )
 
 
 @app.route('/log_new_workout', methods=['POST'])
@@ -90,11 +101,11 @@ def handle_new_workout():
     user_id = session.get("user_id")
 
     # Get form variables
-    exercise_type = request.form["exercise-type"]
+    exercise_type = request.form["exercise-type"].lower()
     workout_time = request.form["workout-time"]
     performance_rating = request.form["performance-rating"]
     distance = request.form["distance"]
-    distance_unit = request.form["distance-unit"]
+    distance_unit = request.form["distance-unit"].lower()
     description = request.form["description"]
 
     new_user = User(user_id=user_id,
