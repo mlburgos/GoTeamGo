@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="" style="width:40%;">
+<div>
+  <h1>{{ first_name }}'s Groups</h1>
+</div>
+</div> <!-- heading and user_photo -->
+<br>
+<a href="/join_group" value="New Group" class="btn btn-primary">Apply to join a new group!</a>
+<br>
+<br>
+<div class="well spaced" style="width:50%;">
+  {% if len_groups > 0 %}
+    <h2>Groups</h2>
+    <ul>
+      {% for group_name, group_id in groups %}
+        <li>
+          <a href="/groups/{{ group_id }}">{{ group_name }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>
+
+{% endblock %}

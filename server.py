@@ -192,10 +192,34 @@ def show_user_group_mates():
     pass
 
 
-@app.route('/groups')
-def show_user_groups():
+@app.route('/join_group')
+def join_new_group():
     pass
 
+
+@app.route('/groups')
+def show_user_groups():
+    """Returns all groups the user """
+
+    user_id = session.get('user_id')
+    user = User.query.filter_by(user_id=user_id).first()
+    first_name = user.first_name
+    groups = []
+
+    if 'user_id' in session:
+        user_groups = user.groups
+
+        for group in user_groups:
+            groups.append((group.group_name, group.group_id))
+    else:
+        flash("Please login")
+        return redirect("/login")
+
+    return render_template("my-groups.html",
+                           first_name=first_name,
+                           groups=groups,
+                           len_groups=len(groups),
+                           )
 
 ##############################################################################
 # Helper functions
