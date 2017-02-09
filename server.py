@@ -184,7 +184,25 @@ def user_profile(user_id):
 
 @app.route('/groups/<int:group_id>')
 def group_profile(group_id):
-    pass
+
+    group = Group.query.filter_by(group_id=group_id).first()
+    group_name = group.group_name
+
+    group_users = group.users
+
+    goal = Goal.query.filter_by(group_id=group_id).order_by(Goal.date_iniciated.desc()).first()
+
+    user_id_user_name_workouts = []
+    # 
+    # Start with figuring out the logic for each user separately, ie on the
+    # user_profile page and then implement it here
+    # 
+    # for user in group_users:
+
+
+    return render_template("group-profile.html",
+                           group_name=group_name,
+                           )
 
 
 @app.route('/group_mates')
