@@ -9,6 +9,8 @@ from model import (User,
                    db,
                    connect_to_db)
 
+import datetime
+
 
 def best_day(user_id):
     """Returns the count of 4 or 5 star workouts by day to which days tend to
@@ -67,3 +69,22 @@ def best_day(user_id):
             "top_performances": top_performances,
             "top_performance_ratio": top_performance_ratio,
             }
+
+
+def weekly_workout(user_id):
+    """Counts the number of workouts done by a user in the week up to the current
+    day.
+
+    If today is a Thursday, it will count the workouts logged over the 4 day span
+    from Monday to Thursday.
+    """
+
+    today = datetime.date.today()
+
+    # using regular .weekday() instead of .isoweekday() to get the number of
+    # days since monday since monday = 0
+    days_from_monday = today.weekday()
+
+    nearest_monday = today - days_from_monday
+
+
