@@ -173,12 +173,17 @@ def user_profile(user_id):
     # 3) top_performance_ratio
     performance_by_day = best_day(user_id)
 
+    groups = [(1, "Group1", 4)]
+
     print performance_by_day
 
     return render_template("user-profile.html",
                            user_photo=user_photo,
                            first_name=first_name,
                            performance_by_day=json.dumps(performance_by_day),
+                           workout_count=3,
+                           personal_goal=4,
+                           groups=groups,
                            )
 
 
