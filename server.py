@@ -1,11 +1,29 @@
 from jinja2 import StrictUndefined
 
-from flask import (Flask, jsonify, render_template, redirect, request, flash,
+from flask import (Flask,
+                   jsonify,
+                   render_template,
+                   redirect,
+                   request,
+                   flash,
                    session)
 
 from flask_debugtoolbar import DebugToolbarExtension
 
-from model import User, GroupUser, Group, GroupAdmin, Goal, Workout, Like, Photo, db, connect_to_db
+from model import (User,
+                   GroupUser,
+                   Group,
+                   GroupAdmin,
+                   Goal,
+                   Workout,
+                   Like,
+                   Photo,
+                   db,
+                   connect_to_db)
+
+from helper import best_day
+
+import json
 
 app = Flask(__name__)
 
@@ -149,14 +167,19 @@ def user_profile(user_id):
     user = User.query.filter_by(user_id=user_id).first()
     first_name = user.first_name
 
+    # Returns a dictionary of the following dictionaries:
+    # 1) workouts_by_day
+    # 2) top_performances
+    # 3) top_performance_ratio
+    performance_by_day = best_day(user_id)
+
+    print performance_by_day
+
     return render_template("user-profile.html",
                            user_photo=user_photo,
                            first_name=first_name,
+                           performance_by_day=json.dumps(performance_by_day),
                            )
-
-
-
-
 
 
 @app.route('/groups/<int:group_id>')
@@ -172,6 +195,11 @@ def show_user_group_mates():
 @app.route('/groups')
 def show_user_groups():
     pass
+
+
+##############################################################################
+# Helper functions
+
 
 
 ##############################################################################

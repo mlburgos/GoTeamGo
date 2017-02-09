@@ -1,8 +1,6 @@
 
 """Models and database functions for final project."""
 
-from flask import Flask
-
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
