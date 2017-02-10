@@ -25,7 +25,7 @@ from model import (User,
 from helper import (get_performances_by_day,
                     get_weeks_workout_count)
 
-import datetime
+from datetime import datetime
 
 import json
 
@@ -102,7 +102,7 @@ def register_process():
 
     # Set personal goal to 0 by default.
     personal_goal = Personal_Goal(user_id=user.user_id,
-                                  date_iniciated=datetime.date.today(),
+                                  date_iniciated=date.today(),
                                   personal_goal=0,
                                   )
 
@@ -124,8 +124,9 @@ def new_workout():
         distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
 
         types_units = distinct_workouts.filter_by(user_id=user_id).all()
-
         print "types_units:", types_units
+
+
         return render_template("new-workout-form.html",
                                types_units=types_units,
                                )
@@ -139,30 +140,58 @@ def handle_new_workout():
 
     # Get user_id from session
     user_id = session.get("user_id")
+    print "user_id:", user_id
+    print type(user_id)
 
     # Get form variables
     exercise_type = request.form["exercise-type"].lower()
+    performance_rating = int(request.form["performance-rating"])
+    print "performance_rating:", performance_rating
+    print type(performance_rating)
 
-    workout_time = request.form["workout-time"]
-    performance_rating = request.form["performance-rating"]
+    # Set distance to 0 if no distance was entered to prevent db error.
     distance = request.form["distance"]
+    if distance == "":
+        distance = 0
+
+    print "distance:", distance
+    print type(distance)
+
+
     distance_unit = request.form["distance-unit"].lower()
+    print "distance_unit:", distance_unit
+    print type(distance_unit)
+
     description = request.form["description"]
+    print "description:", description
+    print type(description)
 
-    new_user = User(user_id=user_id,
-                    exercise_type=exercise_type,
-                    workout_time=workout_time,
-                    performance_rating=performance_rating,
-                    distance=distance,
-                    distance_unit=distance_unit,
-                    description=description,
-                    )
+    # Set workout_time to current date and time if no date or time were entered.
+    workout_time = request.form["workout-time"]
+    if workout_time == "":
+        workout_time = datetime.now()
 
-    db.session.add(new_user)
+    print "workout_time:", workout_time
+    print type(workout_time)
+
+    new_workout = Workout(user_id=user_id,
+                          exercise_type=exercise_type,
+                          workout_time=workout_time,
+                          performance_rating=performance_rating,
+                          distance=distance,
+                          distance_unit=distance_unit,
+                          description=description,
+                          )
+
+    db.session.add(new_workout)
     db.session.commit()
 
-    flash("User %s added." % email)
+    print "workout_time:", workout_time
+    print type(workout_time)
+
+    flash("Workout added!")
     return redirect("/friends")
+
 
 
 @app.route('/logout')
