@@ -10,7 +10,7 @@ from model import (User,
                    db,
                    connect_to_db)
 
-from datetime import datetime
+from datetime import datetime, date
 
 import math
 
@@ -123,13 +123,15 @@ def add_sample_workouts(num_workouts, num_users):
             db.session.add(new_workout)
             db.session.commit()
 
+    today = date.today()
+
     for i in range(1, 7):
-        for j in range(1, datetime.date.today().day + 1):
+        for j in range(1, today.day + 1):
 
             hour = random.randint(6, 22)
             user_id = i
             exercise_type = "run"
-            workout_time = datetime(2017, 1, j, hour, 0)
+            workout_time = datetime(2017, today.month, j, hour, 0)
             performance_rating = random.randint(1, 5)
             distance = random.randint(1, 10)
             distance_unit = "miles"
@@ -142,7 +144,7 @@ def add_sample_workouts(num_workouts, num_users):
                                   distance_unit=distance_unit,
                                   )
 
-            if (j == 1) or (j == num_workouts):
+            if (j == 1) or (j == today.day + 1):
                 print new_workout
 
             db.session.add(new_workout)
@@ -203,7 +205,7 @@ def add_sample_goals():
 
     user1_goal = Personal_Goal(user_id=1,
                                date_iniciated=datetime(2017, 1, 1),
-                               personal_goal=5,
+                               personal_goal=7,
                                )
 
     user2_goal = Personal_Goal(user_id=2,

@@ -191,9 +191,9 @@ class Personal_Goal(db.Model):
     __tablename__ = "personal-goals"
 
     personal_goal_id = db.Column(db.Integer,
-                        autoincrement=True,
-                        primary_key=True,
-                        )
+                                 autoincrement=True,
+                                 primary_key=True,
+                                 )
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.user_id'),
                         nullable=False,
@@ -202,8 +202,8 @@ class Personal_Goal(db.Model):
                                nullable=False,
                                )
     personal_goal = db.Column(db.Integer,
-                     nullable=False,
-                     )
+                              nullable=False,
+                              )
 
     # Defining relationships.
     user = db.relationship("User")
@@ -213,7 +213,6 @@ class Personal_Goal(db.Model):
 
         return "<Personal_Goal user_id=%s date_iniciated=%s personal_goal=%s>"\
                % (self.user_id, self.date_iniciated, self.personal_goal)
-
 
 
 class Workout(db.Model):
@@ -317,10 +316,8 @@ class Photo(db.Model):
                % (self.photo_id, self.user_id)
 
 
-
 ##############################################################################
 # Helper functions
-
 
 def connect_to_db(app):
     """Connect the database to our Flask app."""

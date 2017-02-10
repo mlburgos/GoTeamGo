@@ -92,6 +92,6 @@ def get_weeks_workout_count(user_id):
                                          Workout.workout_time >= nearest_monday)\
                                  .all()
 
-    
+    return len(user_workouts)
 
 

@@ -177,6 +177,18 @@ def user_profile(user_id):
 
     workout_count = get_weeks_workout_count(user_id)
 
+    personal_goal = Personal_Goal.query\
+                                 .filter_by(user_id=user_id)\
+                                 .order_by(Personal_Goal.date_iniciated.desc())\
+                                 .first()\
+                                 .personal_goal
+
+    personal_progress = (float(workout_count)/personal_goal)*100
+    personal_progress_formatted = "{0:.0f}%".format(personal_progress)
+
+    # Defines the max for the personal progress bar.
+    personal_valuemax = max(personal_progress, 100)
+
     groups = [(1, "Group1", 4)]
 
     print performance_by_day
@@ -185,8 +197,11 @@ def user_profile(user_id):
                            user_photo=user_photo,
                            first_name=first_name,
                            performance_by_day=json.dumps(performance_by_day),
-                           workout_count=3,
-                           personal_goal=4,
+                           workout_count=workout_count,
+                           personal_goal=personal_goal,
+                           personal_progress=personal_progress,
+                           personal_progress_formatted=personal_progress_formatted,
+                           personal_valuemax=personal_valuemax,
                            groups=groups,
                            )
 
@@ -199,7 +214,9 @@ def group_profile(group_id):
 
     group_users = group.users
 
-    goal = Goal.query.filter_by(group_id=group_id).order_by(Goal.date_iniciated.desc()).first()
+    goal = Goal.query.filter_by(group_id=group_id)\
+                     .order_by(Goal.date_iniciated.desc())\
+                     .first()
 
     user_id_user_name_workouts = []
     # 
