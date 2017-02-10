@@ -21,13 +21,17 @@
       <br>
       <h3>Progess toward goals:</h3>
       <h4>Personal</h4>
-      <label>Goal:</label>
-      {{ personal_goal }}
-      <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%">
-          {{ personal_progress_formatted }}
+      {% if personal_goal == 0 %}
+        <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
+      {% else %}  
+        <label>Goal:</label>
+        {{ personal_goal }}
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%">
+            {{ personal_progress_formatted }}
+          </div>
         </div>
-      </div>
+      {% endif %}
 
       {% for group_id, group_name, group_goal in groups %}
       <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>

@@ -162,6 +162,9 @@ class Goal(db.Model):
                          db.ForeignKey('groups.group_id'),
                          nullable=False,
                          )
+    # This user_id represents the user that SET the goal, not the user to whom
+    # the goal corresponds. It corresponds to all the users in the group to
+    # which the goal corresponds.
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.user_id'),
                         nullable=False,
@@ -188,7 +191,7 @@ class Personal_Goal(db.Model):
     Keeps record of personal goals.
     """
 
-    __tablename__ = "personal-goals"
+    __tablename__ = "personal_goals"
 
     personal_goal_id = db.Column(db.Integer,
                                  autoincrement=True,

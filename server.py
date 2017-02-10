@@ -25,6 +25,8 @@ from model import (User,
 from helper import (get_performances_by_day,
                     get_weeks_workout_count)
 
+import datetime
+
 import json
 
 app = Flask(__name__)
@@ -92,7 +94,22 @@ def register_process():
     db.session.add(new_user)
     db.session.commit()
 
-    flash("User %s added." % email)
+    user = User.query.filter_by(email=email).first()
+
+    # Add user info to the session.
+    session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
+
+    # Set personal goal to 0 by default.
+    personal_goal = Personal_Goal(user_id=user.user_id,
+                                  date_iniciated=datetime.date.today(),
+                                  personal_goal=0,
+                                  )
+
+    db.session.add(personal_goal)
+    db.session.commit()
+
+    flash("User %s added. Log your first workout!" % email)
     return redirect("/")
 
 
@@ -162,7 +179,7 @@ def user_profile(user_id):
 
     user_photo_obj = Photo.query.filter_by(user_id=user_id).first()
     if user_photo_obj is None:
-        user_photo = ""
+        user_photo = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
     else:
         user_photo = user_photo_obj.photo_url
 
@@ -175,15 +192,22 @@ def user_profile(user_id):
     # 3) top_performance_ratio
     performance_by_day = get_performances_by_day(user_id)
 
+    # Returns the number of workouts done since most recent Monday.
     workout_count = get_weeks_workout_count(user_id)
 
+    # Returns most recently set personal goal.
     personal_goal = Personal_Goal.query\
                                  .filter_by(user_id=user_id)\
                                  .order_by(Personal_Goal.date_iniciated.desc())\
                                  .first()\
                                  .personal_goal
 
-    personal_progress = (float(workout_count)/personal_goal)*100
+    # Prevents division by 0.
+    if personal_goal == 0:
+        personal_progress = 0
+    else:
+        personal_progress = (float(workout_count)/personal_goal)*100
+
     personal_progress_formatted = "{0:.0f}%".format(personal_progress)
 
     # Defines the max for the personal progress bar.
@@ -281,6 +305,18 @@ def show_user_groups():
                            groups=groups,
                            len_groups=len(groups),
                            )
+
+
+@app.route('/update_personal_goal')
+def update_p_goal():
+
+    pass
+
+
+@app.route('/update_group_goal')
+def update_g_goal():
+    
+    pass
 
 ##############################################################################
 # Helper functions

@@ -95,3 +95,19 @@ def get_weeks_workout_count(user_id):
     return len(user_workouts)
 
 
+def get_groups_and_goals(user_id):
+    """ Returns a list of tuples of the form:
+
+    [(group_id, group_name, goal)]
+
+    ex: [(1, "Group1", 4)]
+    """
+
+    user_groups = User.query.filter_by(user_id=user_id).first().groups
+
+    # pull group ids from user groups
+
+    # get most recent goal for each group and add it to a list 
+
+
+

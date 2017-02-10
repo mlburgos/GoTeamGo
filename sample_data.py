@@ -69,6 +69,17 @@ def assign_group_users(num):
         db.session.add(new_group_user)
         db.session.commit()
 
+    # Add User1 to group 1 as well for testing purposes.
+    new_group_user = GroupUser(user_id=1,
+                               group_id=1,
+                               approved=approved,
+                               )
+    print new_group_user
+    db.session.add(new_group_user)
+    db.session.commit()
+
+
+
 
 def assign_group_admins(num):
     """Manually created this to ensure that the user_id and group_id match
