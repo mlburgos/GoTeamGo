@@ -43,6 +43,10 @@ class User(db.Model):
 
     workouts = db.relationship("Workout")
 
+    goals = db.relationship("Goal")
+
+    personal_goals = db.relationship("Personal_Goal")
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 
@@ -169,11 +173,47 @@ class Goal(db.Model):
                      nullable=False,
                      )
 
+    users = db.relationship("User")
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 
         return "<Goal group_id=%s date_iniciated=%s goal=%s>"\
                % (self.group_id, self.date_iniciated, self.goal)
+
+
+class Personal_Goal(db.Model):
+    """Define and update personal goals
+
+    Keeps record of personal goals.
+    """
+
+    __tablename__ = "personal-goals"
+
+    personal_goal_id = db.Column(db.Integer,
+                        autoincrement=True,
+                        primary_key=True,
+                        )
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False,
+                        )
+    date_iniciated = db.Column(db.DateTime,
+                               nullable=False,
+                               )
+    personal_goal = db.Column(db.Integer,
+                     nullable=False,
+                     )
+
+    # Defining relationships.
+    user = db.relationship("User")
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<Personal_Goal user_id=%s date_iniciated=%s personal_goal=%s>"\
+               % (self.user_id, self.date_iniciated, self.personal_goal)
+
 
 
 class Workout(db.Model):

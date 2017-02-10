@@ -1,7 +1,21 @@
-from model import User, GroupUser, Group, GroupAdmin, Goal, Workout, Like, Photo, db, connect_to_db
+from model import (User,
+                   GroupUser,
+                   Group,
+                   GroupAdmin,
+                   Goal,
+                   Workout,
+                   Like,
+                   Personal_Goal,
+                   Photo,
+                   db,
+                   connect_to_db)
+
 from datetime import datetime
+
 import math
+
 import random
+
 
 def add_sample_users(num):
     """"""
@@ -109,6 +123,31 @@ def add_sample_workouts(num_workouts, num_users):
             db.session.add(new_workout)
             db.session.commit()
 
+    for i in range(1, 7):
+        for j in range(1, datetime.date.today().day + 1):
+
+            hour = random.randint(6, 22)
+            user_id = i
+            exercise_type = "run"
+            workout_time = datetime(2017, 1, j, hour, 0)
+            performance_rating = random.randint(1, 5)
+            distance = random.randint(1, 10)
+            distance_unit = "miles"
+
+            new_workout = Workout(user_id=user_id,
+                                  exercise_type=exercise_type,
+                                  workout_time=workout_time,
+                                  performance_rating=performance_rating,
+                                  distance=distance,
+                                  distance_unit=distance_unit,
+                                  )
+
+            if (j == 1) or (j == num_workouts):
+                print new_workout
+
+            db.session.add(new_workout)
+            db.session.commit()
+
 
 def add_sample_likes(num_workouts, num_users):
     """User1 is liking every fifth workout that is in the db."""
@@ -161,6 +200,23 @@ def add_sample_goals():
             print new_goal
             db.session.add(new_goal)
             db.session.commit()
+
+    user1_goal = Personal_Goal(user_id=1,
+                               date_iniciated=datetime(2017, 1, 1),
+                               personal_goal=5,
+                               )
+
+    user2_goal = Personal_Goal(user_id=2,
+                               date_iniciated=datetime(2017, 1, 1),
+                               personal_goal=3,
+                               )
+
+    print "user1_goal:", user1_goal
+    print "user2_goal:", user2_goal
+
+    db.session.add(user1_goal)
+    db.session.add(user2_goal)
+    db.session.commit()
 
 
 def add_my_photo():

@@ -5,6 +5,7 @@ from model import (User,
                    Goal,
                    Workout,
                    Like,
+                   Personal_Goal,
                    Photo,
                    db,
                    connect_to_db)
@@ -12,7 +13,7 @@ from model import (User,
 import datetime
 
 
-def best_day(user_id):
+def get_performances_by_day(user_id):
     """Returns the count of 4 or 5 star workouts by day to which days tend to
     yield better performances
 
@@ -71,7 +72,7 @@ def best_day(user_id):
             }
 
 
-def weekly_workout(user_id):
+def get_weeks_workout_count(user_id):
     """Counts the number of workouts done by a user in the week up to the current
     day.
 
@@ -83,8 +84,14 @@ def weekly_workout(user_id):
 
     # using regular .weekday() instead of .isoweekday() to get the number of
     # days since monday since monday = 0
-    days_from_monday = today.weekday()
+    days_from_monday = datetime.timedelta(days=today.weekday())
 
     nearest_monday = today - days_from_monday
+
+    user_workouts = Workout.query.filter(Workout.user_id == user_id,
+                                         Workout.workout_time >= nearest_monday)\
+                                 .all()
+
+    
 
 

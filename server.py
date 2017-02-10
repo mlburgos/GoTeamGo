@@ -17,11 +17,13 @@ from model import (User,
                    Goal,
                    Workout,
                    Like,
+                   Personal_Goal,
                    Photo,
                    db,
                    connect_to_db)
 
-from helper import best_day
+from helper import (get_performances_by_day,
+                    get_weeks_workout_count)
 
 import json
 
@@ -143,7 +145,7 @@ def handle_new_workout():
     db.session.commit()
 
     flash("User %s added." % email)
-    return redirect("/users/<int:user_id>")
+    return redirect("/friends")
 
 
 @app.route('/logout')
@@ -155,7 +157,7 @@ def logout():
     return redirect("/")
 
 
-@app.route('/users/<user_id>')
+@app.route('/users/<int:user_id>')
 def user_profile(user_id):
 
     user_photo_obj = Photo.query.filter_by(user_id=user_id).first()
@@ -171,7 +173,9 @@ def user_profile(user_id):
     # 1) workouts_by_day
     # 2) top_performances
     # 3) top_performance_ratio
-    performance_by_day = best_day(user_id)
+    performance_by_day = get_performances_by_day(user_id)
+
+    workout_count = get_weeks_workout_count(user_id)
 
     groups = [(1, "Group1", 4)]
 
@@ -210,9 +214,26 @@ def group_profile(group_id):
                            )
 
 
-@app.route('/group_mates')
+@app.route('/friends')
 def show_user_group_mates():
-    pass
+    """"""
+
+    user_id = session.get('user_id')
+
+    # my_friends = {group_id: {
+    #                            group_name: "name",
+    #                            members: {
+    #                                      user_id: "name",
+    #                                      }
+    #                          }
+    #               }
+
+    my_friends = {}
+
+    if my_friends == {}:
+        return redirect("/users/{}".format(user_id))
+
+    return render_template("my-friends.html")
 
 
 @app.route('/join_group')
