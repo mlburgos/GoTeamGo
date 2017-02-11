@@ -140,39 +140,23 @@ def handle_new_workout():
 
     # Get user_id from session
     user_id = session.get("user_id")
-    print "user_id:", user_id
-    print type(user_id)
 
     # Get form variables
     exercise_type = request.form["exercise-type"].lower()
     performance_rating = int(request.form["performance-rating"])
-    print "performance_rating:", performance_rating
-    print type(performance_rating)
 
-    # Set distance to 0 if no distance was entered to prevent db error.
+    # Set distance to None if no distance was entered to prevent db error.
     distance = request.form["distance"]
     if distance == "":
-        distance = 0
-
-    print "distance:", distance
-    print type(distance)
-
+        distance = None
 
     distance_unit = request.form["distance-unit"].lower()
-    print "distance_unit:", distance_unit
-    print type(distance_unit)
-
     description = request.form["description"]
-    print "description:", description
-    print type(description)
 
     # Set workout_time to current date and time if no date or time were entered.
     workout_time = request.form["workout-time"]
     if workout_time == "":
         workout_time = datetime.now()
-
-    print "workout_time:", workout_time
-    print type(workout_time)
 
     new_workout = Workout(user_id=user_id,
                           exercise_type=exercise_type,
@@ -185,9 +169,6 @@ def handle_new_workout():
 
     db.session.add(new_workout)
     db.session.commit()
-
-    print "workout_time:", workout_time
-    print type(workout_time)
 
     flash("Workout added!")
     return redirect("/friends")
