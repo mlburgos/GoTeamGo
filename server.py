@@ -29,6 +29,9 @@ from datetime import datetime
 
 import json
 
+from functools import wraps
+
+
 app = Flask(__name__)
 
 # Need to modify this later
@@ -69,6 +72,29 @@ def handle_login():
     return redirect("/")
 
 
+def login_required(f):
+    """Decorator that will verify that prevent the user from accessing certain
+    routes if they are not logged in.
+
+    """
+
+    print "in Decorator before wrapper"
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        print "in wrapper"
+        if "user_id" in session:
+            print "in wrapper conditional - if"
+            return f(*args, **kwargs)
+            # some_func()
+        else:
+            print "in wrapper conditional - else"
+            flash("Please login to access this page.")
+            return redirect('/login')
+
+    print "in Decorator before returning wrapper"
+    return wrapper
+
+
 @app.route('/register')
 def registration():
 
@@ -79,9 +105,17 @@ def registration():
 def register_process():
     """Process registration."""
 
-    # Get form variables
+    # Get form variables and test validity
     email = request.form["email"]
     password = request.form["password"]
+    password_confirmation = request.form["password-confirmation"]
+    
+    # Test for email uniqueness
+    email_check = User.query.filter_by(email=email).all()
+    if email_check != []:
+
+
+    # Get additional form variables
     first_name = request.form["first-name"]
     last_name = request.form["last-name"]
 
@@ -114,9 +148,11 @@ def register_process():
 
 
 @app.route('/')
+@login_required
 def new_workout():
     """Workout form."""
 
+    print "in new_workout"
     if 'user_id' in session:
         user_id = session.get("user_id")
 
@@ -130,8 +166,8 @@ def new_workout():
         return render_template("new-workout-form.html",
                                types_units=types_units,
                                )
-    else:
-        return redirect("/login")
+    # else:
+    #     return redirect("/login")
 
 
 @app.route('/', methods=['POST'])
@@ -185,6 +221,7 @@ def logout():
 
 
 @app.route('/users/<int:user_id>')
+@login_required
 def user_profile(user_id):
 
     user_photo_obj = Photo.query.filter_by(user_id=user_id).first()
@@ -241,6 +278,7 @@ def user_profile(user_id):
 
 
 @app.route('/groups/<int:group_id>')
+@login_required
 def group_profile(group_id):
 
     group = Group.query.filter_by(group_id=group_id).first()
@@ -266,6 +304,7 @@ def group_profile(group_id):
 
 
 @app.route('/friends')
+@login_required
 def show_user_group_mates():
     """"""
 
@@ -288,11 +327,13 @@ def show_user_group_mates():
 
 
 @app.route('/join_group')
+@login_required
 def join_new_group():
     pass
 
 
 @app.route('/groups')
+@login_required
 def show_user_groups():
     """Returns all groups the user """
 
@@ -318,12 +359,14 @@ def show_user_groups():
 
 
 @app.route('/update_personal_goal')
+@login_required
 def update_p_goal():
 
     pass
 
 
 @app.route('/update_group_goal')
+@login_required
 def update_g_goal():
     
     pass

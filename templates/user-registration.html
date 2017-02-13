@@ -24,43 +24,45 @@
     </div>
 
     <div class="form-group">
-      <label>Password:
-        <input type="password" name="password" required class="form-control">
-      </label>
-    </div>
-
-    <div class="form-group">
-      <label>Confirm Password:
-        <input type="password" name="confirm-password" required class="form-control">
-      </label>
+      <label for="inputPassword" class="control-label">Password</label>
+      <div class="form-inline row">
+        <div class="form-group col-sm-6">
+          <input type="password" data-minlength="6" class="form-control" id="password" placeholder="Password" required name="password">
+          <div class="help-block">Minimum of 5 characters</div>
+        </div>
+        <div class="form-group col-sm-6">
+          <input type="password" class="form-control" id="confirm-password" placeholder="Confirm" required name="password-confirmation">
+          <div class="help-block with-errors" id="password-msg"></div>
+        </div>
+      </div>
     </div>
 
     <div class="form-group">
         <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
     </div>
 
-    <div class="form-group">
-    <label for="inputPassword" class="control-label">Password</label>
-    <div class="form-inline row">
-      <div class="form-group col-sm-6">
-        <input type="password" data-minlength="6" class="form-control" id="inputPassword" placeholder="Password" required>
-        <div class="help-block">Minimum of 6 characters</div>
-      </div>
-      <div class="form-group col-sm-6">
-        <input type="password" class="form-control" id="inputPasswordConfirm" data-match="#inputPassword" data-match-error="Whoops, these don't match" placeholder="Confirm" required>
-        <div class="help-block with-errors"></div>
-      </div>
-    </div>
-  </div>
 
   </form>
 
 </div>
 </div>
+<script src="https://code.jquery.com/jquery.js"></script>
 
 <script type="text/javascript">
 
-   $("#form-submit")
+   var password = $("#password"),
+      confirm_password = $("#confirm-password");
+
+   function validatePassword(){
+      if(password.val() != confirm_password.val()) {
+         $("#password-msg").html("Passwords Don't Match");
+      } else {
+         $("#password-msg").html("");
+      };
+   }
+
+   password.on("change", validatePassword);
+   confirm_password.on("keyup", validatePassword);
 
 </script>
 
