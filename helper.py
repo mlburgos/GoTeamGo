@@ -94,7 +94,30 @@ def get_weeks_workout_count(user_id):
     return len(user_workouts)
 
 
-def get_groups_and_goals(user_id):
+def calc_progress(workout_count, goal):
+    """Prevents division by 0 in calculating percent of goal accomplished.
+    """
+
+    if goal == 0:
+        return 0
+    else:
+        progress = (float(workout_count)/goal)*100
+        return [progress, "{0:.0f}%".format(progress)]
+
+
+def format_progress(progress):
+    return "{0:.0f}%".format(progress)
+
+
+def get_current_goal(group_id):
+    return Goal.query\
+               .filter_by(group_id=group_id)\
+               .order_by(Goal.date_iniciated.desc())\
+               .first()\
+               .goal
+
+
+def get_groups_and_current_goals(user_id):
     """ Returns a list of tuples of the form:
 
     [(group_id, group_name, goal)]
@@ -102,11 +125,24 @@ def get_groups_and_goals(user_id):
     ex: [(1, "Group1", 4)]
     """
 
-    user_groups = User.query.filter_by(user_id=user_id).first().groups
+    user_groups = User.by_id(user_id).groups
 
-    # pull group ids from user groups
+    return [[group.group_id,
+             group.group_name,
+             get_current_goal(group.group_id),
+             ]
+            for group in user_groups]
 
-    # get most recent goal for each group and add it to a list 
 
+if __name__ == "__main__":
+    # As a convenience, if we run this module interactively, it will leave
+    # you in a state of being able to work with the database directly.
 
+    from server import app
 
+    connect_to_db(app)
+
+    # Only have this un-commented for initial load.
+    db.create_all()
+
+    print "Connected to DB."

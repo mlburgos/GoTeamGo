@@ -22,7 +22,11 @@ from model import (User,
                    connect_to_db)
 
 from helper import (get_performances_by_day,
-                    get_weeks_workout_count)
+                    get_weeks_workout_count,
+                    get_groups_and_current_goals,
+                    calc_progress,
+                    format_progress,
+                    )
 
 from datetime import datetime, date
 
@@ -220,44 +224,49 @@ def logout():
 @login_required
 def user_profile(user_id):
 
-    print "user_id:", user_id
-
     user = User.by_id(user_id)
-
-    print "user:", user
-
     first_name = user.first_name
-    user_photo = User.photo_url
-    # Returns a dictionary of the following dictionaries:
-    # 1) workouts_by_day
-    # 2) top_performances
-    # 3) top_performance_ratio
+    user_photo = user.photo_url
+
+    # Returns a dictionary of dictionaies:
+    # {
+    #  "workouts_by_day" = {1: 0, ..., 7: 0},
+    #  "top_performances" = {1: 0, ..., 7: 0},
+    #  "top_performance_ratio" = {1: 0, ..., 7: 0}
+    #  }
     performance_by_day = get_performances_by_day(user_id)
 
     # Returns the number of workouts done since most recent Monday.
     workout_count = get_weeks_workout_count(user_id)
 
     # Returns most recently set personal goal.
-    personal_goal = Personal_Goal.query\
-                                 .filter_by(user_id=user_id)\
-                                 .order_by(Personal_Goal.date_iniciated.desc())\
-                                 .first()\
-                                 .personal_goal
+    personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
+
+    personal_progress, personal_progress_formatted = calc_progress(workout_count, personal_goal)
 
     # Prevents division by 0.
-    if personal_goal == 0:
-        personal_progress = 0
-    else:
-        personal_progress = (float(workout_count)/personal_goal)*100
+    # if personal_goal == 0:
+    #     personal_progress = 0
+    # else:
+    #     personal_progress = (float(workout_count)/personal_goal)*100
 
-    personal_progress_formatted = "{0:.0f}%".format(personal_progress)
+    # personal_progress_formatted = format_progress(personal_progress)
 
     # Defines the max for the personal progress bar.
     personal_valuemax = max(personal_progress, 100)
 
-    groups = [(1, "Group1", 4)]
+    # Returns a list of lists of the form:
+    # [[group_id, group_name, goal]
+    # ex: [[1, "Group1", 4]]
+    groups = get_groups_and_current_goals(user_id)
 
-    print performance_by_day
+    full_group_info = [group + calc_progress(workout_count, group[2])
+                       for group in groups]
+    print "full_group_info:", full_group_info
+    # for group_id, group_name, group_goal in groups:
+    #     progress_towards_group_goal = calc_progress(group_goal)
+
+
 
     return render_template("user-profile.html",
                            user_photo=user_photo,
@@ -268,7 +277,7 @@ def user_profile(user_id):
                            personal_progress=personal_progress,
                            personal_progress_formatted=personal_progress_formatted,
                            personal_valuemax=personal_valuemax,
-                           groups=groups,
+                           full_group_info=full_group_info,
                            )
 
 

@@ -200,6 +200,19 @@ class Goal(db.Model):
     def by_id(cls, goal_id):
         return cls.query.filter_by(goal_id=goal_id).first()
 
+    @classmethod
+    def get_current_goals_by_user_id(cls, group_id_list):
+        """Return a list of the current goal objects for each group in the list.
+        """
+
+        def get_current_goal(group_id):
+            return cls.query\
+                      .filter_by(group_id=group_id)\
+                      .order_by(Goal.date_iniciated.desc())\
+                      .first()
+
+        return [get_current_goal(group_id) for group_id in group_id_list]
+
 
 class Personal_Goal(db.Model):
     """Define and update personal goals
@@ -236,6 +249,14 @@ class Personal_Goal(db.Model):
     @classmethod
     def by_id(cls, personal_goal_id):
         return cls.query.filter_by(personal_goal_id=personal_goal_id).first()
+
+    @classmethod
+    def get_current_goal_by_user_id(cls, user_id):
+        return cls.query\
+                  .filter_by(user_id=user_id)\
+                  .order_by(Personal_Goal.date_iniciated.desc())\
+                  .first()\
+                  .personal_goal
 
 
 class Workout(db.Model):
@@ -290,6 +311,7 @@ class Workout(db.Model):
         return cls.query.filter_by(workout_id=workout_id).first()
 
 
+
 class Like(db.Model):
     """"Like teammates' workouts"""
 
@@ -320,31 +342,6 @@ class Like(db.Model):
     @classmethod
     def by_id(cls, like_id):
         return cls.query.filter_by(like_id=like_id).first()
-
-
-# class Photo(db.Model):
-#     """Stores user photos"""
-
-#     __tablename__ = "photos"
-
-#     photo_id = db.Column(db.Integer,
-#                          autoincrement=True,
-#                          primary_key=True,
-#                          )
-#     user_id = db.Column(db.Integer,
-#                         db.ForeignKey('users.user_id'),
-#                         nullable=False,
-#                         unique=True,
-#                         )
-#     photo_url = db.Column(db.String(350),
-#                           nullable=False,
-#                           )
-
-#     def __repr__(self):
-#         """Provide helpful representation when printed."""
-
-#         return "<Photo photo_id=%s user_id=%s>"\
-#                % (self.photo_id, self.user_id)
 
 
 ##############################################################################
