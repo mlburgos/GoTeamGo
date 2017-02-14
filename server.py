@@ -75,23 +75,16 @@ def handle_login():
 def login_required(f):
     """Decorator that will verify that prevent the user from accessing certain
     routes if they are not logged in.
-
     """
 
-    print "in Decorator before wrapper"
     @wraps(f)
     def wrapper(*args, **kwargs):
-        print "in wrapper"
         if "user_id" in session:
-            print "in wrapper conditional - if"
             return f(*args, **kwargs)
-            # some_func()
         else:
-            print "in wrapper conditional - else"
             flash("Please login to access this page.")
             return redirect('/login')
 
-    print "in Decorator before returning wrapper"
     return wrapper
 
 
@@ -108,14 +101,8 @@ def register_process():
     # Get form variables and test validity
     email = request.form["email"]
     password = request.form["password"]
-    password_confirmation = request.form["password-confirmation"]
-    
-    # Test for email uniqueness
-    email_check = User.query.filter_by(email=email).all()
-    if email_check != []:
 
-
-    # Get additional form variables
+    # Get remaining form variables
     first_name = request.form["first-name"]
     last_name = request.form["last-name"]
 
@@ -147,27 +134,39 @@ def register_process():
     return redirect("/")
 
 
+@app.route('/verify-email.json', methods=['POST'])
+def verify():
+    """Verify email uniqueness and password consistency.
+    """
+
+    email = request.form["email"]
+
+    # Test for email uniqueness
+    email_check = User.query.filter_by(email=email).all()
+    if email_check != []:
+        return_data = {'success': False, 'msg': "Email already in system. Login or try a different email."}
+        return jsonify(return_data)
+
+    return jsonify({'success': True, 'msg': ''})
+
+
 @app.route('/')
 @login_required
 def new_workout():
     """Workout form."""
 
-    print "in new_workout"
-    if 'user_id' in session:
-        user_id = session.get("user_id")
+    user_id = session.get("user_id")
 
-        # Get all previously logged workout types
-        distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
+    # Get all previously logged workout types
+    distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
 
-        types_units = distinct_workouts.filter_by(user_id=user_id).all()
-        print "types_units:", types_units
+    types_units = distinct_workouts.filter_by(user_id=user_id).all()
+    print "types_units:", types_units
 
 
-        return render_template("new-workout-form.html",
+    return render_template("new-workout-form.html",
                                types_units=types_units,
                                )
-    # else:
-    #     return redirect("/login")
 
 
 @app.route('/', methods=['POST'])

@@ -1,0 +1,3 @@
+Things to make pretty
+
+- user-registration alerts for non-unique email and inconsistent password
