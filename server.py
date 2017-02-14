@@ -18,7 +18,6 @@ from model import (User,
                    Workout,
                    Like,
                    Personal_Goal,
-                   Photo,
                    db,
                    connect_to_db)
 
@@ -163,10 +162,9 @@ def new_workout():
     types_units = distinct_workouts.filter_by(user_id=user_id).all()
     print "types_units:", types_units
 
-
     return render_template("new-workout-form.html",
-                               types_units=types_units,
-                               )
+                           types_units=types_units,
+                           )
 
 
 @app.route('/', methods=['POST'])
@@ -209,7 +207,6 @@ def handle_new_workout():
     return redirect("/friends")
 
 
-
 @app.route('/logout')
 def logout():
     """Log out."""
@@ -223,15 +220,14 @@ def logout():
 @login_required
 def user_profile(user_id):
 
-    user_photo_obj = Photo.query.filter_by(user_id=user_id).first()
-    if user_photo_obj is None:
-        user_photo = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png"
-    else:
-        user_photo = user_photo_obj.photo_url
+    print "user_id:", user_id
 
-    user = User.query.filter_by(user_id=user_id).first()
+    user = User.by_id(user_id)
+
+    print "user:", user
+
     first_name = user.first_name
-
+    user_photo = User.photo_url
     # Returns a dictionary of the following dictionaries:
     # 1) workouts_by_day
     # 2) top_performances

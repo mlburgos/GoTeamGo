@@ -6,7 +6,6 @@ from model import (User,
                    Workout,
                    Like,
                    Personal_Goal,
-                   Photo,
                    db,
                    connect_to_db)
 
@@ -235,12 +234,14 @@ def add_sample_goals():
 def add_my_photo():
     """Adds my photo to User1"""
 
-    my_photo = Photo(user_id=1,
-                     photo_url="http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg",
-                     )
+    me = User.by_id(1)
+    me.photo_url = "http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg"
+    # my_photo = Photo(user_id=1,
+    #                  photo_url="http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg",
+    #                  )
 
-    print my_photo
-    db.session.add(my_photo)
+    # print my_photo
+    # db.session.add(my_photo)
     db.session.commit()
 
 if __name__ == '__main__':

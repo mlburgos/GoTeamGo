@@ -6,7 +6,6 @@ from model import (User,
                    Workout,
                    Like,
                    Personal_Goal,
-                   Photo,
                    db,
                    connect_to_db)
 

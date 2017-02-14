@@ -31,9 +31,10 @@ class User(db.Model):
     password = db.Column(db.String(64),
                          nullable=False,
                          )
-    # photo_url = db.Column(db.String(350),
-    #                       nullable=False,
-    #                       )
+    photo_url = db.Column(db.String(350),
+                          nullable=False,
+                          default="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png",
+                          )
 
     # Defining relationships.
     groups = db.relationship("Group",
@@ -321,29 +322,29 @@ class Like(db.Model):
         return cls.query.filter_by(like_id=like_id).first()
 
 
-class Photo(db.Model):
-    """Stores user photos"""
+# class Photo(db.Model):
+#     """Stores user photos"""
 
-    __tablename__ = "photos"
+#     __tablename__ = "photos"
 
-    photo_id = db.Column(db.Integer,
-                         autoincrement=True,
-                         primary_key=True,
-                         )
-    user_id = db.Column(db.Integer,
-                        db.ForeignKey('users.user_id'),
-                        nullable=False,
-                        unique=True,
-                        )
-    photo_url = db.Column(db.String(350),
-                          nullable=False,
-                          )
+#     photo_id = db.Column(db.Integer,
+#                          autoincrement=True,
+#                          primary_key=True,
+#                          )
+#     user_id = db.Column(db.Integer,
+#                         db.ForeignKey('users.user_id'),
+#                         nullable=False,
+#                         unique=True,
+#                         )
+#     photo_url = db.Column(db.String(350),
+#                           nullable=False,
+#                           )
 
-    def __repr__(self):
-        """Provide helpful representation when printed."""
+#     def __repr__(self):
+#         """Provide helpful representation when printed."""
 
-        return "<Photo photo_id=%s user_id=%s>"\
-               % (self.photo_id, self.user_id)
+#         return "<Photo photo_id=%s user_id=%s>"\
+#                % (self.photo_id, self.user_id)
 
 
 ##############################################################################
