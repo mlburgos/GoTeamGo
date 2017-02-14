@@ -25,7 +25,6 @@ from helper import (get_performances_by_day,
                     get_weeks_workout_count,
                     get_groups_and_current_goals,
                     calc_progress,
-                    format_progress,
                     )
 
 from datetime import datetime, date
@@ -260,13 +259,11 @@ def user_profile(user_id):
     # ex: [[1, "Group1", 4]]
     groups = get_groups_and_current_goals(user_id)
 
+    # Extends groups to include progress toward group goal and formatted progress.
+    # [[group_id, group_name, goal, progress, formatted_progress]
+    # ex: [[1, "Group1", 4, 0.50, "50%"]]
     full_group_info = [group + calc_progress(workout_count, group[2])
                        for group in groups]
-    print "full_group_info:", full_group_info
-    # for group_id, group_name, group_goal in groups:
-    #     progress_towards_group_goal = calc_progress(group_goal)
-
-
 
     return render_template("user-profile.html",
                            user_photo=user_photo,

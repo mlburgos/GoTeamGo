@@ -105,18 +105,6 @@ def calc_progress(workout_count, goal):
         return [progress, "{0:.0f}%".format(progress)]
 
 
-def format_progress(progress):
-    return "{0:.0f}%".format(progress)
-
-
-def get_current_goal(group_id):
-    return Goal.query\
-               .filter_by(group_id=group_id)\
-               .order_by(Goal.date_iniciated.desc())\
-               .first()\
-               .goal
-
-
 def get_groups_and_current_goals(user_id):
     """ Returns a list of tuples of the form:
 
@@ -129,7 +117,7 @@ def get_groups_and_current_goals(user_id):
 
     return [[group.group_id,
              group.group_name,
-             get_current_goal(group.group_id),
+             Goal.get_current_goal(group.group_id),
              ]
             for group in user_groups]
 

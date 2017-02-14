@@ -201,17 +201,12 @@ class Goal(db.Model):
         return cls.query.filter_by(goal_id=goal_id).first()
 
     @classmethod
-    def get_current_goals_by_user_id(cls, group_id_list):
-        """Return a list of the current goal objects for each group in the list.
-        """
-
-        def get_current_goal(group_id):
-            return cls.query\
-                      .filter_by(group_id=group_id)\
-                      .order_by(Goal.date_iniciated.desc())\
-                      .first()
-
-        return [get_current_goal(group_id) for group_id in group_id_list]
+    def get_current_goal(cls, group_id):
+        return cls.query\
+                  .filter_by(group_id=group_id)\
+                  .order_by(Goal.date_iniciated.desc())\
+                  .first()\
+                  .goal
 
 
 class Personal_Goal(db.Model):
