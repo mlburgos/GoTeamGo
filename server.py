@@ -25,7 +25,7 @@ from model import (User,
 from helper import (get_performances_by_day,
                     get_weeks_workout_count)
 
-from datetime import datetime
+from datetime import datetime, date
 
 import json
 

@@ -31,6 +31,9 @@ class User(db.Model):
     password = db.Column(db.String(64),
                          nullable=False,
                          )
+    # photo_url = db.Column(db.String(350),
+    #                       nullable=False,
+    #                       )
 
     # Defining relationships.
     groups = db.relationship("Group",
@@ -51,6 +54,10 @@ class User(db.Model):
         """Provide helpful representation when printed."""
 
         return "<User user_id=%s email=%s>" % (self.user_id, self.email)
+
+    @classmethod
+    def by_id(cls, user_id):
+        return cls.query.filter_by(user_id=user_id).first()
 
 
 class GroupUser(db.Model):
@@ -108,6 +115,10 @@ class Group(db.Model):
 
         return "<Group group_id=%s group_name=%s>"\
                % (self.group_id, self.group_name)
+
+    @classmethod
+    def by_id(cls, group_id):
+        return cls.query.filter_by(group_id=group_id).first()
 
 
 class GroupAdmin(db.Model):
@@ -184,6 +195,10 @@ class Goal(db.Model):
         return "<Goal group_id=%s date_iniciated=%s goal=%s>"\
                % (self.group_id, self.date_iniciated, self.goal)
 
+    @classmethod
+    def by_id(cls, goal_id):
+        return cls.query.filter_by(goal_id=goal_id).first()
+
 
 class Personal_Goal(db.Model):
     """Define and update personal goals
@@ -216,6 +231,10 @@ class Personal_Goal(db.Model):
 
         return "<Personal_Goal user_id=%s date_iniciated=%s personal_goal=%s>"\
                % (self.user_id, self.date_iniciated, self.personal_goal)
+
+    @classmethod
+    def by_id(cls, personal_goal_id):
+        return cls.query.filter_by(personal_goal_id=personal_goal_id).first()
 
 
 class Workout(db.Model):
@@ -265,6 +284,10 @@ class Workout(db.Model):
                   self.exercise_type,
                   )
 
+    @classmethod
+    def by_id(cls, workout_id):
+        return cls.query.filter_by(workout_id=workout_id).first()
+
 
 class Like(db.Model):
     """"Like teammates' workouts"""
@@ -292,6 +315,10 @@ class Like(db.Model):
 
         return "<Like like_id=%s workout_id=%s user_id=%s>"\
                % (self.like_id, self.workout_id, self.user_id)
+
+    @classmethod
+    def by_id(cls, like_id):
+        return cls.query.filter_by(like_id=like_id).first()
 
 
 class Photo(db.Model):
