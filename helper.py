@@ -99,7 +99,7 @@ def calc_progress(workout_count, goal):
     """
 
     if goal == 0:
-        return 0
+        return [0, 0]
     else:
         progress = (float(workout_count)/goal)*100
         return [progress, "{0:.0f}%".format(progress)]

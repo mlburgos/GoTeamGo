@@ -230,6 +230,17 @@ def add_sample_goals():
     db.session.add(user2_goal)
     db.session.commit()
 
+    for x in xrange(3, 15 + 1):
+        user_goal = Personal_Goal(user_id=x,
+                                  date_iniciated=datetime(2017, 1, 1),
+                                  personal_goal=0,
+                                  )
+
+        print "user"+str(x)+"_goal:", user_goal
+
+        db.session.add(user_goal)
+        db.session.commit()
+
 
 def add_my_photo():
     """Adds my photo to User1"""

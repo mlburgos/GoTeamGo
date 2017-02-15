@@ -243,14 +243,6 @@ def user_profile(user_id):
 
     personal_progress, personal_progress_formatted = calc_progress(workout_count, personal_goal)
 
-    # Prevents division by 0.
-    # if personal_goal == 0:
-    #     personal_progress = 0
-    # else:
-    #     personal_progress = (float(workout_count)/personal_goal)*100
-
-    # personal_progress_formatted = format_progress(personal_progress)
-
     # Defines the max for the personal progress bar.
     personal_valuemax = max(personal_progress, 100)
 
@@ -282,25 +274,35 @@ def user_profile(user_id):
 @login_required
 def group_profile(group_id):
 
-    group = Group.query.filter_by(group_id=group_id).first()
+    group = Group.by_id(group_id)
     group_name = group.group_name
 
     group_users = group.users
 
-    goal = Goal.query.filter_by(group_id=group_id)\
-                     .order_by(Goal.date_iniciated.desc())\
-                     .first()
+    group_goal = Goal.get_current_goal(group_id)
 
-    user_id_user_name_workouts = []
-    # 
-    # Start with figuring out the logic for each user separately, ie on the
-    # user_profile page and then implement it here
-    # 
-    # for user in group_users:
+    users_full_info = []
 
+    for user in group_users:
+        name = user.first_name + " " + user.last_name
+        # Returns the number of workouts done since most recent Monday.
+        workout_count = get_weeks_workout_count(user.user_id)
+        progress, progress_formatted = calc_progress(workout_count, group_goal)
+
+        users_full_info.append([user.user_id,
+                                name,
+                                user.photo_url,
+                                workout_count,
+                                progress,
+                                progress_formatted
+                                ])
+
+    print users_full_info
 
     return render_template("group-profile.html",
                            group_name=group_name,
+                           group_goal=group_goal,
+                           users_full_info=users_full_info,
                            )
 
 
@@ -338,16 +340,18 @@ def join_new_group():
 def show_user_groups():
     """Returns all groups the user """
 
-    user_id = session.get('user_id')
-    user = User.query.filter_by(user_id=user_id).first()
-    first_name = user.first_name
-    groups = []
-
     if 'user_id' in session:
+        user_id = session.get('user_id')
+        user = User.by_id(user_id)
+        first_name = user.first_name
         user_groups = user.groups
 
-        for group in user_groups:
-            groups.append((group.group_name, group.group_id))
+        groups = [(group.group_name,
+                   group.group_id,
+                   )
+                  for group in user_groups
+                  ]
+
     else:
         flash("Please login")
         return redirect("/login")
