@@ -399,12 +399,66 @@ def show_user_groups():
                            )
 
 
+@app.route('/update_photo')
+@login_required
+def update_photo():
+
+    user_id = session.get("user_id")
+
+    return render_template("update-photo.html",
+                           user_id=user_id,
+                           )
+
+
+@app.route('/update_photo', methods=['POST'])
+@login_required
+def handle_update_photo():
+    """Updates the users phto in the db."""
+
+    user_id = session.get('user_id')
+
+    user = User.by_id(user_id)
+
+    user.photo_url = request.form.get("photo-url")
+
+    db.session.commit()
+
+    return redirect("/users/{}".format(user_id),
+                    )
+
+
 @app.route('/update_personal_goal')
 @login_required
-def update_p_goal():
+def update_personal_goal():
 
-    pass
+    user_id = session.get('user_id')
 
+    personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
+
+    return render_template("update-personal-goal.html",
+                           user_id=user_id,
+                           personal_goal=personal_goal,
+                           )
+
+
+@app.route('/update_personal_goal', methods=['POST'])
+@login_required
+def handle_update_personal_goal():
+
+    user_id = session.get('user_id')
+
+    personal_goal = request.form.get("personal-goal")
+
+    new_goal = Personal_Goal(user_id=user_id,
+                             date_iniciated=datetime.now(),
+                             personal_goal=personal_goal,
+                             )
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return redirect("/users/{}".format(user_id),
+                    )
 
 @app.route('/update_group_goal')
 @login_required

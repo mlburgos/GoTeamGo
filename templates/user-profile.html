@@ -11,6 +11,8 @@
       <!-- </div> -->
       <!-- <div> -->
         <img src="{{ user_photo }}">
+        <br>
+        <a href="/update_photo">Update Photo</a>
       <!-- </div> -->
     </div> <!-- heading and user_photo -->
 
@@ -26,6 +28,8 @@
       {% else %}  
         <label>Goal:</label>
         {{ personal_goal }}
+        <br>
+        <a href="/update_personal_goal">Update personal goal</a>
         <div class="progress">
           <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%">
             {{ personal_progress_formatted }}
