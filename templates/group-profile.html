@@ -15,22 +15,24 @@
 <div class="container" >
   {% for user_id, name, photo_url, workout_count, progress, formatted_progress in users_full_info %}
   <div class="row">
-    <div class="col-xs-4"> 
-        <h4><a href="/users/{{ user_id }}">{{ name }}</a>:</h4>
-        <img src="{{ photo_url }}">
-    </div> <!-- heading and user_photo -->
+    <div class="col-xs-6">
+      <div class="col-xs-4"> 
+          <h4><a href="/users/{{ user_id }}">{{ name }}</a>:</h4>
+          <img src="{{ photo_url }}" width="100" hiegth="100">
+      </div> <!-- heading and user_photo -->
 
-    <div class="col-xs-8">
-      <h5>Workout Count:</h5>
-      {{ workout_count }}
-      <br>
-      <h5>Progess toward goal:</h5>
-      <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%">
-          {{ formatted_progress }}
+      <div class="col-xs-8">
+        <h5>Workout Count:</h5>
+        {{ workout_count }}
+        <br>
+        <h5>Progess toward goal:</h5>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%">
+            {{ formatted_progress }}
+          </div>
         </div>
       </div>
-    </div>
+    </div>  
   </div>
   {% endfor %}
 </div>

@@ -312,21 +312,57 @@ def show_user_group_mates():
     """"""
 
     user_id = session.get('user_id')
+    user = User.by_id(user_id)
 
-    # my_friends = {group_id: {
-    #                            group_name: "name",
-    #                            members: {
-    #                                      user_id: "name",
-    #                                      }
-    #                          }
-    #               }
+    groups = user.groups
 
-    my_friends = {}
+    friends = []
 
-    if my_friends == {}:
+    for group in groups:
+        members = group.users
+        for member in members:
+            if member.user_id != user_id and member not in friends:
+                friends.append(member)
+
+    unique_friends = set(friends)
+
+    friends_full_info = []
+
+    for friend in unique_friends:
+        name = friend.first_name + " " + friend.last_name
+
+        # Returns the number of workouts done since most recent Monday.
+        workout_count = get_weeks_workout_count(friend.user_id)
+
+        # Returns most recently set personal goal.
+        personal_goal = Personal_Goal.get_current_goal_by_user_id(friend.user_id)
+
+        progress, progress_formatted = calc_progress(workout_count, personal_goal)
+
+        friends_full_info.append([friend.user_id,
+                                  name,
+                                  friend.photo_url,
+                                  workout_count,
+                                  personal_goal,
+                                  progress,
+                                  progress_formatted
+                                  ])
+
+    print "friends_full_info:", friends_full_info
+
+    # Try to alphebetize friends
+    # alphabetical_friends_full_info = sorted(friends_full_info,
+    #                                         key=lambda friend: friend[2]
+    #                                         )
+
+    # print "alphabetical_friends_full_info:", alphabetical_friends_full_info
+
+    if friends_full_info == []:
         return redirect("/users/{}".format(user_id))
 
-    return render_template("my-friends.html")
+    return render_template("my-friends.html",
+                           friends_full_info=friends_full_info,
+                           )
 
 
 @app.route('/join_group')
