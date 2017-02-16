@@ -14,6 +14,7 @@ from model import (User,
                    GroupUser,
                    Group,
                    GroupAdmin,
+                   GroupPendingUser,
                    Goal,
                    Workout,
                    Like,
@@ -25,6 +26,7 @@ from helper import (get_performances_by_day,
                     get_weeks_workout_count,
                     get_groups_and_current_goals,
                     calc_progress,
+                    get_admin_groups_and_pending,
                     )
 
 from datetime import datetime, date
@@ -70,12 +72,17 @@ def handle_login():
     session["user_id"] = user.user_id
     session["user_name"] = user.first_name
 
+    admin_groups = GroupAdmin.by_user_id(user.user_id)
+
+    if admin_groups:
+        session["is_admin"] = True
+
     flash("Logged in")
     return redirect("/")
 
 
 def login_required(f):
-    """Decorator that will verify that prevent the user from accessing certain
+    """Decorator that will prevent the user from accessing certain
     routes if they are not logged in.
     """
 
@@ -88,6 +95,24 @@ def login_required(f):
             return redirect('/login')
 
     return wrapper
+
+
+def admin_required(f):
+    """Decorator that will prevent non-admins from accessing the approve_to_group
+    routes
+    """
+
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if "is_admin" in session:
+            return f(*args, **kwargs)
+        else:
+            flash("Sorry, this page is for admin only.")
+            user_id = session.get('user_id')
+            return redirect("/users/{}".format(user_id))
+
+    return wrapper
+
 
 
 @app.route('/register')
@@ -136,16 +161,16 @@ def register_process():
     return redirect("/")
 
 
-@app.route('/verify-email.json', methods=['POST'])
-def verify():
-    """Verify email uniqueness and password consistency.
+@app.route('/verify_email.json', methods=['POST'])
+def verify_email():
+    """Verify email uniqueness.
     """
 
     email = request.form["email"]
 
     # Test for email uniqueness
     email_check = User.query.filter_by(email=email).all()
-    if email_check != []:
+    if email_check is not None:
         return_data = {'success': False, 'msg': "Email already in system. Login or try a different email."}
         return jsonify(return_data)
 
@@ -368,7 +393,50 @@ def show_user_group_mates():
 @app.route('/join_group')
 @login_required
 def join_new_group():
-    pass
+
+    user_id = session.get("user_id")
+
+    return render_template("join-group.html",
+                           user_id=user_id,
+                           )
+
+
+@app.route('/verify_group_name_exists.json', methods=['POST'])
+def verify_group_name_exists():
+    """Verify the requested group name exists.
+    """
+
+    group_name = request.form["group_name"]
+
+    # Test for group name uniqueness
+    name_check = Group.by_name(group_name=group_name)
+    if name_check is None:
+        return_data = {'success': False, 'msg': "Group name does not exist. Please verify the name and try again."}
+        return jsonify(return_data)
+
+    return jsonify({'success': True, 'msg': ''})
+
+
+@app.route('/join_group', methods=['POST'])
+@login_required
+def handle_join_new_group():
+
+    user_id = session.get('user_id')
+
+    requested_group = request.form.get("group-name")
+
+    group_id = Group.by_name(requested_group).group_id
+
+    new_group_pending_user = GroupPendingUser(user_id=user_id,
+                                              group_id=group_id,
+                                              approved=False,
+                                              )
+
+    db.session.add(new_group_pending_user)
+    db.session.commit()
+
+    flash("Request sent.")
+    return redirect("/users/{}".format(user_id))
 
 
 @app.route('/groups')
@@ -457,8 +525,119 @@ def handle_update_personal_goal():
     db.session.add(new_goal)
     db.session.commit()
 
-    return redirect("/users/{}".format(user_id),
+    return redirect("/users/{}".format(user_id))
+
+
+@app.route('/new_group')
+@login_required
+def create_new_group():
+
+    user_id = session.get('user_id')
+
+    return render_template("group-registration.html",
+                           user_id=user_id,
+                           )
+
+
+@app.route('/verify_group_name_is_unique.json', methods=['POST'])
+def verify_group_name_is_unique():
+    """Verify group name uniqueness.
+    """
+
+    group_name = request.form["group_name"]
+
+    # Test for group name uniqueness
+    name_check = Group.by_name(group_name=group_name)
+    if name_check is not None:
+        return_data = {'success': False, 'msg': "Name already in system. Please try a different name."}
+        return jsonify(return_data)
+
+    return jsonify({'success': True, 'msg': ''})
+
+
+@app.route('/new_group', methods=['POST'])
+@login_required
+def handle_new_group():
+
+    user_id = session.get('user_id')
+
+    group_name = request.form.get("group-name")
+    group_goal = request.form.get("group-goal")
+
+    new_group = Group(group_name=group_name,
+                      )
+
+    db.session.add(new_group)
+    db.session.commit()
+
+    group = Group.by_name(group_name)
+    group_id = group.group_id
+
+    new_group_user = GroupUser(user_id=user_id,
+                               group_id=group_id,
+                               approved=True,
+                               )
+
+    new_group_admin = GroupAdmin(group_id=group_id,
+                                 user_id=user_id,
+                                 )
+
+    new_goal = Goal(group_id=group_id,
+                    user_id=user_id,
+                    date_iniciated=datetime.now(),
+                    goal=group_goal,
                     )
+
+    db.session.add(new_group_user)
+    db.session.add(new_group_admin)
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return redirect("/users/{}".format(user_id))
+
+
+@app.route('/approve_to_group')
+@login_required
+@admin_required
+def approve_to_group():
+
+    user_id = session.get('user_id')
+
+    # Returns a dictionary of lists of tuples of info on the users pending
+    # approval:
+    # {group_name: [(user_id, user_name),
+    #               ],
+    # }
+    # ex: {Group1: [(1, "User1 Lname1")]}
+    admin_groups = get_admin_groups_and_pending(user_id)
+
+    print "admin_groups:", admin_groups
+
+    return render_template("admin.html",
+                           user_id=user_id,
+                           admin_groups=admin_groups,
+                           )
+
+
+@app.route('/approve_to_group', methods=['POST'])
+@login_required
+@admin_required
+def handle_approve_to_group():
+
+    user_id = session.get('user_id')
+
+    personal_goal = request.form.get("personal-goal")
+
+    new_goal = Personal_Goal(user_id=user_id,
+                             date_iniciated=datetime.now(),
+                             personal_goal=personal_goal,
+                             )
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return redirect("/users/{}".format(user_id))
+
 
 @app.route('/update_group_goal')
 @login_required

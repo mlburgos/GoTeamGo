@@ -1,5 +1,6 @@
 from model import (User,
                    GroupUser,
+                   GroupPendingUser,
                    Group,
                    GroupAdmin,
                    Goal,
@@ -120,6 +121,35 @@ def get_groups_and_current_goals(user_id):
              Goal.get_current_goal(group.group_id),
              ]
             for group in user_groups]
+
+
+def get_admin_groups_and_pending(user_id):
+    """ Returns a dictionary of lists of tuples of info on the users pending
+    approval:
+
+    {group_name: [(user_id, user_name),
+                   ],
+     }
+
+    ex: {Group1: [(1, "User1 Lname1")]}
+    """
+
+    # Returns a list of group_ids of the groups for which the user is an admin.
+    admin_groups = GroupAdmin.get_group_names_by_user_id(user_id)
+
+    pending = {}
+
+    for group_id, group_name in admin_groups:
+        pending_users = GroupPendingUser.by_group_id(group_id)
+
+        if pending_users:
+            full_pending_users = [(pending_user_id,
+                                   User.get_name_by_id(pending_user_id))
+                                  for pending_user_id in pending_users
+                                  ]
+            pending[group_name] = full_pending_users
+
+    return pending
 
 
 if __name__ == "__main__":

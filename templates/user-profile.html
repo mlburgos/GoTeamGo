@@ -12,7 +12,19 @@
       <!-- <div> -->
         <img src="{{ user_photo }}">
         <br>
-        <a href="/update_photo">Update Photo</a>
+        <br>
+        <div class="list-group">
+          <label>Options:</label>
+          <a href="/update_photo" class="list-group-item">Update Photo</a>
+          <a href="/update_personal_goal" class="list-group-item">Update personal goal</a>
+          <a href="/join_group" class="list-group-item">Request to join a new group</a>
+          <a href="/new_group" class="list-group-item">Start a new group</a>
+          {% if 'is_admin' in session %}
+            <a href="/approve_to_group" class="list-group-item">Approve Pending Users</a>
+          {% endif %}
+            
+
+        </div>
       <!-- </div> -->
     </div> <!-- heading and user_photo -->
 
@@ -29,7 +41,6 @@
         <label>Goal:</label>
         {{ personal_goal }}
         <br>
-        <a href="/update_personal_goal">Update personal goal</a>
         <div class="progress">
           <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%">
             {{ personal_progress_formatted }}

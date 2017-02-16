@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid">
+<div>
+  <h1>Update your photo!</h1>
+  <br>
+  <form action="/update_photo" method="POST" id="update-form">
+    <div class="form-inline row">
+      <div class="form-group col-sm-6">
+        <label>Photo Url:
+          <input type="text" name="photo-url" required class="form-control">
+        </label>
+      </div>
+    </div>
+    <br>
+    <div class="form-group">
+        <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
+         <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+    </div>
+
+
+  </form>
+
+</div>
+</div>
+
+{% endblock %}

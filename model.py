@@ -31,7 +31,7 @@ class User(db.Model):
     password = db.Column(db.String(64),
                          nullable=False,
                          )
-    photo_url = db.Column(db.String(350),
+    photo_url = db.Column(db.String(600),
                           nullable=False,
                           default="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png",
                           )
@@ -60,6 +60,10 @@ class User(db.Model):
     def by_id(cls, user_id):
         return cls.query.filter_by(user_id=user_id).first()
 
+    @classmethod
+    def get_name_by_id(cls, user_id):
+        user = cls.query.filter_by(user_id=user_id).first()
+        return user.first_name + " " + user.last_name
 
 class GroupUser(db.Model):
     """Serves as an association table between User and Group."""
@@ -78,14 +82,47 @@ class GroupUser(db.Model):
                          db.ForeignKey('groups.group_id'),
                          nullable=False,
                          )
-    approved = db.Column(db.Boolean,
-                         nullable=False)
 
     def __repr__(self):
         """Provide helpful representation when printed."""
 
         return "<GroupUser user_id=%s group_id=%s>"\
                % (self.user_id, self.group_id)
+
+
+class GroupPendingUser(db.Model):
+    """Serves as an association table between User and Group."""
+
+    __tablename__ = "groups_pending_users"
+
+    group_pending_user_id = db.Column(db.Integer,
+                              autoincrement=True,
+                              primary_key=True,
+                              )
+    user_id = db.Column(db.Integer,
+                        db.ForeignKey('users.user_id'),
+                        nullable=False,
+                        )
+    group_id = db.Column(db.Integer,
+                         db.ForeignKey('groups.group_id'),
+                         nullable=False,
+                         )
+
+
+    def __repr__(self):
+        """Provide helpful representation when printed."""
+
+        return "<GroupPendingUser user_id=%s group_id=%s approved=%s>"\
+               % (self.user_id, self.group_id, self.approved)
+
+    @classmethod
+    def by_group_id(cls, group_id):
+        """Returns a list of the user ids who are pending approval to join the
+        group.
+        """
+
+        pendings = cls.query.filter_by(group_id=group_id).all()
+        return [pending.user_id for pending in pendings]
 
 
 class Group(db.Model):
@@ -120,6 +157,10 @@ class Group(db.Model):
     @classmethod
     def by_id(cls, group_id):
         return cls.query.filter_by(group_id=group_id).first()
+
+    @classmethod
+    def by_name(cls, group_name):
+        return cls.query.filter_by(group_name=group_name).first()
 
 
 class GroupAdmin(db.Model):
@@ -157,6 +198,26 @@ class GroupAdmin(db.Model):
                   self.user_id,
                   )
 
+    @classmethod
+    def by_user_id(cls, user_id):
+        """Returns a list of the group ids for which the user is an admin.
+        """
+
+        groups = cls.query.filter_by(user_id=user_id).all()
+        return [group.group_id for group in groups]
+
+    @classmethod
+    def get_group_names_by_user_id(cls, user_id):
+        """Returns a list of tuples of group ids and group names for which the
+        user is an admin.
+        """
+
+        groups = cls.by_user_id(user_id)
+        return [(group,
+                 Group.by_id(group).group_name)
+                for group in groups
+                ]
+
 
 class Goal(db.Model):
     """Define and update group goals
@@ -188,6 +249,7 @@ class Goal(db.Model):
                      nullable=False,
                      )
 
+    # Defining relationships.
     users = db.relationship("User")
 
     def __repr__(self):

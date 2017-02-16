@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid">
+<div>
+  <h1>Approve people to your group(s)</h1>
+  <br>
+  <form action="/approve_requests" method="POST" id="approval-form">
+    {% if admin_groups %}
+      {% for group in admin_groups %}
+      <div class="form row">
+
+        <div class="col-lg-6">
+          <h3>{{ group }}</h3>
+          <div class="input-group">
+            
+            {% for user_id, user_name in group %}
+              <div class="checkbox">
+                <label><input type="checkbox" value="{{ user_id }}">{{ user_name }}</label>
+              </div>
+            {% endfor %}
+
+          </div><!-- /input-group -->
+        </div><!-- /.col-lg-6 -->
+
+      </div> <!-- /form row -->
+      {% endfor %}  
+    {% else %}
+    <h3>No users to approve at the current time.</h3>
+    {% endif %}
+    
+    <div class="form-group">
+        <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
+        <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+    </div>
+
+
+  </form>
+
+</div>
+</div>
+
+
+{% endblock %}

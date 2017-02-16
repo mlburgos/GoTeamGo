@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid">
+<div>
+  <h1>Request to join a group!</h1>
+  <br>
+  <form action="/join_group" method="POST" id="registration-form">
+    <div class="form-inline row">
+      <div class="form-group col-sm-6">
+        <label>Name of group you'd like to join:
+          <input type="text" name="group-name" id="group-name" required class="form-control">
+        </label>
+      </div>
+    </div>
+    <br>
+    <div class="form-group">
+        <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
+        <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+    </div>
+
+
+  </form>
+
+</div>
+</div>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+
+<script type="text/javascript">
+
+   function showValidationResults (result) {
+      // result: object with success boolean, message string
+
+         if (result.success) {
+
+            $("#registration-form").submit()
+
+         } else {
+            $("#js-flash").html(result.msg)
+            $("#js-flash").show()
+         }
+
+
+
+   }
+
+   function validateGroupNameExists (evt) {
+      evt.preventDefault();
+
+      var formInputs = {
+         "group_name": $("#group-name").val(),
+      }
+
+      $.post('/verify_group_name_exists.json',
+             formInputs,
+             showValidationResults
+             );
+   }
+
+   $("#registration-form").on("submit", validateGroupNameExists)
+
+
+</script>
+
+{% endblock %}
