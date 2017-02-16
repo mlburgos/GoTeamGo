@@ -127,11 +127,11 @@ def get_admin_groups_and_pending(user_id):
     """ Returns a dictionary of lists of tuples of info on the users pending
     approval:
 
-    {group_name: [(user_id, user_name),
+    {group_name: [(user_id, user_name, pending_user_id),
                    ],
      }
 
-    ex: {Group1: [(1, "User1 Lname1")]}
+    ex: {Group1: [(1, "User1 Lname1", 1)]}
     """
 
     # Returns a list of group_ids of the groups for which the user is an admin.
@@ -140,12 +140,17 @@ def get_admin_groups_and_pending(user_id):
     pending = {}
 
     for group_id, group_name in admin_groups:
+        # Returns a list of tuples of the form:
+        # [(user_id, pending_id)]
+        # where the pending_id is the id for GroupPendingUser
         pending_users = GroupPendingUser.by_group_id(group_id)
 
         if pending_users:
             full_pending_users = [(pending_user_id,
-                                   User.get_name_by_id(pending_user_id))
-                                  for pending_user_id in pending_users
+                                   User.get_name_by_id(pending_user_id),
+                                   pending_id,
+                                   )
+                                  for pending_user_id, pending_id in pending_users
                                   ]
             pending[group_name] = full_pending_users
 

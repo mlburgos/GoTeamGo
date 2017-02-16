@@ -5,7 +5,7 @@
 <div>
   <h1>Approve people to your group(s)</h1>
   <br>
-  <form action="/approve_requests" method="POST" id="approval-form">
+  <form action="/approve_to_group" method="POST" id="approval-form" name="checks">
     {% if admin_groups %}
       {% for group in admin_groups %}
       <div class="form row">
@@ -14,9 +14,11 @@
           <h3>{{ group }}</h3>
           <div class="input-group">
             
-            {% for user_id, user_name in group %}
+            {% for user_id, user_name, pending_id in admin_groups[group] %}
               <div class="checkbox">
-                <label><input type="checkbox" value="{{ user_id }}">{{ user_name }}</label>
+                <label>
+                  <input type="checkbox" name="check" value="{{ pending_id }}">{{ user_name }}
+                </label>
               </div>
             {% endfor %}
 
@@ -28,7 +30,7 @@
     {% else %}
     <h3>No users to approve at the current time.</h3>
     {% endif %}
-    
+
     <div class="form-group">
         <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
         <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>

@@ -65,6 +65,7 @@ class User(db.Model):
         user = cls.query.filter_by(user_id=user_id).first()
         return user.first_name + " " + user.last_name
 
+
 class GroupUser(db.Model):
     """Serves as an association table between User and Group."""
 
@@ -95,10 +96,10 @@ class GroupPendingUser(db.Model):
 
     __tablename__ = "groups_pending_users"
 
-    group_pending_user_id = db.Column(db.Integer,
-                              autoincrement=True,
-                              primary_key=True,
-                              )
+    pending_id = db.Column(db.Integer,
+                           autoincrement=True,
+                           primary_key=True,
+                           )
     user_id = db.Column(db.Integer,
                         db.ForeignKey('users.user_id'),
                         nullable=False,
@@ -108,12 +109,15 @@ class GroupPendingUser(db.Model):
                          nullable=False,
                          )
 
-
     def __repr__(self):
         """Provide helpful representation when printed."""
 
-        return "<GroupPendingUser user_id=%s group_id=%s approved=%s>"\
-               % (self.user_id, self.group_id, self.approved)
+        return "<GroupPendingUser pending_id=%s user_id=%s group_id=%s>"\
+               % (self.pending_id, self.user_id, self.group_id)
+
+    @classmethod
+    def by_id(cls, pending_id):
+        return cls.query.filter_by(pending_id=pending_id).first()
 
     @classmethod
     def by_group_id(cls, group_id):
@@ -122,7 +126,11 @@ class GroupPendingUser(db.Model):
         """
 
         pendings = cls.query.filter_by(group_id=group_id).all()
-        return [pending.user_id for pending in pendings]
+        return [(pending.user_id,
+                 pending.pending_id,
+                 )
+                for pending in pendings
+                ]
 
 
 class Group(db.Model):
@@ -214,7 +222,8 @@ class GroupAdmin(db.Model):
 
         groups = cls.by_user_id(user_id)
         return [(group,
-                 Group.by_id(group).group_name)
+                 Group.by_id(group).group_name,
+                 )
                 for group in groups
                 ]
 

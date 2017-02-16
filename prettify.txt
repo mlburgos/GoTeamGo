@@ -1,8 +1,9 @@
 Things to make pretty
 
-- user-registration alerts for non-unique email and inconsistent password
+
 - alphebetize freinds/group members in /friends and /groups/<group id>
 
+Update-photo
 - update-photo.html: add url validation to update-photo.html
 - update-photo.html: add photo preview using ajax to update-photo.html
 
@@ -11,6 +12,4 @@ update-personal-goal
 
 User profile
 - make options list look nicer. Consider moving to another place
-
-Group Registration
-- use ajax to verify that the name isn't taken
+- make the picture resize

@@ -603,12 +603,20 @@ def approve_to_group():
 
     user_id = session.get('user_id')
 
-    # Returns a dictionary of lists of tuples of info on the users pending
-    # approval:
-    # {group_name: [(user_id, user_name),
+    """ I think you need to restructure the return of this to be:
+    # {group_name: {[(user_id, user_name, group_pending_user_id),
     #               ],
     # }
-    # ex: {Group1: [(1, "User1 Lname1")]}
+
+    to make it easier to remove the record from the pending table
+    """
+
+    # Returns a dictionary of lists of tuples of info on the users pending
+    # approval:
+    # {group_name: [(user_id, user_name, pending_id),
+    #               ],
+    # }
+    # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_pending(user_id)
 
     print "admin_groups:", admin_groups
@@ -623,18 +631,29 @@ def approve_to_group():
 @login_required
 @admin_required
 def handle_approve_to_group():
+    """Recieves a list of approved pending users, adds them to GroupUser, and
+    deletes them from GroupPendingUser.
+    """
 
     user_id = session.get('user_id')
+    approved_pending_ids = request.form.getlist('check')
 
-    personal_goal = request.form.get("personal-goal")
+    for pending_id in approved_pending_ids:
+        pending_user = GroupPendingUser.by_id(pending_id)
+        print "pending_user:", pending_user
+        pending_user_id = pending_user.user_id
+        group_id = pending_user.group_id
 
-    new_goal = Personal_Goal(user_id=user_id,
-                             date_iniciated=datetime.now(),
-                             personal_goal=personal_goal,
-                             )
+        new_member = GroupUser(user_id=pending_user_id,
+                               group_id=group_id,
+                               )
 
-    db.session.add(new_goal)
-    db.session.commit()
+        print "new_member:", new_member
+        db.session.add(new_member)
+        db.session.commit()
+
+        db.session.delete(pending_user)
+        db.session.commit()
 
     return redirect("/users/{}".format(user_id))
 
@@ -642,7 +661,7 @@ def handle_approve_to_group():
 @app.route('/update_group_goal')
 @login_required
 def update_g_goal():
-    
+
     pass
 
 ##############################################################################

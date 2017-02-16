@@ -52,6 +52,13 @@ def add_sample_groups(num):
         db.session.add(new_group)
         db.session.commit()
 
+    # Adding this to test the admin page
+    new_group = Group(group_name="Group4",
+                      )
+    print new_group
+    db.session.add(new_group)
+    db.session.commit()
+
 
 def assign_group_users(num):
 
@@ -59,7 +66,6 @@ def assign_group_users(num):
 
         user_id = i
         group_id = (i % groups_to_add) + 1
-        approved = True
 
         new_group_user = GroupUser(user_id=user_id,
                                    group_id=group_id,
@@ -69,11 +75,19 @@ def assign_group_users(num):
         db.session.commit()
 
     # Add User1 to group 1 as well for testing purposes.
-    new_group_user = GroupUser(user_id=1,
-                               group_id=1,
-                               )
-    print new_group_user
-    db.session.add(new_group_user)
+    new_group_user1 = GroupUser(user_id=1,
+                                group_id=1,
+                                )
+
+    # Add User3 to group 4 as well to test the admin page.
+    new_group_user2 = GroupUser(user_id=3,
+                                group_id=4,
+                                )
+
+    print new_group_user1
+    print new_group_user2
+    db.session.add(new_group_user1)
+    db.session.add(new_group_user2)
     db.session.commit()
 
 
@@ -92,6 +106,11 @@ def assign_group_admins(num):
                                   )
     new_group_admin3 = GroupAdmin(user_id=2,
                                   group_id=3,
+                                  )
+
+    # Add User3 as admin for group 4 as well to test the admin page.
+    new_group_admin3 = GroupAdmin(user_id=3,
+                                  group_id=4,
                                   )
 
     print new_group_admin1
@@ -182,6 +201,7 @@ def add_sample_goals():
     group_admin = {1: 3,
                    2: 1,
                    3: 2,
+                   4: 3,
                    }
 
     # Defines the [Day component of datetime obj, goal in terms of number of
@@ -259,17 +279,21 @@ def add_sample_groups_pending_users():
     pending_user_2 = GroupPendingUser(user_id=5,
                                       group_id=1,
                                       )
-    pending_user_3 = GroupPendingUser(user_id=5,
+    pending_user_3 = GroupPendingUser(user_id=8,
                                       group_id=1,
                                       )
-
+    pending_user_4 = GroupPendingUser(user_id=2,
+                                      group_id=4,
+                                      )
     print pending_user_1
     print pending_user_2
     print pending_user_3
+    print pending_user_4
 
     db.session.add(pending_user_1)
     db.session.add(pending_user_2)
     db.session.add(pending_user_3)
+    db.session.add(pending_user_4)
     db.session.commit()
 
 
@@ -291,3 +315,4 @@ if __name__ == '__main__':
     add_sample_likes(workouts_to_add, users_to_add)
     add_sample_goals()
     add_my_photo()
+    add_sample_groups_pending_users()
