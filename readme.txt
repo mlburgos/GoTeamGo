@@ -44,7 +44,7 @@ Test it out!
 
     Register as a new user to:
         - log a workout 
-        - request to join a group (try Goup1)
+        - request to join a group (try Group1)
         - create a new group
         - add a photo
         - set a personal goal 
