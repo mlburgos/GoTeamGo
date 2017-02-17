@@ -91,8 +91,6 @@ def assign_group_users(num):
     db.session.commit()
 
 
-
-
 def assign_group_admins(num):
     """Manually created this to ensure that the user_id and group_id match
 
@@ -109,17 +107,19 @@ def assign_group_admins(num):
                                   )
 
     # Add User3 as admin for group 4 as well to test the admin page.
-    new_group_admin3 = GroupAdmin(user_id=3,
+    new_group_admin4 = GroupAdmin(user_id=3,
                                   group_id=4,
                                   )
 
     print new_group_admin1
     print new_group_admin2
     print new_group_admin3
+    print new_group_admin4
 
     db.session.add(new_group_admin1)
     db.session.add(new_group_admin2)
     db.session.add(new_group_admin3)
+    db.session.add(new_group_admin4)
     db.session.commit()
 
 

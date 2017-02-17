@@ -84,6 +84,47 @@ class GroupUser(db.Model):
                          nullable=False,
                          )
 
+    @classmethod
+    def by_id(cls, group_user_id):
+        return cls.query.filter_by(group_user_id=group_user_id).first()
+
+    @classmethod
+    def by_group_id(cls, group_id):
+        """Returns a list of tuples of user ids and their group_user_id who are
+        in the group.
+        """
+
+        members = cls.query.filter_by(group_id=group_id).all()
+        return [(member.user_id,
+                 member.group_user_id,
+                 )
+                for member in members
+                ]
+
+    @classmethod
+    def by_user_id(cls, user_id):
+        """Returns a list of tuples group ids and group_user_id for which the
+        user is a member.
+        """
+
+        groups = cls.query.filter_by(user_id=user_id).all()
+        return [(group.group_id, group.group_user_id) for group in groups]
+
+    @classmethod
+    def by_user_id_dict(cls, user_id):
+        """Returns a dict of group_id: group_user_id for which the
+        user is a member.
+        """
+
+        groups = cls.query.filter_by(user_id=user_id).all()
+
+        result = {}
+        for group in groups:
+            result[group.group_id] = group.group_user_id
+
+        return result
+
+
     def __repr__(self):
         """Provide helpful representation when printed."""
 
@@ -121,8 +162,8 @@ class GroupPendingUser(db.Model):
 
     @classmethod
     def by_group_id(cls, group_id):
-        """Returns a list of the user ids who are pending approval to join the
-        group.
+        """Returns a list of tuples of user ids and their pending_id who are
+        pending approval to join the group.
         """
 
         pendings = cls.query.filter_by(group_id=group_id).all()
@@ -220,12 +261,26 @@ class GroupAdmin(db.Model):
         user is an admin.
         """
 
-        groups = cls.by_user_id(user_id)
-        return [(group,
-                 Group.by_id(group).group_name,
+        group_ids = cls.by_user_id(user_id)
+        return [(group_id,
+                 Group.by_id(group_id).group_name,
                  )
-                for group in groups
+                for group_id in group_ids
                 ]
+
+    @classmethod
+    def get_group_names_by_user_id_dict(cls, user_id):
+        """Returns a dict of group_id: group_user_id for which the
+        user is a member.
+        """
+
+        group_ids = cls.by_user_id(user_id)
+
+        result = {}
+        for group_id in group_ids:
+            result[group_id] = Group.by_id(group_id).group_name
+
+        return result
 
 
 class Goal(db.Model):

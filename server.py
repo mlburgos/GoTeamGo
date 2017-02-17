@@ -27,6 +27,7 @@ from helper import (get_performances_by_day,
                     get_groups_and_current_goals,
                     calc_progress,
                     get_admin_groups_and_pending,
+                    get_admin_groups_and_members,
                     )
 
 from datetime import datetime, date
@@ -74,8 +75,13 @@ def handle_login():
 
     admin_groups = GroupAdmin.by_user_id(user.user_id)
 
-    if admin_groups:
-        session["is_admin"] = True
+    print "Type(admin_groups):", type(admin_groups)
+    print "len(admin_groups):", len(admin_groups)
+    print "admin_groups:", admin_groups
+
+    session["is_admin"] = (len(admin_groups) != 0)
+
+    print "session['is_admin']:", session.get('is_admin')
 
     flash("Logged in")
     return redirect("/")
@@ -104,7 +110,7 @@ def admin_required(f):
 
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if "is_admin" in session:
+        if "is_admin":
             return f(*args, **kwargs)
         else:
             flash("Sorry, this page is for admin only.")
@@ -245,8 +251,15 @@ def logout():
 
 
 @app.route('/users/<int:user_id>')
+@app.route('/my_profile')
 @login_required
-def user_profile(user_id):
+def user_profile(user_id=None):
+
+    active_user_profile_page = False
+
+    if user_id is None:
+        user_id = session.get('user_id')
+        active_user_profile_page = True
 
     user = User.by_id(user_id)
     first_name = user.first_name
@@ -283,6 +296,7 @@ def user_profile(user_id):
                        for group in groups]
 
     return render_template("user-profile.html",
+                           active_user_profile_page=active_user_profile_page,
                            user_photo=user_photo,
                            first_name=first_name,
                            performance_by_day=json.dumps(performance_by_day),
@@ -603,14 +617,6 @@ def approve_to_group():
 
     user_id = session.get('user_id')
 
-    """ I think you need to restructure the return of this to be:
-    # {group_name: {[(user_id, user_name, group_pending_user_id),
-    #               ],
-    # }
-
-    to make it easier to remove the record from the pending table
-    """
-
     # Returns a dictionary of lists of tuples of info on the users pending
     # approval:
     # {group_name: [(user_id, user_name, pending_id),
@@ -618,8 +624,6 @@ def approve_to_group():
     # }
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_pending(user_id)
-
-    print "admin_groups:", admin_groups
 
     return render_template("admin.html",
                            user_id=user_id,
@@ -656,6 +660,51 @@ def handle_approve_to_group():
         db.session.commit()
 
     return redirect("/users/{}".format(user_id))
+
+
+@app.route('/remove_from_group')
+@login_required
+@admin_required
+def remove_from_group():
+
+    user_id = session.get('user_id')
+    print "user_id:", user_id
+
+    # Returns a dictionary of lists of tuples of info on the users in each group:
+    # {group_name: [(user_id, user_name, group_user_id),
+    #               ],
+    # }
+    # ex: {Group1: [(1, "User1 Lname1", 1)]}
+    admin_groups = get_admin_groups_and_members(user_id)
+
+    print "admin_groups:", admin_groups
+
+    return render_template("admin-remove.html",
+                           user_id=user_id,
+                           admin_groups=admin_groups,
+                           )
+
+
+@app.route('/remove_from_group', methods=['POST'])
+@login_required
+@admin_required
+def handle_remove_from_group():
+    """Recieves a list of approved pending users, adds them to GroupUser, and
+    deletes them from GroupPendingUser.
+    """
+
+    user_id = session.get('user_id')
+    remove_group_user_ids = request.form.getlist('check')
+
+    for pending_id in remove_group_user_ids:
+        user_pending_removal = GroupUser.by_id(pending_id)
+        print "user_pending_removal:", user_pending_removal
+
+        db.session.delete(user_pending_removal)
+        db.session.commit()
+
+    return redirect("/users/{}".format(user_id))
+
 
 
 @app.route('/update_group_goal')

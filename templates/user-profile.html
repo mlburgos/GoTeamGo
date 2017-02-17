@@ -14,15 +14,17 @@
         <br>
         <br>
         <div class="list-group">
-          <label>Options:</label>
-          <a href="/update_photo" class="list-group-item">Update Photo</a>
-          <a href="/update_personal_goal" class="list-group-item">Update personal goal</a>
-          <a href="/join_group" class="list-group-item">Request to join a new group</a>
-          <a href="/new_group" class="list-group-item">Start a new group</a>
-          {% if 'is_admin' in session %}
-            <a href="/approve_to_group" class="list-group-item">Approve Pending Users</a>
+          {% if active_user_profile_page %}
+            <label>Options:</label>
+            <a href="/update_photo" class="list-group-item">Update Photo</a>
+            <a href="/update_personal_goal" class="list-group-item">Update personal goal</a>
+            <a href="/join_group" class="list-group-item">Request to join a new group</a>
+            <a href="/new_group" class="list-group-item">Start a new group</a>
+            {% if session['is_admin'] %}
+              <a href="/approve_to_group" class="list-group-item">Approve Pending Users</a>
+              <a href="/remove_from_group" class="list-group-item">Remove Users</a>
+            {% endif %}
           {% endif %}
-            
 
         </div>
       <!-- </div> -->
@@ -36,7 +38,11 @@
       <h3>Progess toward goals:</h3>
       <h4>Personal</h4>
       {% if personal_goal == 0 %}
-        <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
+        {% if active_user_profile_page %}
+          <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
+        {% else %}  
+          <h5>{{ first_name }} hasn't set a personal goal yet!</h5>
+        {% endif %}
       {% else %}  
         <label>Goal:</label>
         {{ personal_goal }}

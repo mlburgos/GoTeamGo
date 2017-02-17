@@ -134,7 +134,8 @@ def get_admin_groups_and_pending(user_id):
     ex: {Group1: [(1, "User1 Lname1", 1)]}
     """
 
-    # Returns a list of group_ids of the groups for which the user is an admin.
+    # Returns a list of tuples of group ids and group names for which the user
+    # is an admin.
     admin_groups = GroupAdmin.get_group_names_by_user_id(user_id)
 
     pending = {}
@@ -155,6 +156,87 @@ def get_admin_groups_and_pending(user_id):
             pending[group_name] = full_pending_users
 
     return pending
+
+
+def get_admin_groups_and_members(user_id):
+    """ Returns a dictionary of lists of tuples of info on the users in each
+    group:
+
+    {group_name: [(user_id, user_name, group_user_id),
+                   ],
+     }
+
+    ex: {Group1: [(1, "User1 Lname1", 1)]}
+    """
+
+    # Returns a list of tuples of group ids and group names for which the user
+    # is an admin.
+    admin_groups = GroupAdmin.get_group_names_by_user_id(user_id)
+
+    members = {}
+
+    for group_id, group_name in admin_groups:
+        # Returns a list of tuples of the form:
+        # [(user_id, group_user_id)]
+        # where the group_user_id is the id for GroupUser
+        current_users = GroupUser.by_group_id(group_id)
+
+        if current_users:
+            full_current_users = [(member_user_id,
+                                   User.get_name_by_id(member_user_id),
+                                   group_user_id,
+                                   )
+                                  for member_user_id, group_user_id in current_users
+                                  if member_user_id != user_id
+                                  ]
+            members[group_name] = full_current_users
+
+    return members
+
+
+def get_groups_you_can_leave(user_id):
+    """ Returns a dictionary of lists of tuples of info on the users in each
+    group:
+
+    {group_name: [(user_id, user_name, group_user_id),
+                   ],
+     }
+
+    ex: {Group1: [(1, "User1 Lname1", 1)]}
+    """
+
+    # Returns a list of tuples of group ids and group names for which the user
+    # is an admin.
+    admin_groups = GroupAdmin.get_group_names_by_user_id_dict(user_id)
+
+    print "admin_groups:", admin_groups
+
+    admin_group_ids = admin_groups.keys()
+
+    print "admin_group_ids:", admin_group_ids
+
+    # Returns a list of tuples group ids and group_user_id for which the user
+    # is a member.
+    # all_group_user_ids = GroupUser.by_user_id(user_id)
+
+    # Returns a dict of group_id: group_user_id for which the user is a member.
+    all_group_user_ids = GroupUser.by_user_id_dict(user_id)
+
+    print "all_group_user_ids:", all_group_user_ids
+
+    # get all group objects to which the user belongs.
+    all_groups = User.by_id(user_id).groups
+
+    print "all_groups:", all_groups
+
+    groups_user_can_leave = {}
+
+    for group in all_groups:
+        if group.group_id not in admin_groups.keys():
+            groups_user_can_leave[group.group_name] = all_group_user_ids[group.group_id]
+
+    print "groups_user_can_leave:", groups_user_can_leave
+
 
 
 if __name__ == "__main__":
