@@ -195,14 +195,13 @@ def get_admin_groups_and_members(user_id):
 
 
 def get_groups_you_can_leave(user_id):
-    """ Returns a dictionary of lists of tuples of info on the users in each
-    group:
+    """ Returns a dictionary of group_name: group_user_id for each group which
+    the user is a member but not an admin.
 
-    {group_name: [(user_id, user_name, group_user_id),
-                   ],
+    {group_name: group_user_id,
      }
 
-    ex: {Group1: [(1, "User1 Lname1", 1)]}
+    ex: {Group1: 1}
     """
 
     # Returns a list of tuples of group ids and group names for which the user
@@ -237,6 +236,7 @@ def get_groups_you_can_leave(user_id):
 
     print "groups_user_can_leave:", groups_user_can_leave
 
+    return groups_user_can_leave
 
 
 if __name__ == "__main__":

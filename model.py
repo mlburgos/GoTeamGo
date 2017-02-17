@@ -256,6 +256,14 @@ class GroupAdmin(db.Model):
         return [group.group_id for group in groups]
 
     @classmethod
+    def by_group_id(cls, group_id):
+        """Returns a list of the group admin user_ids for the admins of the group.
+        """
+
+        groups = cls.query.filter_by(group_id=group_id).all()
+        return [group.user_id for group in groups]
+
+    @classmethod
     def get_group_names_by_user_id(cls, user_id):
         """Returns a list of tuples of group ids and group names for which the
         user is an admin.

@@ -3,32 +3,23 @@
 
 <div class="container-fluid">
 <div>
-  <h1>Remove people from your group(s)</h1>
+  <h1>Groups you can leave:</h1>
   <br>
-  <form action="/remove_from_group" method="POST" id="removal-form" name="checks">
-    {% if admin_groups %}
-      {% for group in admin_groups %}
-      <div class="form row">
-
-        <div class="col-lg-6">
-          <h3>{{ group }}</h3>
-          <div class="input-group">
-            
-            {% for member_user_id, user_name, group_user_id in admin_groups[group] %}
-              <div class="checkbox">
-                <label>
-                  <input type="checkbox" name="check" value="{{ group_user_id }}">{{ user_name }}
-                </label>
-              </div>
-            {% endfor %}
-
-          </div><!-- /input-group -->
-        </div><!-- /.col-lg-6 -->
-
-      </div> <!-- /form row -->
-      {% endfor %}  
+  <form action="/leave_group" method="POST" id="removal-form" name="checks">
+    {% if leavable_groups %}
+      <div class="input-group">
+        {% for group in leavable_groups %}
+          <div class="form col-xs-6">
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" name="check" value="{{ leavable_groups[group] }}">{{ group }}
+              </label>
+            </div>
+          </div> <!-- /form col-xs-6 -->
+        {% endfor %}
+      </div><!-- /input-group --> 
     {% else %}
-    <h3>Your groups have no users.</h3>
+    <h3>You don't have any groups that you can leave.</h3>
     {% endif %}
 
     <div class="form-group">

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid">
+<div>
+  <h1>Update {{ group_name }}'s goal!</h1>
+  <br>
+  <form action="/update_group_goal/{{ group_id }}" method="POST" id="update-form">
+    <div class="form-inline row">
+      <div class="form-group col-sm-6">
+        <h4>Current Goal: {{ group_goal }}</h4>
+        <label>New Goal:
+          <input type="number" name="group-goal" required class="form-control">
+        </label>
+      </div>
+    </div>
+    <br>
+    <div class="form-group">
+        <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
+         <a href="/my_profile" value="Nevermind" class="btn btn-danger">Never mind</a>
+    </div>
+
+
+  </form>
+
+</div>
+</div>
+
+{% endblock %}

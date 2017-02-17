@@ -13,3 +13,10 @@ update-personal-goal
 User profile
 - make options list look nicer. Consider moving to another place
 - make the picture resize
+- add a bootstrap badge to the "approve pending users" button (see "Buttons with badges" in bootstrap)
+
+
+NavBar
+- define the "active" selection
+- make Groups a dropdown
+- make the admin from user profile a dropdown (less convinsed on this cuz i like seeing right away if there are pending requests to join)

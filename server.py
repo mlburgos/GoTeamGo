@@ -28,6 +28,7 @@ from helper import (get_performances_by_day,
                     calc_progress,
                     get_admin_groups_and_pending,
                     get_admin_groups_and_members,
+                    get_groups_you_can_leave,
                     )
 
 from datetime import datetime, date
@@ -320,6 +321,10 @@ def group_profile(group_id):
 
     group_goal = Goal.get_current_goal(group_id)
 
+    user_id = session.get('user_id')
+    is_group_admin = (group_id in GroupAdmin.by_user_id(user_id))
+    print "is_group_admin:", is_group_admin
+
     users_full_info = []
 
     for user in group_users:
@@ -341,6 +346,8 @@ def group_profile(group_id):
     return render_template("group-profile.html",
                            group_name=group_name,
                            group_goal=group_goal,
+                           group_id=group_id,
+                           is_group_admin=is_group_admin,
                            users_full_info=users_full_info,
                            )
 
@@ -443,7 +450,6 @@ def handle_join_new_group():
 
     new_group_pending_user = GroupPendingUser(user_id=user_id,
                                               group_id=group_id,
-                                              approved=False,
                                               )
 
     db.session.add(new_group_pending_user)
@@ -644,7 +650,6 @@ def handle_approve_to_group():
 
     for pending_id in approved_pending_ids:
         pending_user = GroupPendingUser.by_id(pending_id)
-        print "pending_user:", pending_user
         pending_user_id = pending_user.user_id
         group_id = pending_user.group_id
 
@@ -652,7 +657,6 @@ def handle_approve_to_group():
                                group_id=group_id,
                                )
 
-        print "new_member:", new_member
         db.session.add(new_member)
         db.session.commit()
 
@@ -668,7 +672,6 @@ def handle_approve_to_group():
 def remove_from_group():
 
     user_id = session.get('user_id')
-    print "user_id:", user_id
 
     # Returns a dictionary of lists of tuples of info on the users in each group:
     # {group_name: [(user_id, user_name, group_user_id),
@@ -677,7 +680,6 @@ def remove_from_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_members(user_id)
 
-    print "admin_groups:", admin_groups
 
     return render_template("admin-remove.html",
                            user_id=user_id,
@@ -698,7 +700,6 @@ def handle_remove_from_group():
 
     for pending_id in remove_group_user_ids:
         user_pending_removal = GroupUser.by_id(pending_id)
-        print "user_pending_removal:", user_pending_removal
 
         db.session.delete(user_pending_removal)
         db.session.commit()
@@ -706,12 +707,90 @@ def handle_remove_from_group():
     return redirect("/users/{}".format(user_id))
 
 
-
-@app.route('/update_group_goal')
+@app.route('/leave_group')
 @login_required
-def update_g_goal():
+def leave_group():
 
-    pass
+    user_id = session.get('user_id')
+    print "user_id:", user_id
+
+    # Returns a dictionary of lists of tuples of info on the users in each group:
+    # {group_name: [(user_id, user_name, group_user_id),
+    #               ],
+    # }
+    # ex: {Group1: [(1, "User1 Lname1", 1)]}
+    leavable_groups = get_groups_you_can_leave(user_id)
+
+    print "leavable_groups:", leavable_groups
+
+    return render_template("leave-group.html",
+                           user_id=user_id,
+                           leavable_groups=leavable_groups,
+                           )
+
+
+@app.route('/leave_group', methods=['POST'])
+@login_required
+def handle_leave_group():
+    """Recieves a list of approved pending users, adds them to GroupUser, and
+    deletes them from GroupPendingUser.
+    """
+
+    user_id = session.get('user_id')
+    remove_group_user_ids = request.form.getlist('check')
+
+    for pending_id in remove_group_user_ids:
+        user_pending_removal = GroupUser.by_id(pending_id)
+        print "user_pending_removal:", user_pending_removal
+
+        db.session.delete(user_pending_removal)
+        db.session.commit()
+
+    return redirect("/my_profile".format(user_id))
+
+
+@app.route('/update_group_goal/<int:group_id>')
+@login_required
+@admin_required
+def update_group_goal(group_id):
+
+    user_id = session.get('user_id')
+
+    if user_id not in GroupAdmin.by_group_id(group_id):
+        flash("Sorry, only admins for this group can update the group's goal.")
+        return redirect('/groups/<int:group_id>')
+
+    group_goal = Goal.get_current_goal(group_id)
+
+    group_name = Group.by_id(group_goal).group_name
+
+    return render_template("update-group-goal.html",
+                           group_name=group_name,
+                           group_id=group_id,
+                           group_goal=group_goal,
+                           )
+
+
+@app.route('/update_group_goal/<int:group_id>', methods=['POST'])
+@login_required
+@admin_required
+def handle_update_group_goal(group_id):
+
+    user_id = session.get('user_id')
+
+    group_goal = request.form.get("group-goal")
+
+    new_goal = Goal(group_id=group_id,
+                    user_id=user_id,
+                    date_iniciated=datetime.now(),
+                    goal=group_goal,
+                    )
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+    return redirect("/groups/{}".format(group_id))
+
 
 ##############################################################################
 # Helper functions

@@ -4,8 +4,12 @@
 <div class="container-fluid">
 <div>
   <h1>{{ group_name }} rocks!</h1>
-  <label>Goal:</label>
-  {{ group_goal }}
+  <h3><label>Goal:</label>
+  {{ group_goal }}</h3>
+  <br>
+  {% if is_group_admin %}
+    <a href="/update_group_goal/{{ group_id }}" class="btn btn-danger" id="update-btn">Update group goal</a>
+  {% endif %}
 </div>
 
 </div> <!-- heading and user_photo -->
@@ -36,5 +40,44 @@
   </div>
   {% endfor %}
 </div>
+
+<script src="https://code.jquery.com/jquery.js"></script>
+
+<script type="text/javascript">
+
+   function showValidationResults (result) {
+      // result: object with success boolean, message string
+
+         if (result.success) {
+
+            $("#registration-form").submit()
+
+         } else {
+            $("#js-flash").html(result.msg)
+            $("#js-flash").show()
+         }
+
+
+
+   }
+
+   function validateGroupNameExists (evt) {
+      evt.preventDefault();
+
+      var formInputs = {
+         "group_id": $("#update-btn").val(),
+      }
+
+      $.post('/verify_group_name_exists.json',
+             formInputs,
+             showValidationResults
+             );
+   }
+
+   // $("#update-btn").on("click", validateGroupNameExists)
+
+
+</script>
+
 
 {% endblock %}
