@@ -72,9 +72,8 @@ def get_performances_by_day(user_id):
             }
 
 
-def get_weeks_workout_count(user_id):
-    """Counts the number of workouts done by a user in the week up to the current
-    day.
+def get_weeks_workouts(user_id):
+    """Returns the workouts done by a user in the week up to the current day.
 
     If today is a Thursday, it will count the workouts logged over the 4 day span
     from Monday to Thursday.
@@ -92,7 +91,7 @@ def get_weeks_workout_count(user_id):
                                          Workout.workout_time >= nearest_monday)\
                                  .all()
 
-    return len(user_workouts)
+    return user_workouts
 
 
 def calc_progress(workout_count, goal):

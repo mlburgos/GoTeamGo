@@ -23,7 +23,7 @@ from model import (User,
                    connect_to_db)
 
 from helper import (get_performances_by_day,
-                    get_weeks_workout_count,
+                    get_weeks_workouts,
                     get_groups_and_current_goals,
                     calc_progress,
                     get_admin_groups_and_pending,
@@ -119,7 +119,6 @@ def admin_required(f):
             return redirect("/users/{}".format(user_id))
 
     return wrapper
-
 
 
 @app.route('/register')
@@ -252,15 +251,13 @@ def logout():
 
 
 @app.route('/users/<int:user_id>')
-@app.route('/my_profile')
 @login_required
-def user_profile(user_id=None):
+def user_profile(user_id):
 
-    active_user_profile_page = False
+    is_my_profile = False
 
-    if user_id is None:
-        user_id = session.get('user_id')
-        active_user_profile_page = True
+    if user_id == session.get('user_id'):
+        is_my_profile = True
 
     user = User.by_id(user_id)
     first_name = user.first_name
@@ -274,8 +271,19 @@ def user_profile(user_id=None):
     #  }
     performance_by_day = get_performances_by_day(user_id)
 
-    # Returns the number of workouts done since most recent Monday.
-    workout_count = get_weeks_workout_count(user_id)
+    # Returns the workouts done since most recent Monday.
+    workouts = get_weeks_workouts(user_id)
+    workout_count = len(workouts)
+
+    workouts_for_board = [(workout.exercise_type,
+                           workout.workout_time,
+                           workout.performance_rating,
+                           workout.distance,
+                           workout.distance_unit,
+                           workout.description,
+                           )
+                          for workout in workouts]
+
 
     # Returns most recently set personal goal.
     personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
@@ -297,7 +305,7 @@ def user_profile(user_id=None):
                        for group in groups]
 
     return render_template("user-profile.html",
-                           active_user_profile_page=active_user_profile_page,
+                           is_my_profile=is_my_profile,
                            user_photo=user_photo,
                            first_name=first_name,
                            performance_by_day=json.dumps(performance_by_day),
@@ -307,6 +315,7 @@ def user_profile(user_id=None):
                            personal_progress_formatted=personal_progress_formatted,
                            personal_valuemax=personal_valuemax,
                            full_group_info=full_group_info,
+                           workouts_for_board=workouts_for_board,
                            )
 
 
@@ -329,8 +338,11 @@ def group_profile(group_id):
 
     for user in group_users:
         name = user.first_name + " " + user.last_name
-        # Returns the number of workouts done since most recent Monday.
-        workout_count = get_weeks_workout_count(user.user_id)
+
+        # Returns the workouts done since most recent Monday.
+        workouts = get_weeks_workouts(user_id)
+        workout_count = len(workouts)
+
         progress, progress_formatted = calc_progress(workout_count, group_goal)
 
         users_full_info.append([user.user_id,
@@ -362,6 +374,8 @@ def show_user_group_mates():
 
     groups = user.groups
 
+
+    # Abstract this away to a get_friends helper method
     friends = []
 
     for group in groups:
@@ -377,8 +391,9 @@ def show_user_group_mates():
     for friend in unique_friends:
         name = friend.first_name + " " + friend.last_name
 
-        # Returns the number of workouts done since most recent Monday.
-        workout_count = get_weeks_workout_count(friend.user_id)
+        # Returns the workouts done since most recent Monday.
+        workouts = get_weeks_workouts(friend.user_id)
+        workout_count = len(workouts)
 
         # Returns most recently set personal goal.
         personal_goal = Personal_Goal.get_current_goal_by_user_id(friend.user_id)
@@ -396,12 +411,14 @@ def show_user_group_mates():
 
     print "friends_full_info:", friends_full_info
 
+    ###########################################################################
     # Try to alphebetize friends
     # alphabetical_friends_full_info = sorted(friends_full_info,
     #                                         key=lambda friend: friend[2]
     #                                         )
 
     # print "alphabetical_friends_full_info:", alphabetical_friends_full_info
+    ###########################################################################
 
     if friends_full_info == []:
         return redirect("/users/{}".format(user_id))
