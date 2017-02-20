@@ -157,6 +157,22 @@ def get_admin_groups_and_pending(user_id):
     return pending
 
 
+def get_admin_pending_count(user_id):
+    """ Returns a count of the users pending approval into groups for which the
+    user is an admin:
+    """
+
+    # Returns a list of the group ids for which the user is an admin.
+    admin_groups = GroupAdmin.by_user_id(user_id)
+
+    pending_users = GroupPendingUser.query\
+                                    .filter(GroupPendingUser.group_id
+                                                            .in_(admin_groups))\
+                                    .all()
+
+    return len(pending_users)
+
+
 def get_admin_groups_and_members(user_id):
     """ Returns a dictionary of lists of tuples of info on the users in each
     group:

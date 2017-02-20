@@ -29,6 +29,7 @@ from helper import (get_performances_by_day,
                     get_admin_groups_and_pending,
                     get_admin_groups_and_members,
                     get_groups_you_can_leave,
+                    get_admin_pending_count,
                     )
 
 from datetime import datetime, date
@@ -76,13 +77,7 @@ def handle_login():
 
     admin_groups = GroupAdmin.by_user_id(user.user_id)
 
-    print "Type(admin_groups):", type(admin_groups)
-    print "len(admin_groups):", len(admin_groups)
-    print "admin_groups:", admin_groups
-
     session["is_admin"] = (len(admin_groups) != 0)
-
-    print "session['is_admin']:", session.get('is_admin')
 
     flash("Logged in")
     return redirect("/")
@@ -304,6 +299,10 @@ def user_profile(user_id):
     full_group_info = [group + calc_progress(workout_count, group[2])
                        for group in groups]
 
+    pending_approval = 0
+    if session.get('is_admin'):
+        pending_approval = get_admin_pending_count(user_id)
+
     return render_template("user-profile.html",
                            is_my_profile=is_my_profile,
                            user_photo=user_photo,
@@ -316,6 +315,7 @@ def user_profile(user_id):
                            personal_valuemax=personal_valuemax,
                            full_group_info=full_group_info,
                            workouts_for_board=workouts_for_board,
+                           pending_approval=pending_approval,
                            )
 
 
