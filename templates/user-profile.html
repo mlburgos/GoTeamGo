@@ -66,20 +66,31 @@
 
       <div class="row">
         <h2>This week's workouts:</h2>
-        <div class="media">
-          <div class="media-left media-top">
-            <a href="#">
-              <img class="media-object" src="..." alt="...">
-            </a>
+        {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
+          <div class="media">
+            <div class="media-left media-top">
+              <!-- <a href="#"> -->
+              <!-- {{"☆" * performance_rating }} -->
+              {% for i in range(performance_rating) %}
+                ☆
+              {% endfor %}
+                <!-- <img class="media-object" src="..." alt="..."> -->
+              <!-- </a> -->
+            </div>
+            <div class="media-body">
+              <h4 class="media-heading"> {{ exercise_type }}</h4>
+              {{ workout_time }}<br>
+              <!-- {{"☆" * performance_rating }} <br> -->
+              {% if distance and distance_unit %}
+                Distance: {{ distance }} {{ distance_unit }} <br>
+              {% endif %}
+              {% if description %}
+                {{ description }}
+              {% endif %}
+            </div>
           </div>
-          <div class="media-body">
-            <h4 class="media-heading">Run</h4>
-            1/15/2017 <br>
-            ☆☆☆☆☆ <br>
-            Distance: 3 miles <br>
-          </div>
-        </div>
-      </div>
+        {% endfor %}
+      </div><!-- row -->
 
     </div><!-- col-xs-8 -->
     

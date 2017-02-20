@@ -279,7 +279,6 @@ def user_profile(user_id):
                            )
                           for workout in workouts]
 
-
     # Returns most recently set personal goal.
     personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
 
