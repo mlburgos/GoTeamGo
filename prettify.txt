@@ -24,3 +24,4 @@ NavBar
 
 Friends
 - add current user info to friends page
+    - do this by putting the parts of the user profile that create the user's stats into a helper fn.

@@ -30,6 +30,7 @@ from helper import (get_performances_by_day,
                     get_admin_groups_and_members,
                     get_groups_you_can_leave,
                     get_admin_pending_count,
+                    get_users_top_workouts,
                     )
 
 from datetime import datetime, date
@@ -242,7 +243,7 @@ def logout():
 
     del session["user_id"]
     flash("Logged Out.")
-    return redirect("/")
+    return redirect("/login")
 
 
 @app.route('/users/<int:user_id>')
@@ -326,20 +327,21 @@ def group_profile(group_id):
     group_name = group.group_name
 
     group_users = group.users
+    group_users_ids = [user.user_id for user in group_users]
 
     group_goal = Goal.get_current_goal(group_id)
 
     user_id = session.get('user_id')
     is_group_admin = (group_id in GroupAdmin.by_user_id(user_id))
-    print "is_group_admin:", is_group_admin
 
     users_full_info = []
 
     for user in group_users:
         name = user.first_name + " " + user.last_name
+        current_user_id = user.user_id
 
         # Returns the workouts done since most recent Monday.
-        workouts = get_weeks_workouts(user_id)
+        workouts = get_weeks_workouts(current_user_id)
         workout_count = len(workouts)
 
         progress, progress_formatted = calc_progress(workout_count, group_goal)
@@ -352,7 +354,7 @@ def group_profile(group_id):
                                 progress_formatted
                                 ])
 
-    print users_full_info
+    workouts_for_board = get_users_top_workouts(group_users_ids)
 
     return render_template("group-profile.html",
                            group_name=group_name,
@@ -360,6 +362,7 @@ def group_profile(group_id):
                            group_id=group_id,
                            is_group_admin=is_group_admin,
                            users_full_info=users_full_info,
+                           workouts_for_board=workouts_for_board,
                            )
 
 

@@ -94,6 +94,41 @@ def get_weeks_workouts(user_id):
     return user_workouts
 
 
+def get_users_top_workouts(user_ids):
+    """Returns the workouts done by a group of users in the week up to the
+    current day. Only returns workouts with performance_rating >= 4.
+
+    If today is a Thursday, it will count the workouts logged over the 4 day span
+    from Monday to Thursday for members in the list of user_ids if they rated
+    them a 4 or 5.
+    """
+
+    today = datetime.date.today()
+
+    # using regular .weekday() instead of .isoweekday() to get the number of
+    # days since monday since monday = 0
+    days_from_monday = datetime.timedelta(days=today.weekday())
+
+    nearest_monday = today - days_from_monday
+
+    workouts = Workout.query.filter(Workout.user_id.in_(user_ids),
+                                    Workout.workout_time >= nearest_monday,
+                                    Workout.performance_rating >= 4)\
+                            .all()
+
+    workouts_for_board = [(workout.exercise_type,
+                           workout.workout_time,
+                           workout.performance_rating,
+                           workout.distance,
+                           workout.distance_unit,
+                           workout.description,
+                           User.get_name_by_id(workout.user_id),
+                           )
+                          for workout in workouts]
+
+    return workouts_for_board
+
+
 def calc_progress(workout_count, goal):
     """Prevents division by 0 in calculating percent of goal accomplished.
     """
