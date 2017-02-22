@@ -22,7 +22,8 @@ from model import (User,
                    db,
                    connect_to_db)
 
-from helper import (get_performances_by_day,
+from helper import (register_new_user,
+                    get_performances_by_day,
                     get_weeks_workouts,
                     get_groups_and_current_goals,
                     calc_progress,
@@ -72,13 +73,13 @@ def handle_login():
 
     user = User.query.filter_by(email=email).first()
 
-    if not user:
-        flash("Email address not found")
-        return redirect("/")
+    # if not user:
+    #     flash("Email address not found")
+    #     return redirect("/")
 
     if user.password != password:
         flash("Incorrect password")
-        return redirect("/")
+        return redirect("/login")
 
     session["user_id"] = user.user_id
     session["user_name"] = user.first_name
@@ -134,37 +135,17 @@ def registration():
 def register_process():
     """Process registration."""
 
-    # Get form variables and test validity
+    # Get form variables
     email = request.form["email"]
     password = request.form["password"]
-
-    # Get remaining form variables
     first_name = request.form["first-name"]
     last_name = request.form["last-name"]
 
-    new_user = User(email=email,
-                    password=password,
-                    first_name=first_name,
-                    last_name=last_name,
-                    )
-
-    db.session.add(new_user)
-    db.session.commit()
-
-    user = User.query.filter_by(email=email).first()
-
-    # Add user info to the session.
-    session["user_id"] = user.user_id
-    session["user_name"] = user.first_name
-
-    # Set personal goal to 0 by default.
-    personal_goal = Personal_Goal(user_id=user.user_id,
-                                  date_iniciated=date.today(),
-                                  personal_goal=0,
-                                  )
-
-    db.session.add(personal_goal)
-    db.session.commit()
+    register_new_user(email=email,
+                      password=password,
+                      first_name=first_name,
+                      last_name=last_name,
+                      )
 
     flash("User %s added. Log your first workout!" % email)
     return redirect("/")
@@ -174,18 +155,23 @@ def register_process():
 def verify_email_existence():
     """Verify email existence.
     Used to prevent multiple accounts for the same email address, and used to
-    verify the account exists in the login process. 
+    verify the account exists in the login process.
     """
 
     email = request.form["email"]
 
     # Test for email existence
     email_check = User.query.filter_by(email=email).all()
-    if email_check is None:
+    print "email_check:", email_check
+
+    if email_check == []:
         return_data = {'existence': False,
                        'msg': 'Email not found. Please try again, or register as a new user.'}
+        print "return_data:", return_data
+
         return jsonify(return_data)
 
+    print "exited the conditional"
     return jsonify({'existence': True,
                     'msg': "Email already in system. Login or try a different email."})
 

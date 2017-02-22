@@ -14,9 +14,11 @@ update-personal-goal
 - require that number be positive
 
 User profile
+- move options into navbar
+    - user options
+    - admin options
 - make options list look nicer. Consider moving to another place
 - make the picture resize
-- add a bootstrap badge to the "approve pending users" button (see "Buttons with badges" in bootstrap)
 - decide how to show the stars
 
 NavBar

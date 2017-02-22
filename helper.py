@@ -15,6 +15,10 @@ import datetime
 import plotly.plotly as py
 import plotly.graph_objs as go
 
+import bcrypt
+
+from flask import session
+
 
 def get_performances_by_day(user_id):
     """Returns the count of 4 or 5 star workouts by day to which days tend to
@@ -73,6 +77,51 @@ def get_performances_by_day(user_id):
             "top_performances": top_performances,
             "top_performance_ratio": top_performance_ratio,
             }
+
+
+def hasher(password):
+    hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
+
+    return hashed_password
+
+
+def register_new_user(email, password, first_name, last_name):
+    """"""
+
+    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+
+    new_user = User(email=email,
+                    password=hashed_password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    user = User.query.filter_by(email=email).first()
+
+    # Set personal goal to 0 by default.
+    personal_goal = Personal_Goal(user_id=user.user_id,
+                                  date_iniciated=datetime.date.today(),
+                                  personal_goal=0,
+                                  )
+
+    db.session.add(personal_goal)
+    db.session.commit()
+
+    # Add user info to the session.
+    session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
+    
+    return (user.user_id,
+            user.first_name)
+
+
+
+    
+
+
 
 
 def generate_seven_day_dict(start_date):
