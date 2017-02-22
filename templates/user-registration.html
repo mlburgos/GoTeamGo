@@ -22,16 +22,6 @@
       </label>
     </div>
 
-<!--     <div class="form-group">
-      <label for="inputPassword" class="control-label">Password</label>
-      <input type="password" data-minlength="5" class="form-control" id="password" placeholder="Password" required name="password">
-      <div class="help-block">Minimum of 5 characters</div>
-    </div>
-    <div class="form-group">
-      <input type="password" class="form-control" id="confirm-password" placeholder="Confirm" required name="password-confirmation">
-      <div class="help-block with-errors" id="password-msg"></div>
-    </div> -->
-
     <div class="form-group">
       <label for="inputPassword" class="control-label">Password</label>
       <div class="form-inline">
@@ -67,6 +57,7 @@
       confirmation = $("#confirm-password");
 
    function validatePassword(){
+
       if(password.val() != confirmation.val()) {
          $("#password-msg").html("Passwords Don't Match");
          $("#form-submit").prop('disabled', true);
@@ -93,6 +84,12 @@
    function verifyEmailExistence (evt) {
       evt.preventDefault();
 
+      if (password.val().length < 6) {
+         $("#js-flash").html("Password is too short. Please make sure password is at least 6 characters.")
+         $("#js-flash").show()
+         return 
+      };
+
       var formInputs = {
          "email": $("#email").val(),
       }
@@ -104,6 +101,7 @@
    }
 
    $("#registration-form").on("submit", verifyEmailExistence)
+
 
 
 </script>

@@ -169,7 +169,6 @@ def register_process():
                       last_name=last_name,
                       )
 
-    # flash("User %s added. Log your first workout!" % email)
     return redirect("/")
 
 
