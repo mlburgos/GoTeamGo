@@ -17,9 +17,13 @@ import plotly.graph_objs as go
 
 import bcrypt
 
-from flask import (session,
+from flask import (Flask,
+                   jsonify,
+                   render_template,
+                   redirect,
+                   request,
                    flash,
-                   )
+                   session)
 
 
 def get_performances_by_day(user_id):
@@ -87,6 +91,14 @@ def hasher(password):
     return hashed_password
 
 
+def check_password(password, hashed):
+    if bcrypt.checkpw(password, hashed):
+        print "success"
+
+    else:
+        print "fail"
+
+
 def register_new_user(email, password, first_name, last_name):
     """"""
 
@@ -117,6 +129,28 @@ def register_new_user(email, password, first_name, last_name):
     session["user_name"] = user.first_name
 
     flash("User %s added. Log your first workout!" % email)
+
+
+def user_login(email, password):
+    """"""
+
+    user = User.query.filter_by(email=email).first()
+
+    hashed_password = user.password
+
+    if not bcrypt.checkpw(password, hashed_password):
+        flash("Incorrect password")
+        return False
+
+    session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
+
+    admin_groups = GroupAdmin.by_user_id(user.user_id)
+
+    session["is_admin"] = (len(admin_groups) != 0)
+
+    flash("Logged in!")
+    return True
 
 
 def generate_seven_day_dict(start_date):

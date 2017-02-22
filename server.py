@@ -23,6 +23,7 @@ from model import (User,
                    connect_to_db)
 
 from helper import (register_new_user,
+                    user_login,
                     get_performances_by_day,
                     get_weeks_workouts,
                     get_groups_and_current_goals,
@@ -55,8 +56,6 @@ app.secret_key = "SECRET_KEY"
 
 # Prevent undefined variables from failing silently.
 app.jinja_env.undefined = StrictUndefined
-
-
 
 
 def login_required(f):
@@ -124,25 +123,10 @@ def handle_login():
     email = request.form["email"]
     password = request.form["password"]
 
-    user = User.query.filter_by(email=email).first()
+    if user_login(email, password):
+        return redirect("/")
 
-    # if not user:
-    #     flash("Email address not found")
-    #     return redirect("/")
-
-    if user.password != password:
-        flash("Incorrect password")
-        return redirect("/login")
-
-    session["user_id"] = user.user_id
-    session["user_name"] = user.first_name
-
-    admin_groups = GroupAdmin.by_user_id(user.user_id)
-
-    session["is_admin"] = (len(admin_groups) != 0)
-
-    flash("Logged in")
-    return redirect("/")
+    return redirect("/login")
 
 
 @app.route('/register')
@@ -733,7 +717,6 @@ def remove_from_group():
     # }
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_members(user_id)
-
 
     return render_template("admin-remove.html",
                            user_id=user_id,
