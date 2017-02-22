@@ -1,5 +1,8 @@
 Things to make pretty
 
+***** IMPORTANT ******
+Switch to using secrets.ssh and delete keys from server.py
+
 
 - alphebetize freinds/group members in /friends and /groups/<group id>
 

@@ -1,12 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 
-
 <!-- style="width:40%;" -->
 <div class="container-fluid" >
   <div class="row">
     <div class="col-xs-4"> 
-        <h1>{{ first_name }}'s World</h1>
+        <h1 id="user-heading" value="7">{{ first_name }}'s World</h1>
         <img src="{{ user_photo }}" width="300" height="300">
         <br>
         <br>
@@ -96,14 +95,37 @@
     
   </div><!-- row -->
 
-
+  <div class="row">
+    <div class="col-xs-6">
+      <h2>Top Performances by Day</h2>
+      <p>This interactive graph can help you see which days yield your 4 and 5 star workouts!</p>
+        <div id="performance-by-day"></div>
+    </div><!-- col-xs-6 -->
+<!--     <div class="col-xs-6">
+      <h2>Top Performances by Hour</h2>
+      <p>This interactive graph can help you see which days yield your 4 and 5 star workouts!</p>
+        <div id="performance-by-hour"></div>
+    </div> -->
+  </div><!-- row -->
 
 </div><!-- container-fluid -->
 
-  <div id="analytics">
-    <h3>This is where all my cool analytics will go</h3>
-    <div id="best-day-to-workout">
-      {{ performance_by_day }}
-    </div>
-  </div>
+<script src="https://code.jquery.com/jquery.js"></script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script type=text/javascript>
+    var byDayData = {{ by_day_fig|tojson|safe }};
+</script>
+
+<script type="text/javascript">
+
+   BY_DAY = document.getElementById('performance-by-day');
+   Plotly.plot( BY_DAY, 
+               byDayData);
+
+
+</script>
+
 {% endblock %}
+

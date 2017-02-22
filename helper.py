@@ -12,6 +12,9 @@ from model import (User,
 
 import datetime
 
+import plotly.plotly as py
+import plotly.graph_objs as go
+
 
 def get_performances_by_day(user_id):
     """Returns the count of 4 or 5 star workouts by day to which days tend to
@@ -70,6 +73,76 @@ def get_performances_by_day(user_id):
             "top_performances": top_performances,
             "top_performance_ratio": top_performance_ratio,
             }
+
+
+def generate_seven_day_dict(start_date):
+    """"""
+
+    seven_day_dict = {}
+
+    for i in xrange(7):
+        days_to_add = datetime.timedelta(days=i)
+        seven_day_dict[start_date + days_to_add] = 0
+
+    return seven_day_dict
+
+
+
+def generate_bar_graph(user_id):
+    """"""
+
+    today = datetime.date.today()
+
+    # using regular .weekday() instead of .isoweekday() to get the number of
+    # days since monday since monday = 0
+    days_from_monday = datetime.timedelta(days=today.weekday())
+
+    nearest_monday = today - days_from_monday
+
+    days_49 = datetime.timedelta(days=49)
+
+    eight_mondays_ago = nearest_monday - days_49
+
+    user_workouts = Workout.query.filter(Workout.user_id == user_id,
+                                         Workout.workout_time >= eight_mondays_ago,
+                                         Workout.performance_rating >= 4)\
+                                 .all()
+
+    X_LABELS = ['Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+                ]
+
+    eight_mondays = [(eight_mondays_ago + datetime.timedelta(days=7*i))
+                     for i in xrange(8)]
+
+    data = []
+
+    for monday in eight_mondays:
+        current_week = generate_seven_day_dict(monday)
+
+        for workout in user_workouts:
+            workout_date = workout.workout_time.date()
+            if workout_date in current_week:
+                current_week[workout_date] += 1
+
+        if monday == nearest_monday:
+            name = "Current Week"
+        else:
+            name = str(monday.month) + "/" + str(monday.day) + "/" + str(monday.year)
+
+        trace = go.Bar(x=X_LABELS,
+                       y=current_week.values(),
+                       name=name,
+                       )
+
+        data.append(trace)
+
+    return data
 
 
 def get_weeks_workouts(user_id):

@@ -31,19 +31,26 @@ from helper import (get_performances_by_day,
                     get_groups_you_can_leave,
                     get_admin_pending_count,
                     get_users_top_workouts,
+                    generate_bar_graph,
                     )
 
 from datetime import datetime, date
 
 import json
 
+import os
+
 from functools import wraps
+
+import plotly.plotly as py
+import plotly.graph_objs as go
+
 
 
 app = Flask(__name__)
 
 # Need to modify this later
-app.secret_key = "ABC"
+app.secret_key = "SECRET_KEY"
 
 # Prevent undefined variables from failing silently.
 app.jinja_env.undefined = StrictUndefined
@@ -190,7 +197,6 @@ def new_workout():
     distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
 
     types_units = distinct_workouts.filter_by(user_id=user_id).all()
-    print "types_units:", types_units
 
     return render_template("new-workout-form.html",
                            types_units=types_units,
@@ -303,6 +309,20 @@ def user_profile(user_id):
     if session.get('is_admin'):
         pending_approval = get_admin_pending_count(user_id)
 
+    #
+    layout = go.Layout(
+        barmode='stack'
+    )
+
+    by_day_data = generate_bar_graph(user_id)
+    by_day_fig = go.Figure(data=by_day_data, layout=layout)
+    print "by_day_fig:", by_day_fig
+
+    # by_hour_data = generate_bar_graph_by_hour(user_id)
+    # by_hour_fig = go.Figure(data=by_hour_data, layout=layout)
+    # print "by_day_fig:", by_day_fig
+
+
     return render_template("user-profile.html",
                            is_my_profile=is_my_profile,
                            user_photo=user_photo,
@@ -316,6 +336,9 @@ def user_profile(user_id):
                            full_group_info=full_group_info,
                            workouts_for_board=workouts_for_board,
                            pending_approval=pending_approval,
+                           user_id=user_id,
+                           by_day_fig=by_day_fig,
+                           # by_hour_fig=by_hour_fig,
                            )
 
 
@@ -327,7 +350,9 @@ def group_profile(group_id):
     group_name = group.group_name
 
     group_users = group.users
+
     group_users_ids = [user.user_id for user in group_users]
+    workouts_for_board = get_users_top_workouts(group_users_ids)
 
     group_goal = Goal.get_current_goal(group_id)
 
@@ -354,15 +379,13 @@ def group_profile(group_id):
                                 progress_formatted
                                 ])
 
-    workouts_for_board = get_users_top_workouts(group_users_ids)
-
     return render_template("group-profile.html",
                            group_name=group_name,
+                           workouts_for_board=workouts_for_board,
                            group_goal=group_goal,
                            group_id=group_id,
                            is_group_admin=is_group_admin,
                            users_full_info=users_full_info,
-                           workouts_for_board=workouts_for_board,
                            )
 
 
@@ -376,7 +399,6 @@ def show_user_group_mates():
 
     groups = user.groups
 
-
     # Abstract this away to a get_friends helper method
     friends = []
 
@@ -386,11 +408,15 @@ def show_user_group_mates():
             if member.user_id != user_id and member not in friends:
                 friends.append(member)
 
-    unique_friends = set(friends)
+    me_and_friends = [user] + friends
+
+    print "me_and_friends:", me_and_friends
+
+    unique_friends_ids = [friend.user_id for friend in me_and_friends]
+    workouts_for_board = get_users_top_workouts(unique_friends_ids + [user_id])
 
     friends_full_info = []
-
-    for friend in unique_friends:
+    for friend in me_and_friends:
         name = friend.first_name + " " + friend.last_name
 
         # Returns the workouts done since most recent Monday.
@@ -411,8 +437,6 @@ def show_user_group_mates():
                                   progress_formatted
                                   ])
 
-    print "friends_full_info:", friends_full_info
-
     ###########################################################################
     # Try to alphebetize friends
     # alphabetical_friends_full_info = sorted(friends_full_info,
@@ -427,6 +451,7 @@ def show_user_group_mates():
 
     return render_template("my-friends.html",
                            friends_full_info=friends_full_info,
+                           workouts_for_board=workouts_for_board,
                            )
 
 

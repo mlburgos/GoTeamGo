@@ -124,7 +124,6 @@ class GroupUser(db.Model):
 
         return result
 
-
     def __repr__(self):
         """Provide helpful representation when printed."""
 
