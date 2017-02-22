@@ -170,20 +170,24 @@ def register_process():
     return redirect("/")
 
 
-@app.route('/verify_email.json', methods=['POST'])
-def verify_email():
-    """Verify email uniqueness.
+@app.route('/verify_email_existence.json', methods=['POST'])
+def verify_email_existence():
+    """Verify email existence.
+    Used to prevent multiple accounts for the same email address, and used to
+    verify the account exists in the login process. 
     """
 
     email = request.form["email"]
 
-    # Test for email uniqueness
+    # Test for email existence
     email_check = User.query.filter_by(email=email).all()
-    if email_check is not None:
-        return_data = {'success': False, 'msg': "Email already in system. Login or try a different email."}
+    if email_check is None:
+        return_data = {'existence': False,
+                       'msg': 'Email not found. Please try again, or register as a new user.'}
         return jsonify(return_data)
 
-    return jsonify({'success': True, 'msg': ''})
+    return jsonify({'existence': True,
+                    'msg': "Email already in system. Login or try a different email."})
 
 
 @app.route('/')
@@ -321,7 +325,6 @@ def user_profile(user_id):
     # by_hour_data = generate_bar_graph_by_hour(user_id)
     # by_hour_fig = go.Figure(data=by_hour_data, layout=layout)
     # print "by_day_fig:", by_day_fig
-
 
     return render_template("user-profile.html",
                            is_my_profile=is_my_profile,
@@ -685,7 +688,7 @@ def approve_to_group():
 @login_required
 @admin_required
 def handle_approve_to_group():
-    """Recieves a list of approved pending users, adds them to GroupUser, and
+    """Receives a list of approved pending users, adds them to GroupUser, and
     deletes them from GroupPendingUser.
     """
 
@@ -756,7 +759,6 @@ def handle_remove_from_group():
 def leave_group():
 
     user_id = session.get('user_id')
-    print "user_id:", user_id
 
     # Returns a dictionary of lists of tuples of info on the users in each group:
     # {group_name: [(user_id, user_name, group_user_id),
@@ -764,8 +766,6 @@ def leave_group():
     # }
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     leavable_groups = get_groups_you_can_leave(user_id)
-
-    print "leavable_groups:", leavable_groups
 
     return render_template("leave-group.html",
                            user_id=user_id,
@@ -785,7 +785,6 @@ def handle_leave_group():
 
     for pending_id in remove_group_user_ids:
         user_pending_removal = GroupUser.by_id(pending_id)
-        print "user_pending_removal:", user_pending_removal
 
         db.session.delete(user_pending_removal)
         db.session.commit()
