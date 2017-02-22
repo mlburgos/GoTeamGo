@@ -17,7 +17,9 @@ import plotly.graph_objs as go
 
 import bcrypt
 
-from flask import session
+from flask import (session,
+                   flash,
+                   )
 
 
 def get_performances_by_day(user_id):
@@ -113,15 +115,8 @@ def register_new_user(email, password, first_name, last_name):
     # Add user info to the session.
     session["user_id"] = user.user_id
     session["user_name"] = user.first_name
-    
-    return (user.user_id,
-            user.first_name)
 
-
-
-    
-
-
+    flash("User %s added. Log your first workout!" % email)
 
 
 def generate_seven_day_dict(start_date):
