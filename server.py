@@ -22,17 +22,23 @@ from model import (User,
                    db,
                    connect_to_db)
 
-from helper import (register_new_user,
-                    user_login,
-                    get_performances_by_day,
+from helper import (user_login,
+                    register_new_user,
+                    verify_email,
+                    get_historical_workout_types_and_units,
+                    submit_new_workout,
+                    get_user_profile_data,
                     get_weeks_workouts,
-                    get_groups_and_current_goals,
+                    get_users_top_workouts,
                     calc_progress,
+                    get_groups_and_current_goals,
+                    get_group_profile_data,
+                    get_friends_data,
+                    verify_group_name_exists_helper,
                     get_admin_groups_and_pending,
                     get_admin_groups_and_members,
                     get_groups_you_can_leave,
                     get_admin_pending_count,
-                    get_users_top_workouts,
                     generate_bar_graph,
                     )
 
@@ -45,10 +51,6 @@ from decorators import (login_required,
 from datetime import datetime, date
 
 import json
-
-import os
-
-from functools import wraps
 
 import plotly.plotly as py
 import plotly.graph_objs as go
@@ -70,6 +72,7 @@ app.jinja_env.undefined = StrictUndefined
 def homepage():
 
     return render_template("user-login.html")
+    # return render_template("user-login2.html")
 
 
 @app.route('/login', methods=['POST'])
@@ -77,11 +80,7 @@ def homepage():
 def handle_login():
     """Process Login"""
 
-    # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
-
-    if user_login(email, password):
+    if user_login():
         return redirect("/")
 
     return redirect("/login")
@@ -99,17 +98,7 @@ def registration():
 def register_process():
     """Process registration."""
 
-    # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
-    first_name = request.form["first-name"]
-    last_name = request.form["last-name"]
-
-    register_new_user(email=email,
-                      password=password,
-                      first_name=first_name,
-                      last_name=last_name,
-                      )
+    register_new_user()
 
     return redirect("/")
 
@@ -121,22 +110,7 @@ def verify_email_existence():
     verify the account exists in the login process.
     """
 
-    email = request.form["email"]
-
-    # Test for email existence
-    email_check = User.query.filter_by(email=email).all()
-    print "email_check:", email_check
-
-    if email_check == []:
-        return_data = {'existence': False,
-                       'msg': 'Email not found. Please try again, or register as a new user.'}
-        print "return_data:", return_data
-
-        return jsonify(return_data)
-
-    print "exited the conditional"
-    return jsonify({'existence': True,
-                    'msg': "Email already in system. Login or try a different email."})
+    return verify_email()
 
 
 @app.route('/')
@@ -144,12 +118,7 @@ def verify_email_existence():
 def new_workout():
     """Workout form."""
 
-    user_id = session.get("user_id")
-
-    # Get all previously logged workout types
-    distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
-
-    types_units = distinct_workouts.filter_by(user_id=user_id).all()
+    types_units = get_historical_workout_types_and_units()
 
     return render_template("new-workout-form.html",
                            types_units=types_units,
@@ -160,39 +129,8 @@ def new_workout():
 def handle_new_workout():
     """Process new workout."""
 
-    # Get user_id from session
-    user_id = session.get("user_id")
+    submit_new_workout()
 
-    # Get form variables
-    exercise_type = request.form["exercise-type"].lower()
-    performance_rating = int(request.form["performance-rating"])
-
-    # Set distance to None if no distance was entered to prevent db error.
-    distance = request.form["distance"]
-    if distance == "":
-        distance = None
-
-    distance_unit = request.form["distance-unit"].lower()
-    description = request.form["description"]
-
-    # Set workout_time to current date and time if no date or time were entered.
-    workout_time = request.form["workout-time"]
-    if workout_time == "":
-        workout_time = datetime.now()
-
-    new_workout = Workout(user_id=user_id,
-                          exercise_type=exercise_type,
-                          workout_time=workout_time,
-                          performance_rating=performance_rating,
-                          distance=distance,
-                          distance_unit=distance_unit,
-                          description=description,
-                          )
-
-    db.session.add(new_workout)
-    db.session.commit()
-
-    flash("Workout added!")
     return redirect("/friends")
 
 
@@ -209,86 +147,8 @@ def logout():
 @login_required
 def user_profile(user_id):
 
-    is_my_profile = False
-
-    if user_id == session.get('user_id'):
-        is_my_profile = True
-
-    user = User.by_id(user_id)
-    first_name = user.first_name
-    user_photo = user.photo_url
-
-    # Returns a dictionary of dictionaies:
-    # {
-    #  "workouts_by_day" = {1: 0, ..., 7: 0},
-    #  "top_performances" = {1: 0, ..., 7: 0},
-    #  "top_performance_ratio" = {1: 0, ..., 7: 0}
-    #  }
-    performance_by_day = get_performances_by_day(user_id)
-
-    # Returns the workouts done since most recent Monday.
-    workouts = get_weeks_workouts(user_id)
-    workout_count = len(workouts)
-
-    workouts_for_board = [(workout.exercise_type,
-                           workout.workout_time,
-                           workout.performance_rating,
-                           workout.distance,
-                           workout.distance_unit,
-                           workout.description,
-                           )
-                          for workout in workouts]
-
-    # Returns most recently set personal goal.
-    personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
-
-    personal_progress, personal_progress_formatted = calc_progress(workout_count, personal_goal)
-
-    # Defines the max for the personal progress bar.
-    personal_valuemax = max(personal_progress, 100)
-
-    # Returns a list of lists of the form:
-    # [[group_id, group_name, goal]
-    # ex: [[1, "Group1", 4]]
-    groups = get_groups_and_current_goals(user_id)
-
-    # Extends groups to include progress toward group goal and formatted progress.
-    # [[group_id, group_name, goal, progress, formatted_progress]
-    # ex: [[1, "Group1", 4, 0.50, "50%"]]
-    full_group_info = [group + calc_progress(workout_count, group[2])
-                       for group in groups]
-
-    pending_approval = 0
-    if session.get('is_admin'):
-        pending_approval = get_admin_pending_count(user_id)
-
-    #
-    layout = go.Layout(
-        barmode='stack'
-    )
-
-    by_day_data, by_hour_data = generate_bar_graph(user_id)
-    by_day_fig = go.Figure(data=by_day_data, layout=layout)
-    print "by_day_fig:", by_day_fig
-    by_hour_fig = go.Figure(data=by_hour_data, layout=layout)
-    print "by_hour_fig:", by_hour_fig
-
     return render_template("user-profile.html",
-                           is_my_profile=is_my_profile,
-                           user_photo=user_photo,
-                           first_name=first_name,
-                           performance_by_day=json.dumps(performance_by_day),
-                           workout_count=workout_count,
-                           personal_goal=personal_goal,
-                           personal_progress=personal_progress,
-                           personal_progress_formatted=personal_progress_formatted,
-                           personal_valuemax=personal_valuemax,
-                           full_group_info=full_group_info,
-                           workouts_for_board=workouts_for_board,
-                           pending_approval=pending_approval,
-                           user_id=user_id,
-                           by_day_fig=by_day_fig,
-                           by_hour_fig=by_hour_fig,
+                           user_info=get_user_profile_data(user_id),
                            )
 
 
@@ -296,113 +156,31 @@ def user_profile(user_id):
 @login_required
 def group_profile(group_id):
 
-    group = Group.by_id(group_id)
-    group_name = group.group_name
-
-    group_users = group.users
-
-    group_users_ids = [user.user_id for user in group_users]
-    workouts_for_board = get_users_top_workouts(group_users_ids)
-
-    group_goal = Goal.get_current_goal(group_id)
-
-    user_id = session.get('user_id')
-    is_group_admin = (group_id in GroupAdmin.by_user_id(user_id))
-
-    users_full_info = []
-
-    for user in group_users:
-        name = user.first_name + " " + user.last_name
-        current_user_id = user.user_id
-
-        # Returns the workouts done since most recent Monday.
-        workouts = get_weeks_workouts(current_user_id)
-        workout_count = len(workouts)
-
-        progress, progress_formatted = calc_progress(workout_count, group_goal)
-
-        users_full_info.append([user.user_id,
-                                name,
-                                user.photo_url,
-                                workout_count,
-                                progress,
-                                progress_formatted
-                                ])
+    group_data = get_group_profile_data(group_id)
 
     return render_template("group-profile.html",
-                           group_name=group_name,
-                           workouts_for_board=workouts_for_board,
-                           group_goal=group_goal,
-                           group_id=group_id,
-                           is_group_admin=is_group_admin,
-                           users_full_info=users_full_info,
+                           group_name=group_data['group_name'],
+                           workouts_for_board=group_data['workouts_for_board'],
+                           group_goal=group_data['group_goal'],
+                           group_id=group_data['group_id'],
+                           is_group_admin=group_data['is_group_admin'],
+                           users_full_info=group_data['users_full_info'],
                            )
 
 
 @app.route('/friends')
 @login_required
-def show_user_group_mates():
-    """"""
+def freinds():
 
-    user_id = session.get('user_id')
-    user = User.by_id(user_id)
+    friends_data = get_friends_data()
 
-    groups = user.groups
+    if friends_data['has_friends']:
+        return render_template("my-friends.html",
+                               friends_full_info=friends_data['friends_full_info'],
+                               workouts_for_board=friends_data['workouts_for_board'],
+                               )
 
-    # Abstract this away to a get_friends helper method
-    friends = []
-
-    for group in groups:
-        members = group.users
-        for member in members:
-            if member.user_id != user_id and member not in friends:
-                friends.append(member)
-
-    me_and_friends = [user] + friends
-
-    print "me_and_friends:", me_and_friends
-
-    unique_friends_ids = [friend.user_id for friend in me_and_friends]
-    workouts_for_board = get_users_top_workouts(unique_friends_ids + [user_id])
-
-    friends_full_info = []
-    for friend in me_and_friends:
-        name = friend.first_name + " " + friend.last_name
-
-        # Returns the workouts done since most recent Monday.
-        workouts = get_weeks_workouts(friend.user_id)
-        workout_count = len(workouts)
-
-        # Returns most recently set personal goal.
-        personal_goal = Personal_Goal.get_current_goal_by_user_id(friend.user_id)
-
-        progress, progress_formatted = calc_progress(workout_count, personal_goal)
-
-        friends_full_info.append([friend.user_id,
-                                  name,
-                                  friend.photo_url,
-                                  workout_count,
-                                  personal_goal,
-                                  progress,
-                                  progress_formatted
-                                  ])
-
-    ###########################################################################
-    # Try to alphebetize friends
-    # alphabetical_friends_full_info = sorted(friends_full_info,
-    #                                         key=lambda friend: friend[2]
-    #                                         )
-
-    # print "alphabetical_friends_full_info:", alphabetical_friends_full_info
-    ###########################################################################
-
-    if friends_full_info == []:
-        return redirect("/users/{}".format(user_id))
-
-    return render_template("my-friends.html",
-                           friends_full_info=friends_full_info,
-                           workouts_for_board=workouts_for_board,
-                           )
+    return redirect("/users/{}".format(session.get('user_id')))
 
 
 @app.route('/join_group')
@@ -421,15 +199,7 @@ def verify_group_name_exists():
     """Verify the requested group name exists.
     """
 
-    group_name = request.form["group_name"]
-
-    # Test for group name uniqueness
-    name_check = Group.by_name(group_name=group_name)
-    if name_check is None:
-        return_data = {'success': False, 'msg': "Group name does not exist. Please verify the name and try again."}
-        return jsonify(return_data)
-
-    return jsonify({'success': True, 'msg': ''})
+    return verify_group_name_exists_helper()
 
 
 @app.route('/join_group', methods=['POST'])
@@ -754,6 +524,7 @@ def update_group_goal(group_id):
     group_name = Group.by_id(group_goal).group_name
 
     return render_template("update-group-goal.html",
+                           user_id=user_id,
                            group_name=group_name,
                            group_id=group_id,
                            group_goal=group_goal,
@@ -792,13 +563,13 @@ def handle_update_group_goal(group_id):
 if __name__ == "__main__":
     # Set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    # app.debug = True
-    # app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
+    app.debug = True
+    app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)
 
     # Use the DebugToolbar
-    # DebugToolbarExtension(app)
+    DebugToolbarExtension(app)
 
 
 

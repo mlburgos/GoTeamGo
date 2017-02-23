@@ -5,12 +5,12 @@
 <div class="container-fluid" >
   <div class="row">
     <div class="col-xs-4"> 
-        <h1 id="user-heading" value="7">{{ first_name }}'s World</h1>
-        <img src="{{ user_photo }}" width="300" height="300">
+        <h1 id="user-heading" value="7">{{ user_info['first_name'] }}'s World</h1>
+        <img src="{{ user_info['user_photo'] }}" width="300" height="300">
         <br>
         <br>
         <div class="list-group">
-          {% if is_my_profile %}
+          {% if user_info['is_my_profile'] %}
             <label>Options:</label>
             <a href="/update_photo" class="list-group-item">Update Photo</a>
             <a href="/update_personal_goal" class="list-group-item">Update personal goal</a>
@@ -18,7 +18,7 @@
             <a href="/new_group" class="list-group-item">Start a new group</a>
             <a href="/leave_group" class="list-group-item">Leave a group</a>
             {% if session['is_admin'] %}
-              <a href="/approve_to_group" class="list-group-item">Approve Pending Users <span class="badge">{{ pending_approval }}</span></a>
+              <a href="/approve_to_group" class="list-group-item">Approve Pending Users <span class="badge">{{ user_info['pending_approval'] }}</span></a>
               <a href="/remove_from_group" class="list-group-item">Remove Users</a>
               <a href="/update_group_goal" class="list-group-item">Update Group Goals</a>
             {% endif %}
@@ -31,33 +31,33 @@
     <div class="col-xs-8">
       <h2>This Week's Progress</h2>
       <h3>Workout Count:</h3>
-      {{ workout_count }}
+      {{ user_info['workout_count'] }}
       <br>
       <h3>Progess toward goals:</h3>
       <h4>Personal</h4>
-      {% if personal_goal == 0 %}
-        {% if is_my_profile %}
+      {% if user_info['personal_goal'] == 0 %}
+        {% if user_info['is_my_profile'] %}
           <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
         {% else %}  
-          <h5>{{ first_name }} hasn't set a personal goal yet!</h5>
+          <h5>{{ user_info['first_name'] }} hasn't set a personal goal yet!</h5>
         {% endif %}
       {% else %}  
         <label>Goal:</label>
-        {{ personal_goal }}
+        {{ user_info['personal_goal'] }}
         <br>
         <div class="progress">
-          <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%">
-            {{ personal_progress_formatted }}
+          <div class="progress-bar" role="progressbar" aria-valuenow="{{ user_info['personal_progress'] }}" aria-valuemin="0" aria-valuemax="{{ user_info['personal_valuemax'] }}" style="min-width: 2em; width: {{ user_info['personal_progress'] }}%" id="personalpb">
+            {{ user_info['personal_progress_formatted'] }}
           </div><!-- progress-bar -->
         </div><!-- progress -->
       {% endif %}
 
-      {% for group_id, group_name, group_goal, progress, formatted_progress in full_group_info %}
+      {% for group_id, group_name, group_goal, progress, formatted_progress in user_info['full_group_info'] %}
       <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>
       <label>Goal:</label>
       {{ group_goal }}
       <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%">
+        <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%" id="group{{ group_id }}">
           {{ formatted_progress }}
         </div><!-- progress-bar -->
       </div><!-- progress -->
@@ -65,7 +65,7 @@
 
       <div class="row">
         <h2>This week's workouts:</h2>
-        {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
+        {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in user_info['workouts_for_board'] %}
           <div class="media">
             <div class="media-left media-top">
               <!-- <a href="#"> -->
@@ -97,15 +97,14 @@
 
   <div class="row">
     <div class="col-xs-6">
-      <h2>Top Performances by Day</h2>
-      <p>This interactive graph can help you see which days yield your 4 and 5 star workouts!</p>
         <div id="performance-by-day"></div>
     </div><!-- col-xs-6 -->
-<!--     <div class="col-xs-6">
-      <h2>Top Performances by Hour</h2>
-      <p>This interactive graph can help you see which days yield your 4 and 5 star workouts!</p>
+  <!-- </div> -->
+
+<!--   <div class="row"> -->
+    <div class="col-xs-6">
         <div id="performance-by-hour"></div>
-    </div> -->
+    </div>
   </div><!-- row -->
 
 </div><!-- container-fluid -->
@@ -114,8 +113,15 @@
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
 <script type=text/javascript>
-    var byDayData = {{ by_day_fig|tojson|safe }};
+    var byDayData = {{ user_info['by_day_fig']|tojson|safe }};
+    var byHourData = {{ user_info['by_hour_fig']|tojson|safe }};
+
+    var groupPbIds = {{ user_info['group_ids'] }};
+
+
 </script>
 
 <script type="text/javascript">
@@ -123,6 +129,20 @@
    BY_DAY = document.getElementById('performance-by-day');
    Plotly.plot( BY_DAY, 
                byDayData);
+
+   BY_HOUR = document.getElementById('performance-by-hour');
+   Plotly.plot( BY_HOUR, 
+               byHourData);
+
+   $(function() { 
+      $("#personalpb").addClass("progressbarbetter");
+
+      for (group of groupPbIds) {
+         var id = "#group" + group;
+         $(id).addClass("progressbarbetter");         
+      };
+
+   });
 
 
 </script>

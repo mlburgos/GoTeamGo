@@ -12,3 +12,17 @@
    content: "\2605";
    position: absolute;
 }
+
+/*#personal-pb {
+    background-image: 'none';
+    background-color: 'red'
+
+}*/
+
+/*.progressbarbetter {
+    background-color: '#3AC9FF'!important;
+}*/
+
+.progressbarbetter {
+    background-color: #3AC9FF !important;
+}

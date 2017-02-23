@@ -23,73 +23,53 @@ from flask import (Flask,
                    flash,
                    session)
 
+import json
+
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 
-def get_performances_by_day(user_id):
-    """Returns the count of 4 or 5 star workouts by day to which days tend to
-    yield better performances
-
-    """
-
-    workouts = Workout.query.filter(Workout.user_id == user_id).all()
-                                        # ((Workout.performance_rating == 4) |
-                                        #  (Workout.performance_rating == 5))).all()
-
-    workouts_by_day = {1: 0,
-                       2: 0,
-                       3: 0,
-                       4: 0,
-                       5: 0,
-                       6: 0,
-                       7: 0,
-                       }
-
-    top_performances = {1: 0,
-                        2: 0,
-                        3: 0,
-                        4: 0,
-                        5: 0,
-                        6: 0,
-                        7: 0,
-                        }
-
-    top_performance_ratio = {1: 0,
-                             2: 0,
-                             3: 0,
-                             4: 0,
-                             5: 0,
-                             6: 0,
-                             7: 0,
-                             }
-
-    for workout in workouts:
-        day_of_week = workout.workout_time.isoweekday()
-
-        workouts_by_day[day_of_week] += 1
-
-        if workout.performance_rating >= 4:
-            top_performances[day_of_week] += 1
-
-    for day in top_performance_ratio:
-        if workouts_by_day[day] > 0:
-            top_performance_ratio[day] = float(top_performances[day])/workouts_by_day[day]
-
-    print "workouts_by_day:", workouts_by_day
-    print "top_performances:", top_performances
-    print "top_performance_ratio:", top_performance_ratio
-
-    return {"workouts_by_day": workouts_by_day,
-            "top_performances": top_performances,
-            "top_performance_ratio": top_performance_ratio,
-            }
+COLOR_SCHEME = ['#B3E9FE', '#73D8FF', '#3AC9FF', '#07BAFF']
 
 
-def register_new_user(email, password, first_name, last_name):
+def user_login():
     """"""
+
+    # Get form variables
+    email = request.form["email"]
+    password = request.form["password"]
+
+    user = User.query.filter_by(email=email).first()
+
+    hashed_password = user.password
+
+    if not bcrypt.check_password_hash(hashed_password, password):
+        flash("Incorrect password")
+        return False
+
+    session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
+
+    admin_groups = GroupAdmin.by_user_id(user.user_id)
+
+    session["is_admin"] = (len(admin_groups) != 0)
+
+    print "session['is_admin']:", session["is_admin"]
+
+    flash("Logged in!")
+    return True
+
+
+def register_new_user():
+    """"""
+
+    # Get form variables
+    email = request.form["email"]
+    password = request.form["password"]
+    first_name = request.form["first-name"]
+    last_name = request.form["last-name"]
 
     hashed_password = bcrypt.generate_password_hash(password)
 
@@ -117,32 +97,169 @@ def register_new_user(email, password, first_name, last_name):
     session["user_id"] = user.user_id
     session["user_name"] = user.first_name
 
-    flash("User %s added. Log your first workout!" % email)
+    flash("Welcome, %s! Log your first workout!" % first_name)
 
 
-def user_login(email, password):
-    """"""
+def verify_email():
+    """Verify email existence.
+    Used to prevent multiple accounts for the same email address, and used to
+    verify the account exists in the login process.
+    """
 
-    user = User.query.filter_by(email=email).first()
+    email = request.form["email"]
 
-    hashed_password = user.password
+    # Test for email existence
+    email_check = User.query.filter_by(email=email).all()
+    print "email_check:", email_check
 
-    if not bcrypt.check_password_hash(hashed_password, password):
-        flash("Incorrect password")
-        return False
+    if email_check == []:
+        return_data = {'existence': False,
+                       'msg': 'Email not found. Please try again, or register as a new user.'}
+        print "return_data:", return_data
 
-    session["user_id"] = user.user_id
-    session["user_name"] = user.first_name
+        return jsonify(return_data)
 
-    admin_groups = GroupAdmin.by_user_id(user.user_id)
+    print "exited the conditional"
+    return jsonify({'existence': True,
+                    'msg': "Email already in system. Login or try a different email."})
 
-    session["is_admin"] = (len(admin_groups) != 0)
 
-    print "session['is_admin']:", session["is_admin"]
+def get_historical_workout_types_and_units():
+    """Returns all distinct types of workouts the user has previously entered
+    as well as the distance units.
 
-    flash("Logged in!")
-    return True
+    >>> get_historical_workout_types_and_units()
+    [(u'run', u'miles')]
+    """
 
+    user_id = session.get("user_id")
+
+    # Get all previously logged workout types
+    distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
+
+    return distinct_workouts.filter_by(user_id=user_id).all()
+
+
+def submit_new_workout():
+    """Process new workout."""
+
+    # Get user_id from session
+    user_id = session.get("user_id")
+
+    # Get form variables
+    exercise_type = request.form["exercise-type"].lower()
+    performance_rating = int(request.form["performance-rating"])
+
+    # Set distance to None if no distance was entered to prevent db error.
+    distance = request.form["distance"]
+    if distance == "":
+        distance = None
+
+    distance_unit = request.form["distance-unit"].lower()
+    description = request.form["description"]
+
+    # Set workout_time to current date and time if no date or time were entered.
+    workout_time = request.form["workout-time"]
+    if workout_time == "":
+        workout_time = datetime.now()
+
+    new_workout = Workout(user_id=user_id,
+                          exercise_type=exercise_type,
+                          workout_time=workout_time,
+                          performance_rating=performance_rating,
+                          distance=distance,
+                          distance_unit=distance_unit,
+                          description=description,
+                          )
+
+    db.session.add(new_workout)
+    db.session.commit()
+
+    flash("Workout added!")
+
+
+def get_user_profile_data(user_id):
+    is_my_profile = False
+
+    if user_id == session.get('user_id'):
+        is_my_profile = True
+
+    user = User.by_id(user_id)
+    first_name = user.first_name
+    user_photo = user.photo_url
+
+    # Returns the workouts done since most recent Monday.
+    workouts = get_weeks_workouts(user_id)
+    workout_count = len(workouts)
+
+    workouts_for_board = [(workout.exercise_type,
+                           workout.workout_time,
+                           workout.performance_rating,
+                           workout.distance,
+                           workout.distance_unit,
+                           workout.description,
+                           )
+                          for workout in workouts]
+
+    # Returns most recently set personal goal.
+    personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
+
+    personal_progress, personal_progress_formatted = calc_progress(workout_count, personal_goal)
+
+    # Defines the max for the personal progress bar.
+    personal_valuemax = max(personal_progress, 100)
+
+    # Returns a list of lists of the form:
+    # [[group_id, group_name, goal]
+    # ex: [[1, "Group1", 4]]
+    groups = get_groups_and_current_goals(user_id)
+
+    group_ids = [group[0] for group in groups]
+
+    # Extends groups to include progress toward group goal and formatted progress.
+    # [[group_id, group_name, goal, progress, formatted_progress]
+    # ex: [[1, "Group1", 4, 0.50, "50%"]]
+    full_group_info = [group + calc_progress(workout_count, group[2])
+                       for group in groups]
+
+    pending_approval = 0
+    if session.get('is_admin'):
+        pending_approval = get_admin_pending_count(user_id)
+
+    #
+    by_day_layout = go.Layout(
+        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        barmode='stack',
+    )
+
+    by_hour_layout = go.Layout(
+        title='Top Performances by hour <br> <i>4 and 5 star performances by hour</i>',
+        barmode='stack',
+    )
+
+    by_day_data, by_hour_data = generate_bar_graph(user_id)
+    by_day_fig = go.Figure(data=by_day_data, layout=by_day_layout)
+    by_hour_fig = go.Figure(data=by_hour_data, layout=by_hour_layout)
+
+    return {'is_my_profile': is_my_profile,
+            'user_photo': user_photo,
+            'first_name': first_name,
+            'workout_count': workout_count,
+            'personal_goal': personal_goal,
+            'personal_progress': personal_progress,
+            'personal_progress_formatted': personal_progress_formatted,
+            'personal_valuemax': personal_valuemax,
+            'full_group_info': full_group_info,
+            'workouts_for_board': workouts_for_board,
+            'pending_approval': pending_approval,
+            'user_id': user_id,
+            'by_day_fig': by_day_fig,
+            'by_hour_fig': by_hour_fig,
+            'group_ids': group_ids,
+            }
+
+################################################################################
+# Supporting functions for get_user_profile_data
 
 def generate_bar_graph(user_id):
     """"""
@@ -206,6 +323,8 @@ def by_day_bar_graph(eight_mondays, nearest_monday, user_workouts):
 
     data = []
 
+    color_counter = 0
+
     for monday in eight_mondays:
         current_week = generate_seven_day_dict(monday)
 
@@ -219,12 +338,26 @@ def by_day_bar_graph(eight_mondays, nearest_monday, user_workouts):
         else:
             name = str(monday.month) + "/" + str(monday.day) + "/" + str(monday.year)
 
+        if color_counter < 2:
+            color = COLOR_SCHEME[0]
+        elif color_counter >= 2 and color_counter < 4:
+            color = COLOR_SCHEME[1]
+        elif color_counter >= 4 and color_counter < 6:
+            color = COLOR_SCHEME[2]
+        else:
+            color = COLOR_SCHEME[3]
+
         trace = go.Bar(x=X_LABELS,
                        y=current_week.values(),
                        name=name,
+                       hoverinfo="none",
+                       marker=dict(color=color,
+                                   ),
                        )
 
         data.append(trace)
+
+        color_counter += 1
 
     return data
 
@@ -247,11 +380,11 @@ def generate_24hr_Xlabels():
     for i in xrange(24):
 
         if i == 0:
-            X_LABELS.append(12 + "AM")
+            X_LABELS.append("12" + "AM")
         elif i < 12:
             X_LABELS.append(str(i) + "AM")
         elif i == 12:
-            X_LABELS.append(12 + "PM")
+            X_LABELS.append("12" + "PM")
         else:
             X_LABELS.append(str(i - 12) + "PM")
 
@@ -264,6 +397,8 @@ def by_hour_bar_graph(eight_mondays, nearest_monday, user_workouts):
     X_LABELS = generate_24hr_Xlabels()
 
     data = []
+
+    color_counter = 0
 
     for monday in eight_mondays:
         current_week = generate_seven_day_dict(monday)
@@ -280,12 +415,26 @@ def by_hour_bar_graph(eight_mondays, nearest_monday, user_workouts):
         else:
             name = str(monday.month) + "/" + str(monday.day) + "/" + str(monday.year)
 
+        if color_counter < 2:
+            color = COLOR_SCHEME[0]
+        elif color_counter >= 2 and color_counter < 4:
+            color = COLOR_SCHEME[1]
+        elif color_counter >= 4 and color_counter < 6:
+            color = COLOR_SCHEME[2]
+        else:
+            color = COLOR_SCHEME[3]
+
         trace = go.Bar(x=X_LABELS,
-                       y=current_week.values(),
+                       y=hr_dict.values(),
                        name=name,
+                       hoverinfo="none",
+                       marker=dict(color=color,
+                                   ),
                        )
 
         data.append(trace)
+
+        color_counter += 1
 
     return data
 
@@ -346,6 +495,9 @@ def get_users_top_workouts(user_ids):
 
     return workouts_for_board
 
+# End of supporting functions specifically for get_user_profile_data
+################################################################################
+
 
 def calc_progress(workout_count, goal):
     """Prevents division by 0 in calculating percent of goal accomplished.
@@ -373,6 +525,133 @@ def get_groups_and_current_goals(user_id):
              Goal.get_current_goal(group.group_id),
              ]
             for group in user_groups]
+
+
+def get_group_profile_data(group_id):
+    """"""
+
+    group = Group.by_id(group_id)
+    group_name = group.group_name
+
+    group_users = group.users
+
+    group_users_ids = [user.user_id for user in group_users]
+    workouts_for_board = get_users_top_workouts(group_users_ids)
+
+    group_goal = Goal.get_current_goal(group_id)
+
+    user_id = session.get('user_id')
+    is_group_admin = (group_id in GroupAdmin.by_user_id(user_id))
+
+    users_full_info = []
+
+    for user in group_users:
+        name = user.first_name + " " + user.last_name
+        current_user_id = user.user_id
+
+        # Returns the workouts done since most recent Monday.
+        workouts = get_weeks_workouts(current_user_id)
+        workout_count = len(workouts)
+
+        progress, progress_formatted = calc_progress(workout_count, group_goal)
+
+        users_full_info.append([user.user_id,
+                                name,
+                                user.photo_url,
+                                workout_count,
+                                progress,
+                                progress_formatted
+                                ])
+
+    return {'group_name': group_name,
+            'workouts_for_board': workouts_for_board,
+            'group_goal': group_goal,
+            'group_id': group_id,
+            'is_group_admin': is_group_admin,
+            'users_full_info': users_full_info,
+            }
+
+
+def get_friends_data():
+    """"""
+
+    user_id = session.get('user_id')
+    user = User.by_id(user_id)
+
+    groups = user.groups
+
+    if groups == []:
+        flash('Join some groups to add friends to your friend page.')
+        return {'has_friends': False}
+
+    # Abstract this away to a get_friends helper method
+    friends = []
+
+    for group in groups:
+        members = group.users
+        for member in members:
+            if member.user_id != user_id and member not in friends:
+                friends.append(member)
+
+    if friends == []:
+        flash('Invite people to join your groups to add friends to your friend page.')
+        return {'has_friends': False}
+
+    me_and_friends = [user] + friends
+
+    me_and_friends_ids = [friend.user_id for friend in me_and_friends]
+    workouts_for_board = get_users_top_workouts(me_and_friends_ids)
+
+    friends_full_info = []
+    for friend in me_and_friends:
+        name = friend.first_name + " " + friend.last_name
+
+        # Returns the workouts done since most recent Monday.
+        workouts = get_weeks_workouts(friend.user_id)
+        workout_count = len(workouts)
+
+        # Returns most recently set personal goal.
+        personal_goal = Personal_Goal.get_current_goal_by_user_id(friend.user_id)
+
+        progress, progress_formatted = calc_progress(workout_count, personal_goal)
+
+        friends_full_info.append([friend.user_id,
+                                  name,
+                                  friend.photo_url,
+                                  workout_count,
+                                  personal_goal,
+                                  progress,
+                                  progress_formatted
+                                  ])
+
+    ###########################################################################
+    # Try to alphebetize friends
+    # alphabetical_friends_full_info = sorted(friends_full_info,
+    #                                         key=lambda friend: friend[2]
+    #                                         )
+
+    # print "alphabetical_friends_full_info:", alphabetical_friends_full_info
+    ###########################################################################
+
+    return {'has_friends': True,
+            'friends_full_info': friends_full_info,
+            'workouts_for_board': workouts_for_board,
+            }
+
+
+def verify_group_name_exists_helper():
+    """Verify the requested group name exists.
+    """
+
+    group_name = request.form["group_name"]
+
+    # Test for group name uniqueness
+    name_check = Group.by_name(group_name=group_name)
+    if name_check is None:
+        return_data = {'success': False, 'msg': "Group name does not exist. Please verify the name and try again."}
+        return jsonify(return_data)
+
+    return jsonify({'success': True, 'msg': ''})
 
 
 def get_admin_groups_and_pending(user_id):

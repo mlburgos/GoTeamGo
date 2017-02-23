@@ -1,0 +1,6 @@
+photo1 = https://static.pexels.com/photos/18933/pexels-photo.jpg
+photo2= https://static.pexels.com/photos/28080/pexels-photo.jpg
+photo3 = https://static.pexels.com/photos/29578/pexels-photo.jpg
+
+
+template source: https://dcrazed.com/css-html-login-form-templates/
