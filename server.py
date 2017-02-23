@@ -53,10 +53,10 @@ from functools import wraps
 import plotly.plotly as py
 import plotly.graph_objs as go
 
-from flask_bcrypt import Bcrypt
+# from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-bcrypt = Bcrypt(app)
+# bcrypt = Bcrypt(app)
 
 # Need to modify this later
 app.secret_key = "SECRET_KEY"
@@ -267,13 +267,11 @@ def user_profile(user_id):
         barmode='stack'
     )
 
-    by_day_data = generate_bar_graph(user_id)
+    by_day_data, by_hour_data = generate_bar_graph(user_id)
     by_day_fig = go.Figure(data=by_day_data, layout=layout)
     print "by_day_fig:", by_day_fig
-
-    # by_hour_data = generate_bar_graph_by_hour(user_id)
-    # by_hour_fig = go.Figure(data=by_hour_data, layout=layout)
-    # print "by_day_fig:", by_day_fig
+    by_hour_fig = go.Figure(data=by_hour_data, layout=layout)
+    print "by_hour_fig:", by_hour_fig
 
     return render_template("user-profile.html",
                            is_my_profile=is_my_profile,
@@ -290,7 +288,7 @@ def user_profile(user_id):
                            pending_approval=pending_approval,
                            user_id=user_id,
                            by_day_fig=by_day_fig,
-                           # by_hour_fig=by_hour_fig,
+                           by_hour_fig=by_hour_fig,
                            )
 
 
@@ -794,13 +792,13 @@ def handle_update_group_goal(group_id):
 if __name__ == "__main__":
     # Set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension
-    app.debug = True
-    app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
+    # app.debug = True
+    # app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
     connect_to_db(app)
 
     # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
 
 
 

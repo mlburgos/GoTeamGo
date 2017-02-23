@@ -15,8 +15,6 @@ import datetime
 import plotly.plotly as py
 import plotly.graph_objs as go
 
-# import bcrypt
-
 from flask import (Flask,
                    jsonify,
                    render_template,
@@ -25,6 +23,10 @@ from flask import (Flask,
                    flash,
                    session)
 
+from flask_bcrypt import Bcrypt
+
+app = Flask(__name__)
+bcrypt = Bcrypt(app)
 
 
 def get_performances_by_day(user_id):
@@ -86,23 +88,8 @@ def get_performances_by_day(user_id):
             }
 
 
-def hasher(password):
-    hashed_password = bcrypt.hashpw(password, bcrypt.gensalt())
-
-    return hashed_password
-
-
-def check_password(password, hashed):
-    if bcrypt.checkpw(password, hashed):
-        return True
-
-    return False
-
-
 def register_new_user(email, password, first_name, last_name):
     """"""
-
-    from server import bcrypt
 
     hashed_password = bcrypt.generate_password_hash(password)
 
@@ -136,9 +123,6 @@ def register_new_user(email, password, first_name, last_name):
 def user_login(email, password):
     """"""
 
-    from server import bcrypt
-
-
     user = User.query.filter_by(email=email).first()
 
     hashed_password = user.password
@@ -154,20 +138,10 @@ def user_login(email, password):
 
     session["is_admin"] = (len(admin_groups) != 0)
 
+    print "session['is_admin']:", session["is_admin"]
+
     flash("Logged in!")
     return True
-
-
-def generate_seven_day_dict(start_date):
-    """"""
-
-    seven_day_dict = {}
-
-    for i in xrange(7):
-        days_to_add = datetime.timedelta(days=i)
-        seven_day_dict[start_date + days_to_add] = 0
-
-    return seven_day_dict
 
 
 def generate_bar_graph(user_id):
@@ -190,6 +164,37 @@ def generate_bar_graph(user_id):
                                          Workout.performance_rating >= 4)\
                                  .all()
 
+    eight_mondays = [(eight_mondays_ago + datetime.timedelta(days=7*i))
+                     for i in xrange(8)]
+
+    by_day_bar_graph_data = by_day_bar_graph(eight_mondays=eight_mondays,
+                                             nearest_monday=nearest_monday,
+                                             user_workouts=user_workouts,
+                                             )
+
+    by_hour_bar_graph_data = by_hour_bar_graph(eight_mondays=eight_mondays,
+                                               nearest_monday=nearest_monday,
+                                               user_workouts=user_workouts,
+                                               )
+
+    return (by_day_bar_graph_data, by_hour_bar_graph_data)
+
+
+def generate_seven_day_dict(start_date):
+    """"""
+
+    seven_day_dict = {}
+
+    for i in xrange(7):
+        days_to_add = datetime.timedelta(days=i)
+        seven_day_dict[start_date + days_to_add] = 0
+
+    return seven_day_dict
+
+
+def by_day_bar_graph(eight_mondays, nearest_monday, user_workouts):
+    """"""
+
     X_LABELS = ['Monday',
                 'Tuesday',
                 'Wednesday',
@@ -198,9 +203,6 @@ def generate_bar_graph(user_id):
                 'Saturday',
                 'Sunday',
                 ]
-
-    eight_mondays = [(eight_mondays_ago + datetime.timedelta(days=7*i))
-                     for i in xrange(8)]
 
     data = []
 
@@ -211,6 +213,67 @@ def generate_bar_graph(user_id):
             workout_date = workout.workout_time.date()
             if workout_date in current_week:
                 current_week[workout_date] += 1
+
+        if monday == nearest_monday:
+            name = "Current Week"
+        else:
+            name = str(monday.month) + "/" + str(monday.day) + "/" + str(monday.year)
+
+        trace = go.Bar(x=X_LABELS,
+                       y=current_week.values(),
+                       name=name,
+                       )
+
+        data.append(trace)
+
+    return data
+
+
+def generate_24hr_dict():
+    """"""
+
+    hr_dict = {}
+
+    for i in xrange(24):
+        hr_dict[i] = 0
+
+    return hr_dict
+
+
+def generate_24hr_Xlabels():
+
+    X_LABELS = []
+
+    for i in xrange(24):
+
+        if i == 0:
+            X_LABELS.append(12 + "AM")
+        elif i < 12:
+            X_LABELS.append(str(i) + "AM")
+        elif i == 12:
+            X_LABELS.append(12 + "PM")
+        else:
+            X_LABELS.append(str(i - 12) + "PM")
+
+    return X_LABELS
+
+
+def by_hour_bar_graph(eight_mondays, nearest_monday, user_workouts):
+    """"""
+
+    X_LABELS = generate_24hr_Xlabels()
+
+    data = []
+
+    for monday in eight_mondays:
+        current_week = generate_seven_day_dict(monday)
+        hr_dict = generate_24hr_dict()
+
+        for workout in user_workouts:
+            workout_date = workout.workout_time.date()
+            workout_hour = workout.workout_time.time().hour
+            if workout_date in current_week:
+                hr_dict[workout_hour] += 1
 
         if monday == nearest_monday:
             name = "Current Week"
@@ -432,19 +495,3 @@ def get_groups_you_can_leave(user_id):
             groups_user_can_leave[group.group_name] = all_group_user_ids[group.group_id]
 
     return groups_user_can_leave
-
-
-if __name__ == "__main__":
-    # As a convenience, if we run this module interactively, it will leave
-    # you in a state of being able to work with the database directly.
-
-    from server import app
-
-    # bcrypt = Bcrypt(app)
-
-    connect_to_db(app)
-
-    # Only have this un-commented for initial load.
-    db.create_all()
-
-    print "Connected to DB."
