@@ -34,3 +34,6 @@ Friends
 
 If I had more time
 - add a by hour chart to user profile 
+
+Login
+- add forgot password functionality

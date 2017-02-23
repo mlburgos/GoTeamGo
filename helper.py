@@ -15,7 +15,7 @@ import datetime
 import plotly.plotly as py
 import plotly.graph_objs as go
 
-import bcrypt
+# import bcrypt
 
 from flask import (Flask,
                    jsonify,
@@ -24,6 +24,7 @@ from flask import (Flask,
                    request,
                    flash,
                    session)
+
 
 
 def get_performances_by_day(user_id):
@@ -93,16 +94,17 @@ def hasher(password):
 
 def check_password(password, hashed):
     if bcrypt.checkpw(password, hashed):
-        print "success"
+        return True
 
-    else:
-        print "fail"
+    return False
 
 
 def register_new_user(email, password, first_name, last_name):
     """"""
 
-    hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+    from server import bcrypt
+
+    hashed_password = bcrypt.generate_password_hash(password)
 
     new_user = User(email=email,
                     password=hashed_password,
@@ -134,11 +136,14 @@ def register_new_user(email, password, first_name, last_name):
 def user_login(email, password):
     """"""
 
+    from server import bcrypt
+
+
     user = User.query.filter_by(email=email).first()
 
     hashed_password = user.password
 
-    if not bcrypt.checkpw(password, hashed_password):
+    if not bcrypt.check_password_hash(hashed_password, password):
         flash("Incorrect password")
         return False
 
@@ -434,6 +439,8 @@ if __name__ == "__main__":
     # you in a state of being able to work with the database directly.
 
     from server import app
+
+    # bcrypt = Bcrypt(app)
 
     connect_to_db(app)
 

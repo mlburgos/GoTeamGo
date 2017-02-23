@@ -16,9 +16,19 @@ import math
 
 import random
 
+from flask import (Flask,
+                   jsonify,
+                   render_template,
+                   redirect,
+                   request,
+                   flash,
+                   session)
+
 
 def add_sample_users(num):
     """"""
+
+    from server import bcrypt
 
     for i in range(1, num + 1):
 
@@ -26,11 +36,12 @@ def add_sample_users(num):
         last_name = "Lname" + str(i)
         email = "User" + str(i) + "@gmail.com"
         password = "pswd" + str(i)
+        hashed_password = bcrypt.generate_password_hash(password)
 
         new_user = User(first_name=first_name,
                         last_name=last_name,
                         email=email,
-                        password=password,
+                        password=hashed_password,
                         )
 
         print new_user
