@@ -654,38 +654,6 @@ def verify_group_name_is_unique_helper(group_name):
     return jsonify({'success': True, 'msg': ''})
 
 
-def handle_new_group_helper(user_id, group_name, group_goal):
-
-    new_group = Group(group_name=group_name,
-                      )
-
-    db.session.add(new_group)
-    db.session.commit()
-
-    group = Group.by_name(group_name)
-    group_id = group.group_id
-
-    new_group_user = GroupUser(user_id=user_id,
-                               group_id=group_id,
-                               approved=True,
-                               )
-
-    new_group_admin = GroupAdmin(group_id=group_id,
-                                 user_id=user_id,
-                                 )
-
-    new_goal = Goal(group_id=group_id,
-                    user_id=user_id,
-                    date_iniciated=datetime.now(),
-                    goal=group_goal,
-                    )
-
-    db.session.add(new_group_user)
-    db.session.add(new_group_admin)
-    db.session.add(new_goal)
-    db.session.commit()
-
-
 def get_admin_groups_and_pending(user_id):
     """ Returns a dictionary of lists of tuples of info on the users pending
     approval:
@@ -719,6 +687,59 @@ def get_admin_groups_and_pending(user_id):
             pending[group_name] = full_pending_users
 
     return pending
+
+
+def handle_new_group_helper(user_id, group_name, group_goal):
+
+    new_group = Group(group_name=group_name,
+                      )
+
+    db.session.add(new_group)
+    db.session.commit()
+
+    group = Group.by_name(group_name)
+    group_id = group.group_id
+
+    new_group_user = GroupUser(user_id=user_id,
+                               group_id=group_id,
+                               approved=True,
+                               )
+
+    new_group_admin = GroupAdmin(group_id=group_id,
+                                 user_id=user_id,
+                                 )
+
+    new_goal = Goal(group_id=group_id,
+                    user_id=user_id,
+                    date_iniciated=datetime.now(),
+                    goal=group_goal,
+                    )
+
+    db.session.add(new_group_user)
+    db.session.add(new_group_admin)
+    db.session.add(new_goal)
+    db.session.commit()
+
+
+def handle_approve_to_group_helper(user_id, approved_pending_ids):
+    """Receives a list of approved pending users, adds them to GroupUser, and
+    deletes them from GroupPendingUser.
+    """
+
+    for pending_id in approved_pending_ids:
+        pending_user = GroupPendingUser.by_id(pending_id)
+        pending_user_id = pending_user.user_id
+        group_id = pending_user.group_id
+
+        new_member = GroupUser(user_id=pending_user_id,
+                               group_id=group_id,
+                               )
+
+        db.session.add(new_member)
+        db.session.commit()
+
+        db.session.delete(pending_user)
+        db.session.commit()
 
 
 def get_admin_pending_count(user_id):
@@ -773,6 +794,18 @@ def get_admin_groups_and_members(user_id):
     return members
 
 
+def handle_remove_from_group_helper(user_id, remove_group_user_ids):
+    """Recieves a list of approved pending users, adds them to GroupUser, and
+    deletes them from GroupPendingUser.
+    """
+
+    for pending_id in remove_group_user_ids:
+        user_pending_removal = GroupUser.by_id(pending_id)
+
+        db.session.delete(user_pending_removal)
+        db.session.commit()
+
+
 def get_groups_you_can_leave(user_id):
     """ Returns a dictionary of group_name: group_user_id for each group which
     the user is a member but not an admin.
@@ -806,3 +839,31 @@ def get_groups_you_can_leave(user_id):
             groups_user_can_leave[group.group_name] = all_group_user_ids[group.group_id]
 
     return groups_user_can_leave
+
+
+def update_group_goal_helper(group_id, user_id):
+
+    if user_id not in GroupAdmin.by_group_id(group_id):
+        flash("Sorry, only admins for this group can update the group's goal.")
+        return redirect('/groups/<int:group_id>')
+
+    group_goal = Goal.get_current_goal(group_id)
+
+    group_name = Group.by_id(group_goal).group_name
+
+    return {'group_name': group_name,
+            'group_goal': group_goal,
+            }
+
+
+def handle_update_group_goal_helper(group_id, user_id, group_goal):
+
+    new_goal = Goal(group_id=group_id,
+                    user_id=user_id,
+                    date_iniciated=datetime.now(),
+                    goal=group_goal,
+                    )
+
+    db.session.add(new_goal)
+    db.session.commit()
+

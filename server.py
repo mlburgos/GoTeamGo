@@ -39,12 +39,16 @@ from helper import (verify_password,
                     handle_update_photo_helper,
                     handle_update_personal_goal_helper,
                     verify_group_name_is_unique_helper,
-                    handle_new_group_helper,
                     get_admin_groups_and_pending,
+                    handle_new_group_helper,
+                    handle_approve_to_group_helper,
                     get_admin_groups_and_members,
+                    handle_remove_from_group_helper,
                     get_groups_you_can_leave,
                     get_admin_pending_count,
                     generate_bar_graph,
+                    update_group_goal_helper,
+                    handle_update_group_goal_helper,
                     )
 
 
@@ -127,7 +131,11 @@ def register_process():
     first_name = request.form["first-name"]
     last_name = request.form["last-name"]
 
-    user = register_new_user(email, password, first_name, last_name)
+    user = register_new_user(email,
+                             password,
+                             first_name,
+                             last_name,
+                             )
 
     # Add user info to the session.
     session["user_id"] = user.user_id
@@ -230,7 +238,9 @@ def group_profile(group_id):
 
     user_id = session.get('user_id')
 
-    group_data = get_group_profile_data(group_id, user_id)
+    group_data = get_group_profile_data(group_id,
+                                        user_id,
+                                        )
 
     return render_template("group-profile.html",
                            group_name=group_data['group_name'],
@@ -286,7 +296,9 @@ def handle_join_new_group():
 
     requested_group = request.form.get("group-name")
 
-    handle_join_new_group_helper(user_id, requested_group)
+    handle_join_new_group_helper(user_id,
+                                requested_group,
+                                )
 
     flash("Request sent.")
 
@@ -328,7 +340,9 @@ def handle_update_photo():
     user_id = session.get('user_id')
     new_photo_url = request.form.get("photo-url")
 
-    handle_update_photo_helper(user_id, new_photo_url)
+    handle_update_photo_helper(user_id,
+                               new_photo_url,
+                               )
 
     return redirect("/users/{}".format(user_id),
                     )
@@ -356,7 +370,9 @@ def handle_update_personal_goal():
 
     personal_goal = request.form.get("personal-goal")
 
-    handle_update_personal_goal_helper(user_id, personal_goal)
+    handle_update_personal_goal_helper(user_id,
+                                       personal_goal,
+                                       )
 
     return redirect("/users/{}".format(user_id))
 
@@ -391,7 +407,10 @@ def handle_new_group():
     group_name = request.form.get("group-name")
     group_goal = request.form.get("group-goal")
 
-    handle_new_group_helper(user_id, group_name, group_goal)
+    handle_new_group_helper(user_id,
+                            group_name,
+                            group_goal,
+                            )
 
     return redirect("/users/{}".format(user_id))
 
@@ -428,20 +447,9 @@ def handle_approve_to_group():
     user_id = session.get('user_id')
     approved_pending_ids = request.form.getlist('check')
 
-    for pending_id in approved_pending_ids:
-        pending_user = GroupPendingUser.by_id(pending_id)
-        pending_user_id = pending_user.user_id
-        group_id = pending_user.group_id
-
-        new_member = GroupUser(user_id=pending_user_id,
-                               group_id=group_id,
-                               )
-
-        db.session.add(new_member)
-        db.session.commit()
-
-        db.session.delete(pending_user)
-        db.session.commit()
+    handle_approve_to_group_helper(user_id,
+                                   approved_pending_ids,
+                                   )
 
     return redirect("/users/{}".format(user_id))
 
@@ -477,11 +485,9 @@ def handle_remove_from_group():
     user_id = session.get('user_id')
     remove_group_user_ids = request.form.getlist('check')
 
-    for pending_id in remove_group_user_ids:
-        user_pending_removal = GroupUser.by_id(pending_id)
-
-        db.session.delete(user_pending_removal)
-        db.session.commit()
+    handle_remove_from_group_helper(user_id,
+                                    remove_group_user_ids,
+                                    )
 
     return redirect("/users/{}".format(user_id))
 
@@ -515,13 +521,11 @@ def handle_leave_group():
     user_id = session.get('user_id')
     remove_group_user_ids = request.form.getlist('check')
 
-    for pending_id in remove_group_user_ids:
-        user_pending_removal = GroupUser.by_id(pending_id)
+    handle_remove_from_group_helper(user_id,
+                                    remove_group_user_ids,
+                                    )
 
-        db.session.delete(user_pending_removal)
-        db.session.commit()
-
-    return redirect("/my_profile".format(user_id))
+    return redirect("/users/{}".format(user_id))
 
 
 @app.route('/update_group_goal/<int:group_id>')
@@ -531,19 +535,15 @@ def update_group_goal(group_id):
 
     user_id = session.get('user_id')
 
-    if user_id not in GroupAdmin.by_group_id(group_id):
-        flash("Sorry, only admins for this group can update the group's goal.")
-        return redirect('/groups/<int:group_id>')
-
-    group_goal = Goal.get_current_goal(group_id)
-
-    group_name = Group.by_id(group_goal).group_name
+    updated_info = update_group_goal_helper(group_id,
+                                            user_id,
+                                            )
 
     return render_template("update-group-goal.html",
                            user_id=user_id,
-                           group_name=group_name,
+                           group_name=updated_info['group_name'],
                            group_id=group_id,
-                           group_goal=group_goal,
+                           group_goal=updated_info['group_goal'],
                            )
 
 
@@ -556,14 +556,10 @@ def handle_update_group_goal(group_id):
 
     group_goal = request.form.get("group-goal")
 
-    new_goal = Goal(group_id=group_id,
-                    user_id=user_id,
-                    date_iniciated=datetime.now(),
-                    goal=group_goal,
-                    )
-
-    db.session.add(new_goal)
-    db.session.commit()
+    handle_update_group_goal_helper(group_id,
+                                    user_id,
+                                    group_goal,
+                                    )
 
     return redirect("/groups/{}".format(group_id))
 
