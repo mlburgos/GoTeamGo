@@ -24,6 +24,7 @@ from model import (User,
 
 from helper import (verify_password,
                     register_new_user,
+                    verify_login,
                     verify_email,
                     get_historical_workout_types_and_units,
                     get_user_profile_data,
@@ -93,7 +94,7 @@ def handle_login():
     email = request.form["email"]
     password = request.form["password"]
 
-    # Returns user object.
+   # Returns user object.
     user = User.by_email(email)
 
     if not verify_password(user, password):
@@ -155,6 +156,16 @@ def verify_email_existence():
     email = request.form["email"]
 
     return verify_email(email)
+
+
+@app.route('/verify_email_and_pswd.json', methods=['POST'])
+def verify_email_and_password():
+    """Verify email existence and confirms password
+    """
+    email = request.form["email"]
+    password = request.form.get("password")
+
+    return verify_login(email, password)
 
 
 @app.route('/')

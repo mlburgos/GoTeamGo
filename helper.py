@@ -25,7 +25,7 @@ from flask import (Flask,
 
 import json
 
-import database_fns
+# import database_fns
 
 from flask_bcrypt import Bcrypt
 
@@ -38,18 +38,6 @@ COLOR_SCHEME = ['#B3E9FE', '#73D8FF', '#3AC9FF', '#07BAFF']
 
 def hash_password(password):
     return bcrypt.generate_password_hash(password)
-
-
-def verify_password(user, password):
-    """
-    """
-
-    hashed_password = user.password
-
-    if not bcrypt.check_password_hash(hashed_password, password):
-        return False
-
-    return True
 
 
 def register_new_user(email, password, first_name, last_name):
@@ -98,6 +86,46 @@ def verify_email(email):
 
     return jsonify({'existence': True,
                     'msg': "Email already in system. Login or try a different email."})
+
+
+def verify_login(email, password):
+    """Verify email existence, and if that passes, it verifies the password.
+
+    """
+
+    # Test for email existence
+    email_check = User.query.filter_by(email=email).all()
+
+    if email_check == []:
+        return_data = {'existence': False,
+                       'msg': 'Email not found. Please try again, or register as a new user.'}
+
+        return jsonify(return_data)
+
+    user = email_check[0]
+
+    hashed_password = user.password
+
+    if not bcrypt.check_password_hash(hashed_password, password):
+        return_data = {'existence': False,
+                       'msg': 'Incorrect password. Please try again.'}
+
+        return jsonify(return_data)
+
+    return jsonify({'existence': True,
+                    'msg': "Email already in system. Login or try a different email."})
+
+
+def verify_password(user, password):
+    """
+    """
+
+    hashed_password = user.password
+
+    if not bcrypt.check_password_hash(hashed_password, password):
+        return False
+
+    return True
 
 
 def get_historical_workout_types_and_units(user_id):
