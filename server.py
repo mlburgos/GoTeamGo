@@ -22,11 +22,10 @@ from model import (User,
                    db,
                    connect_to_db)
 
-from helper import (user_login,
+from helper import (verify_password,
                     register_new_user,
                     verify_email,
                     get_historical_workout_types_and_units,
-                    submit_new_workout,
                     get_user_profile_data,
                     get_weeks_workouts,
                     get_users_top_workouts,
@@ -35,6 +34,12 @@ from helper import (user_login,
                     get_group_profile_data,
                     get_friends_data,
                     verify_group_name_exists_helper,
+                    handle_join_new_group_helper,
+                    show_user_groups_helper,
+                    handle_update_photo_helper,
+                    handle_update_personal_goal_helper,
+                    verify_group_name_is_unique_helper,
+                    handle_new_group_helper,
                     get_admin_groups_and_pending,
                     get_admin_groups_and_members,
                     get_groups_you_can_leave,
@@ -80,10 +85,28 @@ def homepage():
 def handle_login():
     """Process Login"""
 
-    if user_login():
-        return redirect("/")
+    # Get form variables
+    email = request.form["email"]
+    password = request.form["password"]
 
-    return redirect("/login")
+    # Returns user object.
+    user = User.by_email(email)
+
+    if not verify_password(user, password):
+        flash("Incorrect password")
+        return redirect("/login")
+
+    # Returns a list of the group ids for which the user is an admin.
+    admin_groups = GroupAdmin.by_user_id(user.user_id)
+
+    session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
+
+    session["is_admin"] = (len(admin_groups) != 0)
+
+    flash("Logged in!")
+
+    return redirect("/")
 
 
 @app.route('/register')
@@ -98,7 +121,19 @@ def registration():
 def register_process():
     """Process registration."""
 
-    register_new_user()
+    # Get form variables
+    email = request.form["email"]
+    password = request.form["password"]
+    first_name = request.form["first-name"]
+    last_name = request.form["last-name"]
+
+    user = register_new_user(email, password, first_name, last_name)
+
+    # Add user info to the session.
+    session["user_id"] = user.user_id
+    session["user_name"] = user.first_name
+
+    flash("Welcome, %s! Log your first workout!" % first_name)
 
     return redirect("/")
 
@@ -109,8 +144,9 @@ def verify_email_existence():
     Used to prevent multiple accounts for the same email address, and used to
     verify the account exists in the login process.
     """
+    email = request.form["email"]
 
-    return verify_email()
+    return verify_email(email)
 
 
 @app.route('/')
@@ -118,7 +154,9 @@ def verify_email_existence():
 def new_workout():
     """Workout form."""
 
-    types_units = get_historical_workout_types_and_units()
+    user_id = session.get("user_id")
+
+    types_units = get_historical_workout_types_and_units(user_id)
 
     return render_template("new-workout-form.html",
                            types_units=types_units,
@@ -129,7 +167,39 @@ def new_workout():
 def handle_new_workout():
     """Process new workout."""
 
-    submit_new_workout()
+    # Get user_id from session
+    user_id = session.get("user_id")
+
+    # Get form variables
+    exercise_type = request.form["exercise-type"].lower()
+    performance_rating = int(request.form["performance-rating"])
+
+    # Set distance to None if no distance was entered to prevent db error.
+    distance = request.form["distance"]
+    if distance == "":
+        distance = None
+
+    distance_unit = request.form["distance-unit"].lower()
+    description = request.form["description"]
+
+    # Set workout_time to current date and time if no date or time were entered.
+    workout_time = request.form["workout-time"]
+    if workout_time == "":
+        workout_time = datetime.now()
+
+    new_workout = Workout(user_id=user_id,
+                          exercise_type=exercise_type,
+                          workout_time=workout_time,
+                          performance_rating=performance_rating,
+                          distance=distance,
+                          distance_unit=distance_unit,
+                          description=description,
+                          )
+
+    db.session.add(new_workout)
+    db.session.commit()
+
+    flash("Workout added!")
 
     return redirect("/friends")
 
@@ -147,8 +217,10 @@ def logout():
 @login_required
 def user_profile(user_id):
 
+    session_user_id = session.get('user_id')
+
     return render_template("user-profile.html",
-                           user_info=get_user_profile_data(user_id),
+                           user_info=get_user_profile_data(user_id, session_user_id),
                            )
 
 
@@ -156,7 +228,9 @@ def user_profile(user_id):
 @login_required
 def group_profile(group_id):
 
-    group_data = get_group_profile_data(group_id)
+    user_id = session.get('user_id')
+
+    group_data = get_group_profile_data(group_id, user_id)
 
     return render_template("group-profile.html",
                            group_name=group_data['group_name'],
@@ -172,7 +246,8 @@ def group_profile(group_id):
 @login_required
 def freinds():
 
-    friends_data = get_friends_data()
+    user_id = session.get('user_id')
+    friends_data = get_friends_data(user_id)
 
     if friends_data['has_friends']:
         return render_template("my-friends.html",
@@ -180,6 +255,7 @@ def freinds():
                                workouts_for_board=friends_data['workouts_for_board'],
                                )
 
+    flash("You're not currently connected to anyone.")
     return redirect("/users/{}".format(session.get('user_id')))
 
 
@@ -210,44 +286,26 @@ def handle_join_new_group():
 
     requested_group = request.form.get("group-name")
 
-    group_id = Group.by_name(requested_group).group_id
-
-    new_group_pending_user = GroupPendingUser(user_id=user_id,
-                                              group_id=group_id,
-                                              )
-
-    db.session.add(new_group_pending_user)
-    db.session.commit()
+    handle_join_new_group_helper(user_id, requested_group)
 
     flash("Request sent.")
-    return redirect("/users/{}".format(user_id))
+
+    return redirect("/users/{}".format(session.get('user_id')))
 
 
 @app.route('/groups')
 @login_required
 def show_user_groups():
-    """Returns all groups the user """
+    """Returns all groups of which the user is a member"""
 
-    if 'user_id' in session:
-        user_id = session.get('user_id')
-        user = User.by_id(user_id)
-        first_name = user.first_name
-        user_groups = user.groups
+    user_id = session.get('user_id')
 
-        groups = [(group.group_name,
-                   group.group_id,
-                   )
-                  for group in user_groups
-                  ]
-
-    else:
-        flash("Please login")
-        return redirect("/login")
+    groups_data = show_user_groups_helper(user_id)
 
     return render_template("my-groups.html",
-                           first_name=first_name,
-                           groups=groups,
-                           len_groups=len(groups),
+                           first_name=groups_data['first_name'],
+                           groups=groups_data['groups'],
+                           len_groups=len(groups_data['groups']),
                            )
 
 
@@ -268,12 +326,9 @@ def handle_update_photo():
     """Updates the users phto in the db."""
 
     user_id = session.get('user_id')
+    new_photo_url = request.form.get("photo-url")
 
-    user = User.by_id(user_id)
-
-    user.photo_url = request.form.get("photo-url")
-
-    db.session.commit()
+    handle_update_photo_helper(user_id, new_photo_url)
 
     return redirect("/users/{}".format(user_id),
                     )
@@ -301,13 +356,7 @@ def handle_update_personal_goal():
 
     personal_goal = request.form.get("personal-goal")
 
-    new_goal = Personal_Goal(user_id=user_id,
-                             date_iniciated=datetime.now(),
-                             personal_goal=personal_goal,
-                             )
-
-    db.session.add(new_goal)
-    db.session.commit()
+    handle_update_personal_goal_helper(user_id, personal_goal)
 
     return redirect("/users/{}".format(user_id))
 
@@ -330,13 +379,7 @@ def verify_group_name_is_unique():
 
     group_name = request.form["group_name"]
 
-    # Test for group name uniqueness
-    name_check = Group.by_name(group_name=group_name)
-    if name_check is not None:
-        return_data = {'success': False, 'msg': "Name already in system. Please try a different name."}
-        return jsonify(return_data)
-
-    return jsonify({'success': True, 'msg': ''})
+    return verify_group_name_is_unique_helper(group_name)
 
 
 @app.route('/new_group', methods=['POST'])
@@ -348,34 +391,7 @@ def handle_new_group():
     group_name = request.form.get("group-name")
     group_goal = request.form.get("group-goal")
 
-    new_group = Group(group_name=group_name,
-                      )
-
-    db.session.add(new_group)
-    db.session.commit()
-
-    group = Group.by_name(group_name)
-    group_id = group.group_id
-
-    new_group_user = GroupUser(user_id=user_id,
-                               group_id=group_id,
-                               approved=True,
-                               )
-
-    new_group_admin = GroupAdmin(group_id=group_id,
-                                 user_id=user_id,
-                                 )
-
-    new_goal = Goal(group_id=group_id,
-                    user_id=user_id,
-                    date_iniciated=datetime.now(),
-                    goal=group_goal,
-                    )
-
-    db.session.add(new_group_user)
-    db.session.add(new_group_admin)
-    db.session.add(new_goal)
-    db.session.commit()
+    handle_new_group_helper(user_id, group_name, group_goal)
 
     return redirect("/users/{}".format(user_id))
 

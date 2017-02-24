@@ -61,6 +61,10 @@ class User(db.Model):
         return cls.query.filter_by(user_id=user_id).first()
 
     @classmethod
+    def by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
+
+    @classmethod
     def get_name_by_id(cls, user_id):
         user = cls.query.filter_by(user_id=user_id).first()
         return user.first_name + " " + user.last_name

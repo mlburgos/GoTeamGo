@@ -25,6 +25,8 @@ from flask import (Flask,
 
 import json
 
+import database_fns
+
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
@@ -34,42 +36,25 @@ bcrypt = Bcrypt(app)
 COLOR_SCHEME = ['#B3E9FE', '#73D8FF', '#3AC9FF', '#07BAFF']
 
 
-def user_login():
-    """"""
+def hash_password(password):
+    return bcrypt.generate_password_hash(password)
 
-    # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
 
-    user = User.query.filter_by(email=email).first()
+def verify_password(user, password):
+    """
+    """
 
     hashed_password = user.password
 
     if not bcrypt.check_password_hash(hashed_password, password):
-        flash("Incorrect password")
         return False
 
-    session["user_id"] = user.user_id
-    session["user_name"] = user.first_name
-
-    admin_groups = GroupAdmin.by_user_id(user.user_id)
-
-    session["is_admin"] = (len(admin_groups) != 0)
-
-    print "session['is_admin']:", session["is_admin"]
-
-    flash("Logged in!")
     return True
 
 
-def register_new_user():
-    """"""
-
-    # Get form variables
-    email = request.form["email"]
-    password = request.form["password"]
-    first_name = request.form["first-name"]
-    last_name = request.form["last-name"]
+def register_new_user(email, password, first_name, last_name):
+    """Creates a new user and sets a default personal goal of 0.
+    """
 
     hashed_password = bcrypt.generate_password_hash(password)
 
@@ -93,38 +78,29 @@ def register_new_user():
     db.session.add(personal_goal)
     db.session.commit()
 
-    # Add user info to the session.
-    session["user_id"] = user.user_id
-    session["user_name"] = user.first_name
-
-    flash("Welcome, %s! Log your first workout!" % first_name)
+    return user
 
 
-def verify_email():
+def verify_email(email):
     """Verify email existence.
     Used to prevent multiple accounts for the same email address, and used to
     verify the account exists in the login process.
     """
 
-    email = request.form["email"]
-
     # Test for email existence
     email_check = User.query.filter_by(email=email).all()
-    print "email_check:", email_check
 
     if email_check == []:
         return_data = {'existence': False,
                        'msg': 'Email not found. Please try again, or register as a new user.'}
-        print "return_data:", return_data
 
         return jsonify(return_data)
 
-    print "exited the conditional"
     return jsonify({'existence': True,
                     'msg': "Email already in system. Login or try a different email."})
 
 
-def get_historical_workout_types_and_units():
+def get_historical_workout_types_and_units(user_id):
     """Returns all distinct types of workouts the user has previously entered
     as well as the distance units.
 
@@ -132,56 +108,19 @@ def get_historical_workout_types_and_units():
     [(u'run', u'miles')]
     """
 
-    user_id = session.get("user_id")
-
     # Get all previously logged workout types
-    distinct_workouts = Workout.query.with_entities(Workout.exercise_type.distinct(), Workout.distance_unit)
+    distinct_workouts = Workout.query\
+                               .with_entities(Workout.exercise_type.distinct(),
+                                              Workout.distance_unit,
+                                              )
 
     return distinct_workouts.filter_by(user_id=user_id).all()
 
 
-def submit_new_workout():
-    """Process new workout."""
-
-    # Get user_id from session
-    user_id = session.get("user_id")
-
-    # Get form variables
-    exercise_type = request.form["exercise-type"].lower()
-    performance_rating = int(request.form["performance-rating"])
-
-    # Set distance to None if no distance was entered to prevent db error.
-    distance = request.form["distance"]
-    if distance == "":
-        distance = None
-
-    distance_unit = request.form["distance-unit"].lower()
-    description = request.form["description"]
-
-    # Set workout_time to current date and time if no date or time were entered.
-    workout_time = request.form["workout-time"]
-    if workout_time == "":
-        workout_time = datetime.now()
-
-    new_workout = Workout(user_id=user_id,
-                          exercise_type=exercise_type,
-                          workout_time=workout_time,
-                          performance_rating=performance_rating,
-                          distance=distance,
-                          distance_unit=distance_unit,
-                          description=description,
-                          )
-
-    db.session.add(new_workout)
-    db.session.commit()
-
-    flash("Workout added!")
-
-
-def get_user_profile_data(user_id):
+def get_user_profile_data(user_id, session_user_id):
     is_my_profile = False
 
-    if user_id == session.get('user_id'):
+    if user_id == session_user_id:
         is_my_profile = True
 
     user = User.by_id(user_id)
@@ -527,7 +466,7 @@ def get_groups_and_current_goals(user_id):
             for group in user_groups]
 
 
-def get_group_profile_data(group_id):
+def get_group_profile_data(group_id, user_id):
     """"""
 
     group = Group.by_id(group_id)
@@ -540,7 +479,6 @@ def get_group_profile_data(group_id):
 
     group_goal = Goal.get_current_goal(group_id)
 
-    user_id = session.get('user_id')
     is_group_admin = (group_id in GroupAdmin.by_user_id(user_id))
 
     users_full_info = []
@@ -572,16 +510,15 @@ def get_group_profile_data(group_id):
             }
 
 
-def get_friends_data():
+def get_friends_data(user_id):
     """"""
 
-    user_id = session.get('user_id')
+
     user = User.by_id(user_id)
 
     groups = user.groups
 
     if groups == []:
-        flash('Join some groups to add friends to your friend page.')
         return {'has_friends': False}
 
     # Abstract this away to a get_friends helper method
@@ -594,7 +531,6 @@ def get_friends_data():
                 friends.append(member)
 
     if friends == []:
-        flash('Invite people to join your groups to add friends to your friend page.')
         return {'has_friends': False}
 
     me_and_friends = [user] + friends
@@ -652,6 +588,102 @@ def verify_group_name_exists_helper():
         return jsonify(return_data)
 
     return jsonify({'success': True, 'msg': ''})
+
+
+def handle_join_new_group_helper(user_id, requested_group):
+
+    group_id = Group.by_name(requested_group).group_id
+
+    new_group_pending_user = GroupPendingUser(user_id=user_id,
+                                              group_id=group_id,
+                                              )
+
+    db.session.add(new_group_pending_user)
+    db.session.commit()
+
+
+def show_user_groups_helper(user_id):
+    """Returns all groups of which the user is a member"""
+
+    user = User.by_id(user_id)
+    first_name = user.first_name
+    user_groups = user.groups
+
+    groups = [(group.group_name,
+               group.group_id,
+               )
+              for group in user_groups
+              ]
+
+    return {'first_name': first_name,
+            'groups': groups,
+            }
+
+
+def handle_update_photo_helper(user_id, new_photo_url):
+    """Updates the users photo in the db."""
+
+    user = User.by_id(user_id)
+    user.photo_url = new_photo_url
+
+    db.session.commit()
+
+
+def handle_update_personal_goal_helper(user_id, personal_goal):
+    """Updates the users personal goal in the db."""
+
+    new_goal = Personal_Goal(user_id=user_id,
+                             date_iniciated=datetime.datetime.now(),
+                             personal_goal=personal_goal,
+                             )
+
+    db.session.add(new_goal)
+    db.session.commit()
+
+
+def verify_group_name_is_unique_helper(group_name):
+    """Verify group name uniqueness.
+    """
+
+    # Test for group name uniqueness
+    name_check = Group.by_name(group_name=group_name)
+    if name_check is not None:
+        return_data = {'success': False, 'msg': "Name already in system. Please try a different name."}
+        return jsonify(return_data)
+
+    return jsonify({'success': True, 'msg': ''})
+
+
+def handle_new_group_helper(user_id, group_name, group_goal):
+
+    new_group = Group(group_name=group_name,
+                      )
+
+    db.session.add(new_group)
+    db.session.commit()
+
+    group = Group.by_name(group_name)
+    group_id = group.group_id
+
+    new_group_user = GroupUser(user_id=user_id,
+                               group_id=group_id,
+                               approved=True,
+                               )
+
+    new_group_admin = GroupAdmin(group_id=group_id,
+                                 user_id=user_id,
+                                 )
+
+    new_goal = Goal(group_id=group_id,
+                    user_id=user_id,
+                    date_iniciated=datetime.now(),
+                    goal=group_goal,
+                    )
+
+    db.session.add(new_group_user)
+    db.session.add(new_group_admin)
+    db.session.add(new_goal)
+    db.session.commit()
 
 
 def get_admin_groups_and_pending(user_id):
