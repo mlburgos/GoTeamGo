@@ -1,0 +1,12 @@
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Groups<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              {% for group_name, group_id in navbar_groups %}
+              <li><a href="/groups/{{ group_id }}">{{ group_name }}</a></li>
+              {% endfor %}
+              <li role="separator" class="divider"></li>
+              <li><a href="/join_group">Request to join a new group</a></li>
+              <li><a href="/new_group">Start a new group</a></li>
+              <li><a href="/leave_group">Leave a group</a></li>
+            </ul>
+          </li>

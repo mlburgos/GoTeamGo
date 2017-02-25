@@ -37,40 +37,46 @@
           <li class="active"><a href="/login">Login<span class="sr-only">(current)</span></a></li>
           {% endif %}
           
-          <!-- <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Groups<span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="#">Action</a></li>
-              <li><a href="#">Another action</a></li>
-              <li><a href="#">Something else here</a></li>
+              {% for group_name, group_id in navbar_groups %}
+              <li><a href="/groups/{{ group_id }}">{{ group_name }}</a></li>
+              {% endfor %}
               <li role="separator" class="divider"></li>
-              <li><a href="#">Separated link</a></li>
-              <li role="separator" class="divider"></li>
-              <li><a href="#">One more separated link</a></li>
+              <li><a href="/join_group">Request to join a new group</a></li>
+              <li><a href="/new_group">Start a new group</a></li>
+              <li><a href="/leave_group">Leave a group</a></li>
             </ul>
-          </li> -->
+          </li>
         </ul>
+
         <!-- <form class="navbar-form navbar-left">
           <div class="form-group">
             <input type="text" class="form-control" placeholder="Search">
           </div>
           <button type="submit" class="btn btn-default">Submit</button>
         </form> -->
+
+
         <ul class="nav navbar-nav navbar-right">
           
           {% if "user_id" in session %}
             <li><a href="/logout">Logout</a></li>
+          
+            {% if session['is_admin'] %}
+
+              <li class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Admin <span class="badge">{{ navbar_pending_approval }}</span><span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/approve_to_group">Approve Pending Users <span class="badge">{{ navbar_pending_approval }}</span></a></li>
+                    <li><a href="/remove_from_group">Remove Users</a></li>
+                    <li><a href="/update_group_goal">Update Group Goals</a></li>
+                  </ul>
+                </li>
+            {% endif %}
+
           {% endif %}
-         <!-- <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-            <ul class="dropdown-menu">
-              <li><a href="#">Action</a></li>
-              <li><a href="#">Another action</a></li>
-              <li><a href="#">Something else here</a></li>
-              <li role="separator" class="divider"></li>
-              <li><a href="#">Separated link</a></li>
-            </ul>
-          </li> -->
         </ul>
       </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->
@@ -90,6 +96,12 @@
 
   <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+  <script>
+       $(document).ready(function(){
+          $('.dropdown-toggle').dropdown()
+      });
+  </script>
 
 
 </body>

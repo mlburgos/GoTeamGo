@@ -27,6 +27,7 @@ from helper import (verify_password,
                     verify_login,
                     verify_email,
                     get_historical_workout_types_and_units,
+                    get_navbar_data,
                     get_user_profile_data,
                     get_weeks_workouts,
                     get_users_top_workouts,
@@ -82,7 +83,6 @@ app.jinja_env.undefined = StrictUndefined
 def homepage():
 
     return render_template("user-login.html")
-    # return render_template("user-login2.html")
 
 
 @app.route('/login', methods=['POST'])
@@ -177,8 +177,12 @@ def new_workout():
 
     types_units = get_historical_workout_types_and_units(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("new-workout-form.html",
                            types_units=types_units,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -228,7 +232,7 @@ def logout():
     """Log out."""
 
     del session["user_id"]
-    flash("Logged Out.")
+    # flash("Logged Out.")
     return redirect("/login")
 
 
@@ -238,8 +242,28 @@ def user_profile(user_id):
 
     session_user_id = session.get('user_id')
 
+    user_info = get_user_profile_data(user_id, session_user_id)
+
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("user-profile.html",
-                           user_info=get_user_profile_data(user_id, session_user_id),
+                           is_my_profile=user_info['is_my_profile'],
+                           user_photo=user_info['user_photo'],
+                           first_name=user_info['first_name'],
+                           workout_count=user_info['workout_count'],
+                           personal_goal=user_info['personal_goal'],
+                           personal_progress=user_info['personal_progress'],
+                           personal_progress_formatted=user_info['personal_progress_formatted'],
+                           personal_valuemax=user_info['personal_valuemax'],
+                           full_group_info=user_info['full_group_info'],
+                           workouts_for_board=user_info['workouts_for_board'],
+                           pending_approval=user_info['pending_approval'],
+                           user_id=user_info['user_id'],
+                           by_day_fig=user_info['by_day_fig'],
+                           by_hour_fig=user_info['by_hour_fig'],
+                           group_ids=user_info['group_ids'],
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -253,6 +277,8 @@ def group_profile(group_id):
                                         user_id,
                                         )
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("group-profile.html",
                            group_name=group_data['group_name'],
                            workouts_for_board=group_data['workouts_for_board'],
@@ -260,6 +286,8 @@ def group_profile(group_id):
                            group_id=group_data['group_id'],
                            is_group_admin=group_data['is_group_admin'],
                            users_full_info=group_data['users_full_info'],
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -270,10 +298,14 @@ def freinds():
     user_id = session.get('user_id')
     friends_data = get_friends_data(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     if friends_data['has_friends']:
         return render_template("my-friends.html",
                                friends_full_info=friends_data['friends_full_info'],
                                workouts_for_board=friends_data['workouts_for_board'],
+                               navbar_groups=navbar_data['groups'],
+                               navbar_pending_approval=navbar_data['pending_approval'],
                                )
 
     flash("You're not currently connected to anyone.")
@@ -286,8 +318,12 @@ def join_new_group():
 
     user_id = session.get("user_id")
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("join-group.html",
                            user_id=user_id,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -308,8 +344,8 @@ def handle_join_new_group():
     requested_group = request.form.get("group-name")
 
     handle_join_new_group_helper(user_id,
-                                requested_group,
-                                )
+                                 requested_group,
+                                 )
 
     flash("Request sent.")
 
@@ -325,10 +361,14 @@ def show_user_groups():
 
     groups_data = show_user_groups_helper(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("my-groups.html",
                            first_name=groups_data['first_name'],
                            groups=groups_data['groups'],
                            len_groups=len(groups_data['groups']),
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -338,8 +378,12 @@ def update_photo():
 
     user_id = session.get("user_id")
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("update-photo.html",
                            user_id=user_id,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -367,9 +411,13 @@ def update_personal_goal():
 
     personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("update-personal-goal.html",
                            user_id=user_id,
                            personal_goal=personal_goal,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -394,8 +442,12 @@ def create_new_group():
 
     user_id = session.get('user_id')
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("group-registration.html",
                            user_id=user_id,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -441,9 +493,13 @@ def approve_to_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_pending(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("admin.html",
                            user_id=user_id,
                            admin_groups=admin_groups,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -479,9 +535,13 @@ def remove_from_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_members(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("admin-remove.html",
                            user_id=user_id,
                            admin_groups=admin_groups,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -516,9 +576,13 @@ def leave_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     leavable_groups = get_groups_you_can_leave(user_id)
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("leave-group.html",
                            user_id=user_id,
                            leavable_groups=leavable_groups,
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 
@@ -550,11 +614,15 @@ def update_group_goal(group_id):
                                             user_id,
                                             )
 
+    navbar_data = get_navbar_data(user_id)
+
     return render_template("update-group-goal.html",
                            user_id=user_id,
                            group_name=updated_info['group_name'],
                            group_id=group_id,
                            group_goal=updated_info['group_goal'],
+                           navbar_groups=navbar_data['groups'],
+                           navbar_pending_approval=navbar_data['pending_approval'],
                            )
 
 

@@ -145,6 +145,27 @@ def get_historical_workout_types_and_units(user_id):
     return distinct_workouts.filter_by(user_id=user_id).all()
 
 
+def get_navbar_data(user_id):
+    """Returns all groups of which the user is a member"""
+
+    user = User.by_id(user_id)
+    user_groups = user.groups
+
+    groups = [(group.group_name,
+               group.group_id,
+               )
+              for group in user_groups
+              ]
+
+    pending_approval = 0
+    if session.get('is_admin'):
+        pending_approval = get_admin_pending_count(user_id)
+
+    return {'groups': groups,
+            'pending_approval': pending_approval,
+            }
+
+
 def get_user_profile_data(user_id, session_user_id):
     is_my_profile = False
 
@@ -646,6 +667,7 @@ def show_user_groups_helper(user_id):
     return {'first_name': first_name,
             'groups': groups,
             }
+
 
 
 def handle_update_photo_helper(user_id, new_photo_url):
