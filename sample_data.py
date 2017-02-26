@@ -25,10 +25,15 @@ from flask import (Flask,
                    session)
 
 
+from flask_bcrypt import Bcrypt
+
+app = Flask(__name__)
+bcrypt = Bcrypt(app)
+
 def add_sample_users(num):
     """"""
 
-    from server import bcrypt
+    # from server import bcrypt
 
     for i in range(1, num + 1):
 

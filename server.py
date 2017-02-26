@@ -141,6 +141,7 @@ def register_process():
     # Add user info to the session.
     session["user_id"] = user.user_id
     session["user_name"] = user.first_name
+    session["is_admin"] = False
 
     flash("Welcome, %s! Log your first workout!" % first_name)
 
@@ -474,6 +475,8 @@ def handle_new_group():
                             group_name,
                             group_goal,
                             )
+
+    session["is_admin"] = True
 
     return redirect("/users/{}".format(user_id))
 
