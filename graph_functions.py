@@ -95,7 +95,6 @@ def generate_bar_graph(user_id):
                                          user_workouts=user_workouts,
                                          )
 
-
     return (by_day_bar_graph_data,
             by_hour_bar_graph_data,
             by_day_bar_graph_grouped_data,
@@ -225,7 +224,7 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
 
     eight_week_trace1 = go.Bar(x=X_LABELS_2,
                                y=zip(*eight_weeks_of_workouts_top)[1],
-                               name="Eight Weeks- Top",
+                               name="Eight Weeks- Top Performances",
                                hoverinfo="none",
                                marker=dict(color=TOP_COLOR,
                                            ),
@@ -233,7 +232,7 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
 
     eight_week_trace2 = go.Bar(x=X_LABELS_2,
                                y=zip(*eight_weeks_of_workouts_all)[1],
-                               name="Eight Weeks- All",
+                               name="Eight Weeks- All Workouts",
                                hoverinfo="none",
                                marker=dict(color=ALL_COLOR,
                                            ),
@@ -262,7 +261,7 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
 
     four_week_trace1 = go.Bar(x=X_LABELS_2,
                               y=zip(*four_weeks_of_workouts_top)[1],
-                              name="Four Weeks- Top",
+                              name="Four Weeks- Top Performances",
                               hoverinfo="none",
                               marker=dict(color=TOP_COLOR,
                                           ),
@@ -270,7 +269,7 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
 
     four_week_trace2 = go.Bar(x=X_LABELS_2,
                               y=zip(*four_weeks_of_workouts_all)[1],
-                              name="Four Weeks- All",
+                              name="Four Weeks- All Workouts",
                               hoverinfo="none",
                               marker=dict(color=ALL_COLOR,
                                           ),

@@ -1,3 +1,4 @@
+
 from model import (User,
                    GroupUser,
                    GroupPendingUser,
@@ -10,25 +11,23 @@ from model import (User,
                    db,
                    connect_to_db)
 
-from datetime import datetime, date
-
-import math
+from datetime import datetime
 
 import random
 
 from flask import (Flask,
-                   jsonify,
-                   render_template,
-                   redirect,
-                   request,
-                   flash,
-                   session)
+                   )
 
 
 from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+
+
+# Improves runtime to generate the passwords upfront.
+HASHED_PASSWORDS = [bcrypt.generate_password_hash("pswd" + str(i))
+                    for i in range(1, 15 + 1)]
 
 
 def add_sample_users(num):
@@ -41,8 +40,7 @@ def add_sample_users(num):
         first_name = "User" + str(i)
         last_name = "Lname" + str(i)
         email = "User" + str(i) + "@gmail.com"
-        password = "pswd" + str(i)
-        hashed_password = bcrypt.generate_password_hash(password)
+        hashed_password = HASHED_PASSWORDS[i - 1]
 
         new_user = User(first_name=first_name,
                         last_name=last_name,
@@ -82,7 +80,7 @@ def assign_group_users(num):
     for i in range(1, num + 1):
 
         user_id = i
-        group_id = (i % groups_to_add) + 1
+        group_id = (i % 3) + 1
 
         new_group_user = GroupUser(user_id=user_id,
                                    group_id=group_id,
@@ -143,6 +141,7 @@ def assign_group_admins(num):
 def add_sample_workouts(num_workouts, num_users):
     """"""
 
+    # January workouts
     for i in range(1, num_users + 1):
         for j in range(1, num_workouts + 1):
 
@@ -150,8 +149,8 @@ def add_sample_workouts(num_workouts, num_users):
             user_id = i
             exercise_type = "run"
             workout_time = datetime(2017, 1, j, hour, 0)
-            performance_rating = random.randint(1, 5)
-            distance = random.randint(1, 10)
+            performance_rating = (j % 5) + 1
+            distance = (j % 10) + 1
             distance_unit = "miles"
 
             new_workout = Workout(user_id=user_id,
@@ -168,17 +167,16 @@ def add_sample_workouts(num_workouts, num_users):
             db.session.add(new_workout)
             db.session.commit()
 
-    today = date.today()
-
-    for i in range(1, 7):
-        for j in range(1, today.day + 1):
+    # February workouts
+    for i in range(1, num_users + 1):
+        for j in range(1, 28 + 1):
 
             hour = random.randint(6, 22)
             user_id = i
             exercise_type = "run"
-            workout_time = datetime(2017, today.month, j, hour, 0)
-            performance_rating = random.randint(1, 5)
-            distance = random.randint(1, 10)
+            workout_time = datetime(2017, 1, j, hour, 0)
+            performance_rating = (j % 5) + 1
+            distance = (j % 10) + 1
             distance_unit = "miles"
 
             new_workout = Workout(user_id=user_id,
@@ -189,7 +187,33 @@ def add_sample_workouts(num_workouts, num_users):
                                   distance_unit=distance_unit,
                                   )
 
-            if (j == 1) or (j == today.day + 1):
+            if (j == 1) or (j == num_workouts):
+                print new_workout
+
+            db.session.add(new_workout)
+            db.session.commit()
+
+    # March workouts
+    for i in range(1, 7):
+        for j in range(1, 8 + 1):
+
+            hour = random.randint(6, 22)
+            user_id = i
+            exercise_type = "run"
+            workout_time = datetime(2017, 3, j, hour, 0)
+            performance_rating = (j % 5) + 1
+            distance = (j % 10) + 1
+            distance_unit = "miles"
+
+            new_workout = Workout(user_id=user_id,
+                                  exercise_type=exercise_type,
+                                  workout_time=workout_time,
+                                  performance_rating=performance_rating,
+                                  distance=distance,
+                                  distance_unit=distance_unit,
+                                  )
+
+            if (j == 1) or (j == 8):
                 print new_workout
 
             db.session.add(new_workout)
@@ -314,22 +338,3 @@ def add_sample_groups_pending_users():
     db.session.commit()
 
 
-if __name__ == '__main__':
-
-    from server import app
-
-    connect_to_db(app)
-
-    users_to_add = 15
-    groups_to_add = users_to_add/5
-    workouts_to_add = 30
-
-    add_sample_users(users_to_add)
-    add_sample_groups(groups_to_add)
-    assign_group_users(users_to_add)
-    assign_group_admins(users_to_add)
-    add_sample_workouts(workouts_to_add, users_to_add)
-    add_sample_likes(workouts_to_add, users_to_add)
-    add_sample_goals()
-    add_my_photo()
-    add_sample_groups_pending_users()

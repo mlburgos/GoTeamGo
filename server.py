@@ -156,7 +156,7 @@ def verify_email_existence():
     """
     email = request.form["email"]
 
-    return verify_email(email)
+    return jsonify(verify_email(email))
 
 
 @app.route('/verify_email_and_pswd.json', methods=['POST'])
@@ -166,7 +166,7 @@ def verify_email_and_password():
     email = request.form["email"]
     password = request.form.get("password")
 
-    return verify_login(email, password)
+    return jsonify(verify_login(email, password))
 
 
 @app.route('/')
@@ -338,7 +338,7 @@ def verify_group_name_exists():
     """Verify the requested group name exists.
     """
 
-    return verify_group_name_exists_helper()
+    return jsonify(verify_group_name_exists_helper())
 
 
 @app.route('/join_group', methods=['POST'])
@@ -464,7 +464,7 @@ def verify_group_name_is_unique():
 
     group_name = request.form["group_name"]
 
-    return verify_group_name_is_unique_helper(group_name)
+    return jsonify(verify_group_name_is_unique_helper(group_name))
 
 
 @app.route('/new_group', methods=['POST'])
@@ -618,6 +618,10 @@ def update_group_goal(group_id):
 
     user_id = session.get('user_id')
 
+    if user_id not in GroupAdmin.by_group_id(group_id):
+        flash("Sorry, only admins for this group can update the group's goal.")
+        return redirect('/users/{}'.format(user_id))
+
     updated_info = update_group_goal_helper(group_id,
                                             user_id,
                                             )
@@ -652,12 +656,6 @@ def handle_update_group_goal(group_id):
 
 
 ##############################################################################
-# Helper functions
-
-
-
-##############################################################################
-
 
 if __name__ == "__main__":
     # Set debug=True here, since it has to be True at the

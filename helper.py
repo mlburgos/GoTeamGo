@@ -16,11 +16,7 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 
 from flask import (Flask,
-                   jsonify,
-                   render_template,
-                   redirect,
                    request,
-                   flash,
                    session)
 
 import json
@@ -82,13 +78,13 @@ def verify_email(email):
     email_check = User.query.filter_by(email=email).all()
 
     if email_check == []:
-        return_data = {'existence': False,
-                       'msg': 'Email not found. Please try again, or register as a new user.'}
+        return {'existence': False,
+                'msg': 'Email not found. Please try again, or register as a new user.'
+                }
 
-        return jsonify(return_data)
-
-    return jsonify({'existence': True,
-                    'msg': "Email already in system. Login or try a different email."})
+    return {'existence': True,
+            'msg': "Email already in system. Login or try a different email."
+            }
 
 
 def verify_login(email, password):
@@ -100,23 +96,19 @@ def verify_login(email, password):
     email_check = User.query.filter_by(email=email).all()
 
     if email_check == []:
-        return_data = {'existence': False,
-                       'msg': 'Email not found. Please try again, or register as a new user.'}
-
-        return jsonify(return_data)
+        return {'existence': False,
+                'msg': 'Email not found. Please try again, or register as a new user.'}
 
     user = email_check[0]
 
     hashed_password = user.password
 
     if not bcrypt.check_password_hash(hashed_password, password):
-        return_data = {'existence': False,
-                       'msg': 'Incorrect password. Please try again.'}
+        return {'existence': False,
+                'msg': 'Incorrect password. Please try again.'}
 
-        return jsonify(return_data)
-
-    return jsonify({'existence': True,
-                    'msg': "Email already in system. Login or try a different email."})
+    return {'existence': True,
+            'msg': "Email already in system. Login or try a different email."}
 
 
 def verify_password(user, password):
@@ -219,12 +211,12 @@ def get_user_profile_data(user_id, session_user_id):
 
     #
     by_day_layout = go.Layout(
-        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
         barmode='stack',
     )
 
     by_day_grouped_layout_test = go.Layout(
-        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
         barmode='grouped',
         legend=dict(orientation="h",
                     font=dict(
@@ -254,17 +246,17 @@ def get_user_profile_data(user_id, session_user_id):
         )
 
     by_hour_layout = go.Layout(
-        title='Top Performances by hour <br> <i>4 and 5 star performances by hour</i>',
+        title='Performances by hour <br> <i>4 and 5 star performances by hour</i>',
         barmode='stack',
     )
 
     by_day_grouped_layout = go.Layout(
-        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        title='Performances by Day <br> <i>4 and 5 star performances by day</i>',
         barmode='grouped',
         )
 
     by_hour_grouped_layout = go.Layout(
-        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        title='Performances by Day <br> <i>4 and 5 star performances by day</i>',
         barmode='grouped',
         )
 
@@ -312,9 +304,6 @@ def get_user_profile_data(user_id, session_user_id):
 
 ################################################################################
 # Supporting functions for get_user_profile_data
-
-
-
 
 
 def get_weeks_workouts(user_id):
@@ -523,10 +512,9 @@ def verify_group_name_exists_helper():
     # Test for group name uniqueness
     name_check = Group.by_name(group_name=group_name)
     if name_check is None:
-        return_data = {'success': False, 'msg': "Group name does not exist. Please verify the name and try again."}
-        return jsonify(return_data)
+        return {'success': False, 'msg': "Group name does not exist. Please verify the name and try again."}
 
-    return jsonify({'success': True, 'msg': ''})
+    return {'success': True, 'msg': ''}
 
 
 def handle_join_new_group_helper(user_id, requested_group):
@@ -588,10 +576,9 @@ def verify_group_name_is_unique_helper(group_name):
     # Test for group name uniqueness
     name_check = Group.by_name(group_name=group_name)
     if name_check is not None:
-        return_data = {'success': False, 'msg': "Name already in system. Please try a different name."}
-        return jsonify(return_data)
+        return {'success': False, 'msg': "Name already in system. Please try a different name."}
 
-    return jsonify({'success': True, 'msg': ''})
+    return {'success': True, 'msg': ''}
 
 
 def get_admin_groups_and_pending(user_id):
@@ -781,10 +768,6 @@ def get_groups_you_can_leave(user_id):
 
 
 def update_group_goal_helper(group_id, user_id):
-
-    if user_id not in GroupAdmin.by_group_id(group_id):
-        flash("Sorry, only admins for this group can update the group's goal.")
-        return redirect('/groups/<int:group_id>')
 
     group_goal = Goal.get_current_goal(group_id)
 
