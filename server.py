@@ -265,6 +265,11 @@ def user_profile(user_id):
                            group_ids=user_info['group_ids'],
                            navbar_groups=navbar_data['groups'],
                            navbar_pending_approval=navbar_data['pending_approval'],
+                           eight_week_by_day_fig=user_info['eight_week_by_day_fig'],
+                           four_week_by_day_fig=user_info['four_week_by_day_fig'],
+                           eight_week_by_hour_fig=user_info['eight_week_by_hour_fig'],
+                           four_week_by_hour_fig=user_info['four_week_by_hour_fig'],
+                           by_day_line_data=user_info['by_day_line_data_fig'],
                            )
 
 

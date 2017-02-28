@@ -71,7 +71,9 @@
                   <ul class="dropdown-menu">
                     <li><a href="/approve_to_group">Approve Pending Users <span class="badge">{{ navbar_pending_approval }}</span></a></li>
                     <li><a href="/remove_from_group">Remove Users</a></li>
-                    <li><a href="/update_group_goal">Update Group Goals</a></li>
+                    {% for group_name, group_id in navbar_groups %}
+                      <li><a href="/update_group_goal/{{ group_id }}">Update {{ group_name }} Goals</a></li>
+                    {% endfor %}
                   </ul>
                 </li>
             {% endif %}

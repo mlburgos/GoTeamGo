@@ -2,7 +2,7 @@
 """Models and database functions for final project."""
 
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+# from datetime import datetime
 
 # import sample_data
 

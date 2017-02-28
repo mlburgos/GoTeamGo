@@ -25,6 +25,9 @@ from flask import (Flask,
 
 import json
 
+
+from graph_functions import generate_bar_graph
+
 # import database_fns
 
 from flask_bcrypt import Bcrypt
@@ -220,14 +223,70 @@ def get_user_profile_data(user_id, session_user_id):
         barmode='stack',
     )
 
+    by_day_grouped_layout_test = go.Layout(
+        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        barmode='grouped',
+        legend=dict(orientation="h",
+                    font=dict(
+                        # family='sans-serif',
+                        # size=12,
+                        # color='#000',
+                        )
+                    ),
+        yaxis=dict(
+            title='# of Workouts',
+            showgrid=False,
+            ticks='outside',
+        ),
+        yaxis2=dict(
+            title="% of Top Workouts",
+            showgrid=False,
+            ticks='outside',
+            range=[0, 100],
+            titlefont=dict(
+                color='rgb(148, 103, 189)'
+            ),
+            tickfont=dict(
+                color='rgb(148, 103, 189)'
+            ),
+            overlaying='y',
+            side='right'),
+        )
+
     by_hour_layout = go.Layout(
         title='Top Performances by hour <br> <i>4 and 5 star performances by hour</i>',
         barmode='stack',
     )
 
-    by_day_data, by_hour_data = generate_bar_graph(user_id)
+    by_day_grouped_layout = go.Layout(
+        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        barmode='grouped',
+        )
+
+    by_hour_grouped_layout = go.Layout(
+        title='Top Performances by Day <br> <i>4 and 5 star performances by day</i>',
+        barmode='grouped',
+        )
+
+    by_day_data, by_hour_data, by_day_data_grouped, by_hour_data_grouped, by_day_line_data = generate_bar_graph(user_id)
     by_day_fig = go.Figure(data=by_day_data, layout=by_day_layout)
     by_hour_fig = go.Figure(data=by_hour_data, layout=by_hour_layout)
+
+    eight_week_data_by_day = by_day_data_grouped['eight_week_data']
+    four_week_data_by_day = by_day_data_grouped['four_week_data']
+
+    # eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout)
+    eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout_test)
+    # four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout)
+    four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout_test)
+
+    eight_week_data_by_hour = by_hour_data_grouped['eight_week_data']
+    four_week_data_by_hour = by_hour_data_grouped['four_week_data']
+
+    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
+    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
+
+    by_day_line_data_fig = dict(data=by_day_line_data)
 
     return {'is_my_profile': is_my_profile,
             'user_photo': user_photo,
@@ -244,187 +303,18 @@ def get_user_profile_data(user_id, session_user_id):
             'by_day_fig': by_day_fig,
             'by_hour_fig': by_hour_fig,
             'group_ids': group_ids,
+            'eight_week_by_day_fig': eight_week_by_day_fig,
+            'four_week_by_day_fig': four_week_by_day_fig,
+            'eight_week_by_hour_fig': eight_week_by_hour_fig,
+            'four_week_by_hour_fig': four_week_by_hour_fig,
+            'by_day_line_data_fig': by_day_line_data_fig,
             }
 
 ################################################################################
 # Supporting functions for get_user_profile_data
 
-def generate_bar_graph(user_id):
-    """"""
-
-    today = datetime.date.today()
-
-    # using regular .weekday() instead of .isoweekday() to get the number of
-    # days since monday since monday = 0
-    days_from_monday = datetime.timedelta(days=today.weekday())
-
-    nearest_monday = today - days_from_monday
-
-    days_49 = datetime.timedelta(days=49)
-
-    eight_mondays_ago = nearest_monday - days_49
-
-    user_workouts = Workout.query.filter(Workout.user_id == user_id,
-                                         Workout.workout_time >= eight_mondays_ago,
-                                         Workout.performance_rating >= 4)\
-                                 .all()
-
-    eight_mondays = [(eight_mondays_ago + datetime.timedelta(days=7*i))
-                     for i in xrange(8)]
-
-    by_day_bar_graph_data = by_day_bar_graph(eight_mondays=eight_mondays,
-                                             nearest_monday=nearest_monday,
-                                             user_workouts=user_workouts,
-                                             )
-
-    by_hour_bar_graph_data = by_hour_bar_graph(eight_mondays=eight_mondays,
-                                               nearest_monday=nearest_monday,
-                                               user_workouts=user_workouts,
-                                               )
-
-    return (by_day_bar_graph_data, by_hour_bar_graph_data)
 
 
-def generate_seven_day_dict(start_date):
-    """"""
-
-    seven_day_dict = {}
-
-    for i in xrange(7):
-        days_to_add = datetime.timedelta(days=i)
-        seven_day_dict[start_date + days_to_add] = 0
-
-    return seven_day_dict
-
-
-def by_day_bar_graph(eight_mondays, nearest_monday, user_workouts):
-    """"""
-
-    X_LABELS = ['Monday',
-                'Tuesday',
-                'Wednesday',
-                'Thursday',
-                'Friday',
-                'Saturday',
-                'Sunday',
-                ]
-
-    data = []
-
-    color_counter = 0
-
-    for monday in eight_mondays:
-        current_week = generate_seven_day_dict(monday)
-
-        for workout in user_workouts:
-            workout_date = workout.workout_time.date()
-            if workout_date in current_week:
-                current_week[workout_date] += 1
-
-        if monday == nearest_monday:
-            name = "Current Week"
-        else:
-            name = str(monday.month) + "/" + str(monday.day) + "/" + str(monday.year)
-
-        if color_counter < 2:
-            color = COLOR_SCHEME[0]
-        elif color_counter >= 2 and color_counter < 4:
-            color = COLOR_SCHEME[1]
-        elif color_counter >= 4 and color_counter < 6:
-            color = COLOR_SCHEME[2]
-        else:
-            color = COLOR_SCHEME[3]
-
-        trace = go.Bar(x=X_LABELS,
-                       y=current_week.values(),
-                       name=name,
-                       hoverinfo="none",
-                       marker=dict(color=color,
-                                   ),
-                       )
-
-        data.append(trace)
-
-        color_counter += 1
-
-    return data
-
-
-def generate_24hr_dict():
-    """"""
-
-    hr_dict = {}
-
-    for i in xrange(24):
-        hr_dict[i] = 0
-
-    return hr_dict
-
-
-def generate_24hr_Xlabels():
-
-    X_LABELS = []
-
-    for i in xrange(24):
-
-        if i == 0:
-            X_LABELS.append("12" + "AM")
-        elif i < 12:
-            X_LABELS.append(str(i) + "AM")
-        elif i == 12:
-            X_LABELS.append("12" + "PM")
-        else:
-            X_LABELS.append(str(i - 12) + "PM")
-
-    return X_LABELS
-
-
-def by_hour_bar_graph(eight_mondays, nearest_monday, user_workouts):
-    """"""
-
-    X_LABELS = generate_24hr_Xlabels()
-
-    data = []
-
-    color_counter = 0
-
-    for monday in eight_mondays:
-        current_week = generate_seven_day_dict(monday)
-        hr_dict = generate_24hr_dict()
-
-        for workout in user_workouts:
-            workout_date = workout.workout_time.date()
-            workout_hour = workout.workout_time.time().hour
-            if workout_date in current_week:
-                hr_dict[workout_hour] += 1
-
-        if monday == nearest_monday:
-            name = "Current Week"
-        else:
-            name = str(monday.month) + "/" + str(monday.day) + "/" + str(monday.year)
-
-        if color_counter < 2:
-            color = COLOR_SCHEME[0]
-        elif color_counter >= 2 and color_counter < 4:
-            color = COLOR_SCHEME[1]
-        elif color_counter >= 4 and color_counter < 6:
-            color = COLOR_SCHEME[2]
-        else:
-            color = COLOR_SCHEME[3]
-
-        trace = go.Bar(x=X_LABELS,
-                       y=hr_dict.values(),
-                       name=name,
-                       hoverinfo="none",
-                       marker=dict(color=color,
-                                   ),
-                       )
-
-        data.append(trace)
-
-        color_counter += 1
-
-    return data
 
 
 def get_weeks_workouts(user_id):
@@ -752,7 +642,6 @@ def handle_new_group_helper(user_id, group_name, group_goal):
 
     new_group_user = GroupUser(user_id=user_id,
                                group_id=group_id,
-                               approved=True,
                                )
 
     new_group_admin = GroupAdmin(group_id=group_id,
@@ -761,7 +650,7 @@ def handle_new_group_helper(user_id, group_name, group_goal):
 
     new_goal = Goal(group_id=group_id,
                     user_id=user_id,
-                    date_iniciated=datetime.now(),
+                    date_iniciated=datetime.datetime.now(),
                     goal=group_goal,
                     )
 

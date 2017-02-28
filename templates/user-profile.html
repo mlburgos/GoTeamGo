@@ -11,17 +11,14 @@
         <br>
         <div class="list-group">
           {% if is_my_profile %}
-            <label>Options:</label>
-            <a href="/update_photo" class="list-group-item">Update Photo</a>
-            <a href="/update_personal_goal" class="list-group-item">Update personal goal</a>
-            <a href="/join_group" class="list-group-item">Request to join a new group</a>
-            <a href="/new_group" class="list-group-item">Start a new group</a>
-            <a href="/leave_group" class="list-group-item">Leave a group</a>
-            {% if session['is_admin'] %}
-              <a href="/approve_to_group" class="list-group-item">Approve Pending Users <span class="badge">{{ pending_approval }}</span></a>
-              <a href="/remove_from_group" class="list-group-item">Remove Users</a>
-              <a href="/update_group_goal" class="list-group-item">Update Group Goals</a>
-            {% endif %}
+            <button type="button" class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options<span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="/update_photo">Update Photo</a></li>
+                <li><a href="/update_personal_goal">Update personal goal</a></li>
+              </ul>
+            </button>
+
           {% endif %}
 
         </div> <!-- list-group -->
@@ -107,6 +104,40 @@
     </div>
   </div><!-- row -->
 
+
+  <div class="row">
+    <div class="col-xs-6">
+        <div id="eight-week-performance-by-day"></div>
+    </div><!-- col-xs-6 -->
+  <!-- </div> -->
+
+<!--   <div class="row"> -->
+    <div class="col-xs-6">
+        <div id="four-week-performance-by-day"></div>
+    </div>
+  </div><!-- row -->
+
+  <div class="row">
+    <div class="col-xs-12">
+        <div id="eight-week-performance-by-hour"></div>
+    </div><!-- col-xs-6 -->
+  <!-- </div> -->
+
+<!--   <div class="row"> -->
+    <div class="col-xs-6">
+        <div id="four-week-performance-by-hour"></div>
+    </div>
+  </div><!-- row -->
+
+
+  <div class="row">
+    <div class="col-xs-6">
+        <div id="performance-by-day-line"></div>
+    </div><!-- col-xs-6 -->
+  <!-- </div> -->
+
+  </div><!-- row -->
+
 </div><!-- container-fluid -->
 
 <script src="https://code.jquery.com/jquery.js"></script>
@@ -118,6 +149,15 @@
 <script type=text/javascript>
     var byDayData = {{ by_day_fig|tojson|safe }};
     var byHourData = {{ by_hour_fig|tojson|safe }};
+
+    var eightWeekByDay = {{ eight_week_by_day_fig|tojson|safe }};
+    var fourWeekByDay = {{ four_week_by_day_fig|tojson|safe }};
+
+
+    var eightWeekByHour = {{ eight_week_by_hour_fig|tojson|safe }};
+    var fourWeekByHour = {{ four_week_by_hour_fig|tojson|safe }};
+
+    var byDayLineData = {{ by_day_line_data|tojson|safe }};
 
     var groupPbIds = {{ group_ids }};
 
@@ -133,6 +173,28 @@
    BY_HOUR = document.getElementById('performance-by-hour');
    Plotly.plot( BY_HOUR, 
                byHourData);
+
+   EIGHT_WEEK_BY_DAY = document.getElementById('eight-week-performance-by-day');
+   Plotly.plot( EIGHT_WEEK_BY_DAY, 
+               eightWeekByDay);
+
+   FOUR_WEEK_BY_DAY = document.getElementById('four-week-performance-by-day');
+   Plotly.plot( FOUR_WEEK_BY_DAY, 
+               fourWeekByDay);
+
+   EIGHT_WEEK_BY_HOUR = document.getElementById('eight-week-performance-by-hour');
+   Plotly.plot( EIGHT_WEEK_BY_HOUR, 
+               eightWeekByHour);
+
+   FOUR_WEEK_BY_HOUR = document.getElementById('four-week-performance-by-hour');
+   Plotly.plot( FOUR_WEEK_BY_HOUR, 
+               fourWeekByHour);
+
+   BY_DAY_LINE = document.getElementById('performance-by-day-line');
+   Plotly.plot( BY_DAY_LINE, 
+               byDayLineData);
+
+
 
    $(function() { 
       $("#personalpb").addClass("progressbarbetter");
