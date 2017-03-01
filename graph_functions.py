@@ -243,7 +243,11 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
                                )
 
     eight_week_percentages = [round(float(top)/total*100, 0)
-                              for top, total in eight_weeks_combined]
+                              if total > 0
+                              else 0
+                              for top, total
+                              in eight_weeks_combined
+                              ]
 
     eight_week_trace_line = go.Scatter(x=X_LABELS_2,
                                        y=eight_week_percentages,
@@ -283,9 +287,6 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
     four_week_trace = go.Scatter(x=X_LABELS_2,
                                  y=four_week_percentages,
                                  name="Percentage of Top Performances",
-                                 # hoverinfo="none",
-                                 # marker=dict(color=TOP_COLOR,
-                                 #             ),
                                  connectgaps=True,
                                  line=dict(shape='spline',
                                            ),
@@ -443,8 +444,29 @@ def by_hour_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
                                            ),
                                )
 
+    eight_weeks_combined = zip(zip(*eight_weeks_of_workouts_top)[1], zip(*eight_weeks_of_workouts_all)[1])
+
+    eight_week_percentages = [round(float(top)/total*100, 0)
+                              if total > 0
+                              else 0
+                              for top, total
+                              in eight_weeks_combined
+                              ]
+
+    eight_week_trace_line = go.Scatter(x=X_LABELS,
+                                       y=eight_week_percentages,
+                                       name="Percentage of Top Performances",
+                                       connectgaps=True,
+                                       line=dict(shape='spline',
+                                                 ),
+                                       yaxis='y2',
+                                       # marker=dict(color='#000',
+                                       #             ),
+                                       )
+
     eight_week_data = [eight_week_trace1,
                        eight_week_trace2,
+                       eight_week_trace_line,
                        ]
 
     four_week_trace1 = go.Bar(x=X_LABELS,
@@ -463,14 +485,32 @@ def by_hour_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
                                           ),
                               )
 
+    four_weeks_combined = zip(zip(*four_weeks_of_workouts_top)[1], zip(*four_weeks_of_workouts_all)[1])
+
+    four_week_percentages = [round(float(top)/total*100, 0)
+                             if total > 0
+                             else 0
+                             for top, total
+                             in four_weeks_combined
+                             ]
+
+    four_week_trace_line = go.Scatter(x=X_LABELS,
+                                      y=four_week_percentages,
+                                      name="Percentage of Top Performances",
+                                      connectgaps=True,
+                                      line=dict(shape='spline',
+                                                ),
+                                      yaxis='y2',
+                                      )
+
     four_week_data = [four_week_trace1,
                       four_week_trace2,
+                      four_week_trace_line,
                       ]
 
     return {'eight_week_data': eight_week_data,
             'four_week_data': four_week_data,
             }
-
 
 
 def by_day_line_graph(eight_mondays, nearest_monday, user_workouts):
@@ -544,3 +584,4 @@ def by_day_line_graph(eight_mondays, nearest_monday, user_workouts):
             ]
 
     return data
+

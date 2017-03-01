@@ -244,10 +244,13 @@ def user_profile(user_id):
 
     session_user_id = session.get('user_id')
 
-    user_info = get_user_profile_data(user_id, session_user_id)
-
     is_admin = (session.get('is_admin') is not None)
     navbar_data = get_navbar_data(user_id, is_admin)
+
+    user_info = get_user_profile_data(user_id,
+                                      session_user_id,
+                                      is_admin,
+                                      )
 
     return render_template("user-profile.html",
                            is_my_profile=user_info['is_my_profile'],

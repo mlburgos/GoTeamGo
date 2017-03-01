@@ -177,7 +177,7 @@ def get_navbar_data(user_id, is_admin):
             }
 
 
-def get_user_profile_data(user_id, session_user_id):
+def get_user_profile_data(user_id, session_user_id, is_admin):
     is_my_profile = False
 
     if user_id == session_user_id:
@@ -222,7 +222,7 @@ def get_user_profile_data(user_id, session_user_id):
                        for group in groups]
 
     pending_approval = 0
-    if session.get('is_admin'):
+    if is_admin:
         pending_approval = get_admin_pending_count(user_id)
 
     #
@@ -233,6 +233,36 @@ def get_user_profile_data(user_id, session_user_id):
 
     by_day_grouped_layout_test = go.Layout(
         title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
+        barmode='grouped',
+        legend=dict(orientation="h",
+                    font=dict(
+                        # family='sans-serif',
+                        # size=12,
+                        # color='#000',
+                        )
+                    ),
+        yaxis=dict(
+            title='# of Workouts',
+            showgrid=False,
+            ticks='outside',
+        ),
+        yaxis2=dict(
+            title="% of Top Workouts",
+            showgrid=False,
+            ticks='outside',
+            range=[0, 100],
+            titlefont=dict(
+                color='rgb(148, 103, 189)'
+            ),
+            tickfont=dict(
+                color='rgb(148, 103, 189)'
+            ),
+            overlaying='y',
+            side='right'),
+        )
+
+    by_hour_grouped_layout_test = go.Layout(
+        title='Workouts by Hour <br> <i>4 and 5 star performances by day</i>',
         barmode='grouped',
         legend=dict(orientation="h",
                     font=dict(
@@ -291,8 +321,10 @@ def get_user_profile_data(user_id, session_user_id):
     eight_week_data_by_hour = by_hour_data_grouped['eight_week_data']
     four_week_data_by_hour = by_hour_data_grouped['four_week_data']
 
-    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
-    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
+    # eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
+    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout_test)
+    # four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
+    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout_test)
 
     by_day_line_data_fig = dict(data=by_day_line_data)
 

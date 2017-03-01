@@ -34,6 +34,7 @@ from helper import (register_new_user,
                     get_historical_workout_types_and_units,
                     get_admin_pending_count,
                     get_navbar_data,
+                    get_user_profile_data,
                     get_weeks_workouts,
                     )
 
@@ -170,7 +171,7 @@ class TestsThatDontNeedAFreshDB(TestCase):
 
         assert get_admin_pending_count(user_id=3) == 4
 
-    def test_get_navbar_data():
+    def test_get_navbar_data(self):
 
         # Test case: verifying structure of return data
         assert get_navbar_data(1, False) == {'groups': [(u'Group1', 1),
@@ -179,6 +180,20 @@ class TestsThatDontNeedAFreshDB(TestCase):
                                              'pending_approval': 0
                                              }
 
+    def test_get_user_profile_data(self):
+
+        # Test case: the current user is viewing their profile
+
+        user_id = 1
+        session_user_id = 1
+        is_admin = True
+
+        get_user_profile_data(user_id, session_user_id, is_admin)
+
+        # Test case: the current user is viewing someone else's profile
+        mismatching_session_user_id = 2
+
+        get_user_profile_data(user_id, mismatching_session_user_id, is_admin)
 
 
 # class TestsThatNeedAFreshDB(TestCase):
