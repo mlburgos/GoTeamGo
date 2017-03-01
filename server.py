@@ -178,7 +178,8 @@ def new_workout():
 
     types_units = get_historical_workout_types_and_units(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("new-workout-form.html",
                            types_units=types_units,
@@ -245,7 +246,8 @@ def user_profile(user_id):
 
     user_info = get_user_profile_data(user_id, session_user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("user-profile.html",
                            is_my_profile=user_info['is_my_profile'],
@@ -283,7 +285,8 @@ def group_profile(group_id):
                                         user_id,
                                         )
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("group-profile.html",
                            group_name=group_data['group_name'],
@@ -304,7 +307,8 @@ def freinds():
     user_id = session.get('user_id')
     friends_data = get_friends_data(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     if friends_data['has_friends']:
         return render_template("my-friends.html",
@@ -324,7 +328,8 @@ def join_new_group():
 
     user_id = session.get("user_id")
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("join-group.html",
                            user_id=user_id,
@@ -367,7 +372,8 @@ def show_user_groups():
 
     groups_data = show_user_groups_helper(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("my-groups.html",
                            first_name=groups_data['first_name'],
@@ -384,7 +390,8 @@ def update_photo():
 
     user_id = session.get("user_id")
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("update-photo.html",
                            user_id=user_id,
@@ -417,7 +424,8 @@ def update_personal_goal():
 
     personal_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("update-personal-goal.html",
                            user_id=user_id,
@@ -448,7 +456,8 @@ def create_new_group():
 
     user_id = session.get('user_id')
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("group-registration.html",
                            user_id=user_id,
@@ -501,7 +510,8 @@ def approve_to_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_pending(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("admin.html",
                            user_id=user_id,
@@ -543,7 +553,8 @@ def remove_from_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     admin_groups = get_admin_groups_and_members(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("admin-remove.html",
                            user_id=user_id,
@@ -584,7 +595,8 @@ def leave_group():
     # ex: {Group1: [(1, "User1 Lname1", 1)]}
     leavable_groups = get_groups_you_can_leave(user_id)
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("leave-group.html",
                            user_id=user_id,
@@ -626,7 +638,8 @@ def update_group_goal(group_id):
                                             user_id,
                                             )
 
-    navbar_data = get_navbar_data(user_id)
+    is_admin = (session.get('is_admin') is not None)
+    navbar_data = get_navbar_data(user_id, is_admin)
 
     return render_template("update-group-goal.html",
                            user_id=user_id,

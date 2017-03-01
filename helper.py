@@ -28,8 +28,8 @@ from graph_functions import generate_bar_graph
 
 from flask_bcrypt import Bcrypt
 
-app = Flask(__name__)
-bcrypt = Bcrypt(app)
+bcrypt_app = Flask(__name__)
+bcrypt = Bcrypt(bcrypt_app)
 
 
 COLOR_SCHEME = ['#B3E9FE', '#73D8FF', '#3AC9FF', '#07BAFF']
@@ -140,7 +140,23 @@ def get_historical_workout_types_and_units(user_id):
     return distinct_workouts.filter_by(user_id=user_id).all()
 
 
-def get_navbar_data(user_id):
+def get_admin_pending_count(user_id):
+    """ Returns a count of the users pending approval into groups for which the
+    user is an admin:
+    """
+
+    # Returns a list of the group ids for which the user is an admin.
+    admin_groups = GroupAdmin.by_user_id(user_id)
+
+    pending_users = GroupPendingUser.query\
+                                    .filter(GroupPendingUser.group_id
+                                                            .in_(admin_groups))\
+                                    .all()
+
+    return len(pending_users)
+
+
+def get_navbar_data(user_id, is_admin):
     """Returns all groups of which the user is a member"""
 
     user = User.by_id(user_id)
@@ -153,7 +169,7 @@ def get_navbar_data(user_id):
               ]
 
     pending_approval = 0
-    if session.get('is_admin'):
+    if is_admin:
         pending_approval = get_admin_pending_count(user_id)
 
     return {'groups': groups,
@@ -668,21 +684,6 @@ def handle_approve_to_group_helper(user_id, approved_pending_ids):
         db.session.commit()
 
 
-def get_admin_pending_count(user_id):
-    """ Returns a count of the users pending approval into groups for which the
-    user is an admin:
-    """
-
-    # Returns a list of the group ids for which the user is an admin.
-    admin_groups = GroupAdmin.by_user_id(user_id)
-
-    pending_users = GroupPendingUser.query\
-                                    .filter(GroupPendingUser.group_id
-                                                            .in_(admin_groups))\
-                                    .all()
-
-    return len(pending_users)
-
 
 def get_admin_groups_and_members(user_id):
     """ Returns a dictionary of lists of tuples of info on the users in each
@@ -789,3 +790,18 @@ def handle_update_group_goal_helper(group_id, user_id, group_goal):
     db.session.add(new_goal)
     db.session.commit()
 
+
+##############################################################################
+
+if __name__ == "__main__":
+    # As a convenience, if we run this module interactively, it will leave
+    # you in a state of being able to work with the database directly.
+
+    from server import app
+
+    connect_to_db(app)
+
+    # Only have this un-commented for initial load.
+    db.create_all()
+
+    print "Connected to DB."

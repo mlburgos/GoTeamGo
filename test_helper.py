@@ -31,6 +31,9 @@ from helper import (register_new_user,
                     verify_email,
                     verify_login,
                     verify_password,
+                    get_historical_workout_types_and_units,
+                    get_admin_pending_count,
+                    get_navbar_data,
                     get_weeks_workouts,
                     )
 
@@ -42,6 +45,10 @@ from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
+
+
+INCORRECT_PASSWORD = "wrong"
+NON_EXISTANT_EMAIL = "fake@gmail.com"
 
 
 class TestsThatDontNeedAFreshDB(TestCase):
@@ -99,7 +106,7 @@ class TestsThatDontNeedAFreshDB(TestCase):
 
     def test_verify_email(self):
 
-        existing_email = "fake"
+        existing_email = "User1@gmail.com"
 
         existing_email_respose = {'existence': True,
                                   'msg': "Email already in system. Login or try a different email."
@@ -107,13 +114,12 @@ class TestsThatDontNeedAFreshDB(TestCase):
 
         assert verify_email(existing_email) == existing_email_respose
 
-        non_existing_email = "fake@gmail.com"
-
+        # Test case: email is not in the database.
         non_existing_email_respose = {'existence': False,
                                       'msg': 'Email not found. Please try again, or register as a new user.'
                                       }
 
-        assert verify_email(non_existing_email) == non_existing_email_respose
+        assert verify_email(NON_EXISTANT_EMAIL) == non_existing_email_respose
 
     def test_verify_login(self):
 
@@ -128,29 +134,50 @@ class TestsThatDontNeedAFreshDB(TestCase):
         assert verify_login(existing_email, password) == existing_email_respose
 
         # Test case: email is incorrect.
-        non_existing_email = "fake@gmail.com"
-
         non_existing_email_respose = {'existence': False,
                                       'msg': 'Email not found. Please try again, or register as a new user.'}
 
-        assert verify_login(non_existing_email, password) == non_existing_email_respose
+        assert verify_login(NON_EXISTANT_EMAIL, password) == non_existing_email_respose
 
         # Test case: email is correct BUT password is incorrect.
-        incorrect_password = "wrong"
 
         incorrect_password_response = {'existence': False,
                                        'msg': 'Incorrect password. Please try again.'}
 
-        assert verify_login(existing_email, incorrect_password) == incorrect_password_response
+        assert verify_login(existing_email, INCORRECT_PASSWORD) == incorrect_password_response
 
     def test_verify_password(self):
-        
+
         user = User.by_id(1)
-        
+
         # Test case: correct password
         password = "pswd1"
 
-        verify_password(user, password)
+        assert verify_password(user, password) is True
+
+        # Test case: incorrect password
+
+        assert verify_password(user, INCORRECT_PASSWORD) is False
+
+    def test_get_historical_workout_types_and_units(self):
+
+        user_id = 1
+        assert get_historical_workout_types_and_units(user_id) == [(u'run', u'miles')]
+
+    def test_get_admin_pending_count(self):
+
+        assert get_admin_pending_count(user_id=1) == 0
+
+        assert get_admin_pending_count(user_id=3) == 4
+
+    def test_get_navbar_data():
+
+        # Test case: verifying structure of return data
+        assert get_navbar_data(1, False) == {'groups': [(u'Group1', 1),
+                                                        (u'Group2', 2)
+                                                        ],
+                                             'pending_approval': 0
+                                             }
 
 
 
