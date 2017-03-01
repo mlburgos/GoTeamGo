@@ -12,15 +12,11 @@ from model import (User,
 
 import datetime
 
-import plotly.plotly as py
 import plotly.graph_objs as go
 
 from flask import (Flask,
                    request,
-                   session)
-
-import json
-
+                   )
 
 from graph_functions import generate_bar_graph
 
@@ -225,13 +221,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
     if is_admin:
         pending_approval = get_admin_pending_count(user_id)
 
-    #
-    by_day_layout = go.Layout(
-        title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
-        barmode='stack',
-    )
-
-    by_day_grouped_layout_test = go.Layout(
+    by_day_grouped_layout = go.Layout(
         title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
         barmode='grouped',
         legend=dict(orientation="h",
@@ -250,7 +240,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             title="% of Top Workouts",
             showgrid=False,
             ticks='outside',
-            range=[0, 100],
+            range=[0, 110],
             titlefont=dict(
                 color='rgb(148, 103, 189)'
             ),
@@ -261,7 +251,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             side='right'),
         )
 
-    by_hour_grouped_layout_test = go.Layout(
+    by_hour_grouped_layout = go.Layout(
         title='Workouts by Hour <br> <i>4 and 5 star performances by day</i>',
         barmode='grouped',
         legend=dict(orientation="h",
@@ -280,7 +270,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             title="% of Top Workouts",
             showgrid=False,
             ticks='outside',
-            range=[0, 100],
+            range=[0, 110],
             titlefont=dict(
                 color='rgb(148, 103, 189)'
             ),
@@ -291,42 +281,19 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             side='right'),
         )
 
-    by_hour_layout = go.Layout(
-        title='Performances by hour <br> <i>4 and 5 star performances by hour</i>',
-        barmode='stack',
-    )
-
-    by_day_grouped_layout = go.Layout(
-        title='Performances by Day <br> <i>4 and 5 star performances by day</i>',
-        barmode='grouped',
-        )
-
-    by_hour_grouped_layout = go.Layout(
-        title='Performances by Day <br> <i>4 and 5 star performances by day</i>',
-        barmode='grouped',
-        )
-
-    by_day_data, by_hour_data, by_day_data_grouped, by_hour_data_grouped, by_day_line_data = generate_bar_graph(user_id)
-    by_day_fig = go.Figure(data=by_day_data, layout=by_day_layout)
-    by_hour_fig = go.Figure(data=by_hour_data, layout=by_hour_layout)
+    by_day_data_grouped, by_hour_data_grouped = generate_bar_graph(user_id)
 
     eight_week_data_by_day = by_day_data_grouped['eight_week_data']
     four_week_data_by_day = by_day_data_grouped['four_week_data']
 
-    # eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout)
-    eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout_test)
-    # four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout)
-    four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout_test)
+    eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout)
+    four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout)
 
     eight_week_data_by_hour = by_hour_data_grouped['eight_week_data']
     four_week_data_by_hour = by_hour_data_grouped['four_week_data']
 
-    # eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
-    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout_test)
-    # four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
-    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout_test)
-
-    by_day_line_data_fig = dict(data=by_day_line_data)
+    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
+    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
 
     return {'is_my_profile': is_my_profile,
             'user_photo': user_photo,
@@ -340,14 +307,11 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             'workouts_for_board': workouts_for_board,
             'pending_approval': pending_approval,
             'user_id': user_id,
-            'by_day_fig': by_day_fig,
-            'by_hour_fig': by_hour_fig,
             'group_ids': group_ids,
             'eight_week_by_day_fig': eight_week_by_day_fig,
             'four_week_by_day_fig': four_week_by_day_fig,
             'eight_week_by_hour_fig': eight_week_by_hour_fig,
             'four_week_by_hour_fig': four_week_by_hour_fig,
-            'by_day_line_data_fig': by_day_line_data_fig,
             }
 
 ################################################################################

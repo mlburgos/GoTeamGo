@@ -70,16 +70,6 @@ def generate_bar_graph(user_id):
     eight_mondays = [(eight_mondays_ago + datetime.timedelta(days=7*i))
                      for i in xrange(8)]
 
-    by_day_bar_graph_data = by_day_bar_graph(eight_mondays=eight_mondays,
-                                             nearest_monday=nearest_monday,
-                                             user_workouts=user_workouts,
-                                             )
-
-    by_hour_bar_graph_data = by_hour_bar_graph(eight_mondays=eight_mondays,
-                                               nearest_monday=nearest_monday,
-                                               user_workouts=user_workouts,
-                                               )
-
     by_day_bar_graph_grouped_data = by_day_bar_graph_grouped(eight_mondays=eight_mondays,
                                                              nearest_monday=nearest_monday,
                                                              user_workouts=user_workouts,
@@ -90,16 +80,8 @@ def generate_bar_graph(user_id):
                                                                user_workouts=user_workouts,
                                                                )
 
-    by_day_line_data = by_day_line_graph(eight_mondays=eight_mondays,
-                                         nearest_monday=nearest_monday,
-                                         user_workouts=user_workouts,
-                                         )
-
-    return (by_day_bar_graph_data,
-            by_hour_bar_graph_data,
-            by_day_bar_graph_grouped_data,
+    return (by_day_bar_graph_grouped_data,
             by_hour_bar_graph_grouped_data,
-            by_day_line_data,
             )
 
 

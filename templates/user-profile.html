@@ -92,28 +92,24 @@
     
   </div><!-- row -->
 
-  <div class="row">
-    <div class="col-xs-6">
-        <div id="eight-week-performance-by-day"></div>
-    </div><!-- col-xs-6 -->
+  <button type="button" class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Graph Options<span class="caret"></span></a>
+    <ul class="dropdown-menu">
+      <li><a href="#" id="by-day-eight">Workouts By Day - Eight Weeks</a></li>
+      <li><a href="#" id="by-day-four">Workouts By Day - Four Weeks</a></li>
+      <li><a href="#" id="by-hour-eight">Workouts By Hour - Eight Weeks</a></li>
+      <li><a href="#" id="by-hour-four">Workouts By Hour - Four Weeks</a></li>
+    </ul>
+  </button>
 
-<!--   <div class="row"> -->
-    <div class="col-xs-6">
-        <div id="four-week-performance-by-day"></div>
-    </div>
-  </div><!-- row -->
+  <div></div>
+     <div class="row" id="eight-week-performance-by-day"></div>
 
-  <div class="row">
-    <div class="col-xs-12">
-        <div id="eight-week-performance-by-hour"></div>
-    </div><!-- col-xs-6 -->
-  <!-- </div> -->
-
-<!--   <div class="row"> -->
-    <div class="col-xs-12">
-        <div id="four-week-performance-by-hour"></div>
-    </div>
-  </div><!-- row -->
+     <div class="row" id="four-week-performance-by-day"></div>
+     
+     <div class="row" id="eight-week-performance-by-hour"></div>
+     
+     <div class="row" id="four-week-performance-by-hour"></div>
 
 
 </div><!-- container-fluid -->
@@ -139,6 +135,10 @@
 </script>
 
 <script type="text/javascript">
+   $("#four-week-performance-by-day").hide();
+   $("#eight-week-performance-by-hour").hide();
+   $("#four-week-performance-by-hour").hide();
+
 
    EIGHT_WEEK_BY_DAY = document.getElementById('eight-week-performance-by-day');
    Plotly.plot( EIGHT_WEEK_BY_DAY, 
@@ -155,6 +155,89 @@
    FOUR_WEEK_BY_HOUR = document.getElementById('four-week-performance-by-hour');
    Plotly.plot( FOUR_WEEK_BY_HOUR, 
                fourWeekByHour);
+
+
+
+   function selectByDayEightGraph (evt) {
+      evt.preventDefault();
+      
+      $("#eight-week-performance-by-day").show();
+      $("#four-week-performance-by-day").hide();
+      $("#eight-week-performance-by-hour").hide();
+      $("#four-week-performance-by-hour").hide();
+   }
+
+   $("#by-day-eight").on('click', selectByDayEightGraph)
+
+
+   function selectByDayFourGraph (evt) {
+      evt.preventDefault();
+      
+      $("#eight-week-performance-by-day").hide();
+      $("#four-week-performance-by-day").show();
+      $("#eight-week-performance-by-hour").hide();
+      $("#four-week-performance-by-hour").hide();
+
+   }
+
+   $("#by-day-four").on('click', selectByDayFourGraph)
+
+
+   function selectByHourEightGraph (evt) {
+      evt.preventDefault();
+      
+      console.log("in selectByHourEightGraph")
+
+      $("#eight-week-performance-by-day").hide();
+      $("#four-week-performance-by-day").hide();
+      $("#eight-week-performance-by-hour").show();
+      $("#four-week-performance-by-hour").hide();
+
+   }
+
+   $("#by-hour-eight").on('click', selectByHourEightGraph)
+
+
+   function selectByHourFourGraph (evt) {
+      evt.preventDefault();
+      
+      $("#eight-week-performance-by-day").hide();
+      $("#four-week-performance-by-day").hide();
+      $("#eight-week-performance-by-hour").hide();
+      $("#four-week-performance-by-hour").show();
+
+   }
+
+   $("#by-hour-four").on('click', selectByDayFourGraph)
+
+   // function selectByDayFourGraph (evt) {
+   //    evt.preventDefault();
+
+   //    Plotly.plot(document.getElementById('graph'),
+   //                fourWeekByDay);
+   // }
+
+   // $("#by-day-four").on('click', selectByDayFourGraph)
+
+
+   // function selectByHourEightGraph (evt) {
+   //    evt.preventDefault();
+      
+   //    Plotly.plot(document.getElementById('graph'),
+   //                eightWeekByHour);
+   // }
+
+   // $("#by-hour-eight").on('click', selectByHourEightGraph)
+
+
+   // function selectByHourFourGraph (evt) {
+   //    evt.preventDefault();
+      
+   //    Plotly.plot(document.getElementById('graph'),
+   //                fourWeekByDay);
+   // }
+
+   // $("#by-hour-four").on('click', selectByHourFourGraph)
 
 </script>
 

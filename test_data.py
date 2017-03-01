@@ -13,8 +13,6 @@ from model import (User,
 
 from datetime import datetime
 
-import random
-
 from flask import (Flask,
                    )
 
@@ -145,7 +143,7 @@ def add_sample_workouts(num_workouts, num_users):
     for i in range(1, num_users + 1):
         for j in range(1, num_workouts + 1):
 
-            hour = random.randint(6, 22)
+            hour = (j % 15) + 6
             user_id = i
             exercise_type = "run"
             workout_time = datetime(2017, 1, j, hour, 0)
@@ -171,7 +169,7 @@ def add_sample_workouts(num_workouts, num_users):
     for i in range(1, num_users + 1):
         for j in range(1, 28 + 1):
 
-            hour = random.randint(6, 22)
+            hour = (j % 15) + 6
             user_id = i
             exercise_type = "run"
             workout_time = datetime(2017, 1, j, hour, 0)
@@ -197,7 +195,7 @@ def add_sample_workouts(num_workouts, num_users):
     for i in range(1, 7):
         for j in range(1, 8 + 1):
 
-            hour = random.randint(6, 22)
+            hour = (j % 15) + 6
             user_id = i
             exercise_type = "run"
             workout_time = datetime(2017, 3, j, hour, 0)
