@@ -15,7 +15,6 @@ import datetime
 import plotly.graph_objs as go
 
 from flask import (Flask,
-                   request,
                    )
 
 from graph_functions import generate_bar_graph
@@ -249,6 +248,8 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             ),
             overlaying='y',
             side='right'),
+        width=1200,
+        height=600,
         )
 
     by_hour_grouped_layout = go.Layout(
@@ -279,6 +280,8 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             ),
             overlaying='y',
             side='right'),
+        width=1200,
+        height=600,
         )
 
     by_day_data_grouped, by_hour_data_grouped = generate_bar_graph(user_id)
@@ -453,7 +456,6 @@ def get_group_profile_data(group_id, user_id):
 def get_friends_data(user_id):
     """"""
 
-
     user = User.by_id(user_id)
 
     groups = user.groups
@@ -515,11 +517,9 @@ def get_friends_data(user_id):
             }
 
 
-def verify_group_name_exists_helper():
+def verify_group_name_exists_helper(group_name):
     """Verify the requested group name exists.
     """
-
-    group_name = request.form["group_name"]
 
     # Test for group name uniqueness
     name_check = Group.by_name(group_name=group_name)
@@ -557,7 +557,6 @@ def show_user_groups_helper(user_id):
     return {'first_name': first_name,
             'groups': groups,
             }
-
 
 
 def handle_update_photo_helper(user_id, new_photo_url):

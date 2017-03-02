@@ -335,7 +335,9 @@ def verify_group_name_exists():
     """Verify the requested group name exists.
     """
 
-    return jsonify(verify_group_name_exists_helper())
+    group_name = request.form["group_name"]
+
+    return jsonify(verify_group_name_exists_helper(group_name))
 
 
 @app.route('/join_group', methods=['POST'])
