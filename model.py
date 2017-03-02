@@ -164,9 +164,15 @@ class GroupPendingUser(db.Model):
         return cls.query.filter_by(pending_id=pending_id).first()
 
     @classmethod
+    def by_user_id(cls, user_id):
+        return cls.query.filter_by(user_id=user_id).all()
+
+    @classmethod
     def by_group_id(cls, group_id):
         """Returns a list of tuples of user ids and their pending_id who are
         pending approval to join the group.
+
+        [(user_id, pending_id)]
         """
 
         pendings = cls.query.filter_by(group_id=group_id).all()

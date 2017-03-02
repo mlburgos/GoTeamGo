@@ -315,32 +315,77 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             'four_week_by_day_fig': four_week_by_day_fig,
             'eight_week_by_hour_fig': eight_week_by_hour_fig,
             'four_week_by_hour_fig': four_week_by_hour_fig,
+            'personal_goal_streak': get_streak(user_id)
             }
 
 ################################################################################
 # Supporting functions for get_user_profile_data
 
 
-def get_weeks_workouts(user_id):
+def get_weeks_workouts(user_id, eval_date=datetime.date.today()):
     """Returns the workouts done by a user in the week up to the current day.
 
     If today is a Thursday, it will count the workouts logged over the 4 day span
     from Monday to Thursday.
     """
 
-    today = datetime.date.today()
-
     # using regular .weekday() instead of .isoweekday() to get the number of
     # days since monday since monday = 0
-    days_from_monday = datetime.timedelta(days=today.weekday())
+    days_from_monday = datetime.timedelta(days=eval_date.weekday())
 
-    nearest_monday = today - days_from_monday
+    nearest_monday = eval_date - days_from_monday
 
     user_workouts = Workout.query.filter(Workout.user_id == user_id,
-                                         Workout.workout_time >= nearest_monday)\
+                                         Workout.workout_time >= nearest_monday,
+                                         Workout.workout_time <= eval_date,
+                                         )\
                                  .all()
 
     return user_workouts
+
+
+def get_streak(user_id):
+
+    today = datetime.date.today()
+    print "today:", today
+    # using regular .weekday() instead of .isoweekday() to get the number of
+    # days since monday since monday = 0
+    days_from_monday = datetime.timedelta(days=today.weekday())
+    days_1 = datetime.timedelta(days=1)
+
+    # Use sundays because the get_weeks_workouts calculates the number of
+    # workouts from the date entered back to the most recent monday, so below I
+    # will loop back through sundays until I reach one where the user did not
+    # hit there taget.
+    nearest_sunday = today - days_from_monday - days_1
+    print "nearest_sunday:", nearest_sunday
+
+    days_7 = datetime.timedelta(days=7)
+
+    streak_counter = 0
+
+    # nearest_sunday = nearest_sunday - days_7
+    # print "nearest_sunday:", nearest_sunday
+
+    current_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
+    print "current_goal:", current_goal
+
+    while True:
+        weeks_workouts = len(get_weeks_workouts(user_id, nearest_sunday))
+        print "weeks_workouts:", weeks_workouts
+        print "streak_counter:", streak_counter
+
+        if weeks_workouts >= current_goal:
+            streak_counter += 1
+            print "added one to streak_counter"
+        else:
+            print "weeks_workouts < current_goal"
+            break
+
+        nearest_sunday = nearest_sunday - days_7
+        print "new nearest_sunday:", nearest_sunday
+
+    return streak_counter
 
 
 def get_users_top_workouts(user_ids):
@@ -410,7 +455,8 @@ def get_groups_and_current_goals(user_id):
 
 
 def get_group_profile_data(group_id, user_id):
-    """"""
+    """
+    """
 
     group = Group.by_id(group_id)
     group_name = group.group_name
@@ -530,6 +576,9 @@ def verify_group_name_exists_helper(group_name):
 
 
 def handle_join_new_group_helper(user_id, requested_group):
+    """
+
+    """
 
     group_id = Group.by_name(requested_group).group_id
 

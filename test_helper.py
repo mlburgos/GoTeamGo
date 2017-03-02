@@ -61,6 +61,9 @@ from results_for_tests import (get_user_profile_matching_session_id_is_admin_res
                                get_user_profile_mismatching_session_id_is_admin_result,
                                get_users_top_workouts_results,
                                get_weeks_workouts_results,
+                               get_friends_data_result,
+                               get_group_profile_data_result,
+                               get_group_profile_data_not_admin_result,
                                )
 
 from flask import (Flask,
@@ -80,6 +83,9 @@ TEST_EMAIL = "bob@gmail.com"
 TEST_PASSWORD = "bob1"
 TEST_FIRST_NAME = "bob"
 TEST_LAST_NAME = "robert"
+TEST_USER_ID = 16
+
+BATMAN_URL = 'https://mi-od-live-s.legocdn.com/r/www/r/catalogs/-/media/catalogs/characters/dc/mugshots/mugshot%202016/76061_1to1_mf_batman_336.png?l.r2=-798905063'
 
 class TestsThatDontNeedAFreshDB(TestCase):
 
@@ -122,17 +128,19 @@ class TestsThatDontNeedAFreshDB(TestCase):
     #                              last_name,
     #                              )
 
-    #     assert user.email == "bob@gmail.com"
+    #     assert user.email == TEST_EMAIL
 
     #     hashed_password = user.password
     #     assert bcrypt.check_password_hash(hashed_password, password)
 
-    #     assert user.first_name == "bob"
-    #     assert user.last_name == "robert"
+    #     assert user.first_name == TEST_FIRST_NAME
+    #     assert user.last_name == TEST_LAST_NAME
 
     #     personal_goal = Personal_Goal.get_current_goal_by_user_id(user.user_id)
 
     #     assert personal_goal == 0
+
+    #     print user
 
     # def test_verify_email(self):
 
@@ -262,28 +270,55 @@ class TestsThatDontNeedAFreshDB(TestCase):
 
     #     assert get_groups_and_current_goals(user_id=3) == [[1, u'Group1', 4], [4, u'Group4', 4]]
 
-    def function():
-        
-        print "get_group_profile_data(group_id, user_id):", get_group_profile_data(group_id, user_id)
+    # def test_get_group_profile_data(self):
 
-    def function():
-        
-        get_friends_data(user_id)
+    #     # Test case 1: is admin
+    #     assert get_group_profile_data(group_id=1, user_id=3) == get_group_profile_data_result
 
-    def function():
-        
-        verify_group_name_exists_helper(group_id)
+    #     # Test case 2: is not admin
+    #     assert get_group_profile_data(group_id=1, user_id=1) == get_group_profile_data_not_admin_result
 
-    def function():
-        
-        handle_join_new_group_helper(user_id, requested_group)
+    # def test_get_friends_data(self):
 
-    def function():
-        
-        show_user_groups_helper(user_id)
+    #     assert get_friends_data(user_id=1) == get_friends_data_result
 
-    def function():
-        handle_update_photo_helper(user_id, new_photo_url)
+    # def test_verify_group_name_exists_helper(self):
+
+    #     # Test case: group name DOES exist
+    #     assert verify_group_name_exists_helper(group_name='Group1') == {'success': True, 'msg': ''}
+
+    #     # Test case: group name does NOT exist (DNE)
+    #     dne_return = {'success': False, 'msg': "Group name does not exist. Please verify the name and try again."}
+    #     assert verify_group_name_exists_helper(group_name='fake group') == dne_return
+
+    def test_handle_join_new_group_helper(self):
+
+        handle_join_new_group_helper(user_id=7, requested_group='Group2')
+
+        assert GroupPendingUser.by_user_id(7) == "[<GroupPendingUser pending_id=5 user_id=7 group_id=2>]"
+
+    # def test_show_user_groups_helper(self):
+
+    #     print "show_user_groups_helper(user_id=1):", show_user_groups_helper(user_id=1)
+
+    #     print "show_user_groups_helper(user_id=2):", show_user_groups_helper(user_id=2)
+
+    #     print "show_user_groups_helper(user_id=3):", show_user_groups_helper(user_id=3)
+
+    #     print "show_user_groups_helper(user_id=TEST_USER_ID):", show_user_groups_helper(user_id=TEST_USER_ID)
+
+    # def test_handle_update_photo_helper(self):
+
+    #     handle_update_photo_helper(user_id=1, new_photo_url=BATMAN_URL)
+
+    #     print "User.by_id(1).photo_url:", User.by_id(1).photo_url
+
+    #     handle_update_photo_helper(user_id=16, new_photo_url=BATMAN_URL)
+
+    #     print "User.by_id(16).photo_url:", User.by_id(16).photo_url
+
+
+
 
 
 # class TestsThatNeedAFreshDB(TestCase):
