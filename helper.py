@@ -248,7 +248,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             ),
             overlaying='y',
             side='right'),
-        width=1200,
+        width=1100,
         height=600,
         )
 
@@ -280,7 +280,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             ),
             overlaying='y',
             side='right'),
-        width=1200,
+        width=1100,
         height=600,
         )
 
@@ -334,12 +334,22 @@ def get_weeks_workouts(user_id, eval_date=datetime.date.today()):
     days_from_monday = datetime.timedelta(days=eval_date.weekday())
 
     nearest_monday = eval_date - days_from_monday
+    print "nearest_monday:", nearest_monday
 
-    user_workouts = Workout.query.filter(Workout.user_id == user_id,
-                                         Workout.workout_time >= nearest_monday,
-                                         Workout.workout_time <= eval_date,
-                                         )\
-                                 .all()
+    if eval_date == datetime.date.today():
+        print "in if eval_date == datetime.date.today():"
+        user_workouts = Workout.query.filter(Workout.user_id == user_id,
+                                             Workout.workout_time >= nearest_monday,
+                                             # Workout.workout_time <= eval_date,
+                                             )\
+                                     .all()
+    else:
+        print "in else"
+        user_workouts = Workout.query.filter(Workout.user_id == user_id,
+                                             Workout.workout_time >= nearest_monday,
+                                             Workout.workout_time <= eval_date,
+                                             )\
+                                     .all()
 
     return user_workouts
 
@@ -357,25 +367,33 @@ def get_streak(user_id):
     # workouts from the date entered back to the most recent monday, so below I
     # will loop back through sundays until I reach one where the user did not
     # hit there taget.
-    nearest_sunday = today - days_from_monday - days_1
+    nearest_sunday = (today - days_from_monday - days_1)
+
     print "nearest_sunday:", nearest_sunday
 
     days_7 = datetime.timedelta(days=7)
 
     streak_counter = 0
 
-    # nearest_sunday = nearest_sunday - days_7
-    # print "nearest_sunday:", nearest_sunday
-
-    current_goal = Personal_Goal.get_current_goal_by_user_id(user_id)
-    print "current_goal:", current_goal
+    goals = Personal_Goal.get_all_goals_by_user_id(user_id)
+    current_goal = goals[0]
 
     while True:
         weeks_workouts = len(get_weeks_workouts(user_id, nearest_sunday))
         print "weeks_workouts:", weeks_workouts
         print "streak_counter:", streak_counter
 
-        if weeks_workouts >= current_goal:
+        i = goals.index(current_goal)
+        while current_goal.date_iniciated.date() > nearest_sunday:
+            i += 1
+            current_goal = goals[i]
+
+        print "current_goal:", current_goal
+        print "current_goal.personal_goal:", current_goal.personal_goal
+
+        if current_goal.personal_goal == 0:
+            break
+        elif weeks_workouts >= current_goal.personal_goal:
             streak_counter += 1
             print "added one to streak_counter"
         else:

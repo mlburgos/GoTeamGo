@@ -264,6 +264,8 @@ def by_day_bar_graph_grouped(eight_mondays, nearest_monday, user_workouts):
     four_weeks_combined = zip(zip(*four_weeks_of_workouts_top)[1], zip(*four_weeks_of_workouts_all)[1])
 
     four_week_percentages = [round(float(top)/total*100, 0)
+                             if total > 0
+                             else 0
                              for top, total in four_weeks_combined]
 
     four_week_trace = go.Scatter(x=X_LABELS_2,

@@ -2,7 +2,7 @@
 {% block content %}
 
 <!-- style="width:40%;" -->
-<div class="container-fluid" >
+<div class="container" >
   <div class="row">
     <div class="col-xs-4"> 
         <h1 id="user-heading" value="7">{{ first_name }}'s World</h1>
@@ -41,6 +41,8 @@
       {% else %}  
         <label>Goal:</label>
         {{ personal_goal }}
+        <label>Streak:</label>
+        {{ personal_goal_streak }}
         <br>
         <div class="progress">
           <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%" id="personalpb">
@@ -59,57 +61,76 @@
         </div><!-- progress-bar -->
       </div><!-- progress -->
       {% endfor %}
-
-      <div class="row">
-        <h2>This week's workouts:</h2>
-        {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
-          <div class="media">
-            <div class="media-left media-top">
-              <!-- <a href="#"> -->
-              <!-- {{"☆" * performance_rating }} -->
-              {% for i in range(performance_rating) %}
-                ☆
-              {% endfor %}
-                <!-- <img class="media-object" src="..." alt="..."> -->
-              <!-- </a> -->
+    </div>
+  
+    <div class="row">
+      <h2>Your workouts for this week:</h2>
+      {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
+        <div class="col-xs-3">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">{{ exercise_type }}: {{"☆" * performance_rating }}</h3>
             </div>
-            <div class="media-body">
-              <h4 class="media-heading"> {{ exercise_type }}</h4>
+            <div class="panel-body">
               {{ workout_time }}<br>
-              <!-- {{"☆" * performance_rating }} <br> -->
               {% if distance and distance_unit %}
                 Distance: {{ distance }} {{ distance_unit }} <br>
+              {% else %}
+                <br>
               {% endif %}
               {% if description %}
                 {{ description }}
+              {% else %}
+                <br>
               {% endif %}
             </div>
           </div>
-        {% endfor %}
-      </div><!-- row -->
+        </div>
+      {% endfor %}  
+    </div>
 
-    </div><!-- col-xs-8 -->
-    
   </div><!-- row -->
 
-  <button type="button" class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Graph Options<span class="caret"></span></a>
-    <ul class="dropdown-menu">
-      <li><a href="#" id="by-day-eight">Workouts By Day - Eight Weeks</a></li>
-      <li><a href="#" id="by-day-four">Workouts By Day - Four Weeks</a></li>
-      <li><a href="#" id="by-hour-eight">Workouts By Hour - Eight Weeks</a></li>
-      <li><a href="#" id="by-hour-four">Workouts By Hour - Four Weeks</a></li>
-    </ul>
-  </button>
+
 
   <div class="row">
-     <div class="col" id="eight-week-performance-by-day"></div>
 
-     <div class="col" id="four-week-performance-by-day"></div>
-     
-     <div class="col" id="eight-week-performance-by-hour"></div>
-     
-     <div class="col" id="four-week-performance-by-hour"></div>
+
+    <h2></h2>
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h3 class="panel-title">Analzye your workout history</h3>
+          <br>
+          <p>Select a graph to figure out when you're at your best.</p>
+
+          <p>Workout By Day - Quickly identify with DOW yield your best workouts so you can make sure not to skip those days</p>
+          <p>Workout By Hour - When does your body like to move? Use these graphs to figure out which times of day you perform the best and most consistently.</p>
+          
+        </div>
+        <div class="panel-body">
+          <button type="button" class="dropdown">
+
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Select a Graph<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+              <li><a href="#" id="by-day-eight">Workouts By Day - Eight Weeks</a></li>
+              <li><a href="#" id="by-day-four">Workouts By Day - Four Weeks</a></li>
+              <li><a href="#" id="by-hour-eight">Workouts By Hour - Eight Weeks</a></li>
+              <li><a href="#" id="by-hour-four">Workouts By Hour - Four Weeks</a></li>
+            </ul>
+          </button>
+
+         <div class="col" id="eight-week-performance-by-day"></div>
+
+         <div class="col" id="four-week-performance-by-day"></div>
+         
+         <div class="col" id="eight-week-performance-by-hour"></div>
+         
+         <div class="col" id="four-week-performance-by-hour"></div>
+   
+      </div>
+    </div>
+
    </div>
 
 </div><!-- container-fluid -->
@@ -212,7 +233,7 @@
 
    }
 
-   $("#by-hour-four").on('click', selectByDayFourGraph)
+   $("#by-hour-four").on('click', selectByHourFourGraph)
 
 
 </script>

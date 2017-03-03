@@ -1,80 +1,77 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="container-fluid" >
-<div>
-  <h1>Friends</h1>
-</div>
-</div> <!-- heading -->
-<br>
-
-<!-- Lots of work to do here. currently just coppied from user-profile. I want to make it so that all the people with a common group show up here grouped by group. reapeats are ok. I want to see small status bars right next to their names -->
-
-
 <div class="container" >
-  <div class="col-xs-6">
-    {% for user_id, name, photo_url, workout_count, personal_goal, progress, formatted_progress in friends_full_info %}
-    <div class="row">
-      <div class="col-xs-12">
-        <div class="col-xs-4"> 
-            <h4><a href="/users/{{ user_id }}">{{ name }}</a>:</h4>
-            <img src="{{ photo_url }}" width="100" height="100">
-        </div> <!-- heading and user_photo -->
+  <div>
+    <h1>Friends</h1>
+  </div>
+  <br>
 
-        <div class="col-xs-8">
-          <h5>Workout Count:</h5>
-          {{ workout_count }}
-          {% if personal_goal > 0 %} 
+
+  <div class="row">
+    <h2>This week's standout workouts:</h2>
+    {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description, name in workouts_for_board %}
+      <div class="col-xs-3">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ name }}</h3>
+          </div>
+          <div class="panel-body">
+            {{ exercise_type }}: {{"☆" * performance_rating }} <br>
+            {{ workout_time }}<br>
+            {% if distance and distance_unit %}
+              Distance: {{ distance }} {{ distance_unit }} <br>
+            {% else %}
             <br>
-
-            <h5>Progess toward personal goal of {{ personal_goal }}:</h5>
-            <div class="progress">
-              <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%">
-                {{ formatted_progress }}
-              </div>
-            </div>
-          {% else %}
-            <h5>{{ name }} hasn't set a personal goal yet!</h5>
-          {% endif %}
+            {% endif %}
+            {% if description %}
+              {{ description }}
+            {% else %}
+            <br>
+            {% endif %}
+          </div>
         </div>
-      </div> 
-    </div>
-    {% endfor %}
-  </div> <!-- col-xs-6 -->
+      </div>
+    {% endfor %}  
+  </div>
 
-  <div class="col-xs-6">
-      <!-- <div class="row"> -->
-        <h2>This week's standout workouts:</h2>
-        {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description, name in workouts_for_board %}
-          <div class="media">
-            <div class="media-left media-top">
-              <!-- <a href="#"> -->
-              <!-- {{"☆" * performance_rating }} -->
-              {% for i in range(performance_rating) %}
-                ☆
-              {% endfor %}
-                <!-- <img class="media-object" src="..." alt="..."> -->
-              <!-- </a> -->
-            </div>
-            <div class="media-body">
-              <h4 class="media-heading"> {{ name }}</h4>
-              {{ exercise_type }}<br>
-              {{ workout_time }}<br>
-              <!-- {{"☆" * performance_rating }} <br> -->
-              {% if distance and distance_unit %}
-                Distance: {{ distance }} {{ distance_unit }} <br>
-              {% endif %}
-              {% if description %}
-                {{ description }}
+
+  <div class="row">
+    <h2>My Friends:</h2>
+    {% for user_id, name, photo_url, workout_count, personal_goal, progress, formatted_progress in friends_full_info %}
+      <div class="col-xs-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title"><a href="/users/{{ user_id }}">{{ name }}</a></h3>
+          </div>
+          <div class="panel-body">
+            <div class="col-xs-4"> 
+              <img src="{{ photo_url }}" width="100" height="100">
+            </div> <!-- user_photo -->
+            <div class="col-xs-8">
+              <h5>Workout Count:</h5>
+              {{ workout_count }}
+              {% if personal_goal > 0 %} 
+                <br>
+
+                <h5>Progess toward personal goal of {{ personal_goal }}:</h5>
+                <div class="progress">
+                  <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%">
+                    {{ formatted_progress }}
+                  </div>
+                </div>
+              {% else %}
+                <h5>{{ name }} hasn't set a personal goal yet!</h5>
+                <br><br>
               {% endif %}
             </div>
           </div>
-        {% endfor %}
-      <!-- </div> -->
-      <!-- row -->
-    </div> <!-- col-xs-6 --
+        </div>
+      </div>
+    {% endfor %}  
+  </div>
 
-</div>
-
+ 
+</div> <!-- container -->
 
 {% endblock %}

@@ -396,6 +396,13 @@ class Personal_Goal(db.Model):
                   .first()\
                   .personal_goal
 
+    @classmethod
+    def get_all_goals_by_user_id(cls, user_id):
+        return cls.query\
+                  .filter_by(user_id=user_id)\
+                  .order_by(Personal_Goal.date_iniciated.desc())\
+                  .all()
+
 
 class Workout(db.Model):
     """Log workouts"""

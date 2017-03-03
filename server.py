@@ -101,7 +101,7 @@ def handle_login():
 
     session["is_admin"] = (len(admin_groups) != 0)
 
-    flash("Logged in!")
+    # flash("Logged in!")
 
     return redirect("/")
 
@@ -244,6 +244,8 @@ def user_profile(user_id):
                                       is_admin,
                                       )
 
+    print "workouts_for_board:", user_info['workouts_for_board']
+
     return render_template("user-profile.html",
                            is_my_profile=user_info['is_my_profile'],
                            user_photo=user_info['user_photo'],
@@ -264,6 +266,7 @@ def user_profile(user_id):
                            four_week_by_day_fig=user_info['four_week_by_day_fig'],
                            eight_week_by_hour_fig=user_info['eight_week_by_hour_fig'],
                            four_week_by_hour_fig=user_info['four_week_by_hour_fig'],
+                           personal_goal_streak=user_info['personal_goal_streak'],
                            )
 
 
@@ -673,7 +676,7 @@ if __name__ == "__main__":
     connect_to_db(app)
 
     # Use the DebugToolbar
-    DebugToolbarExtension(app)
+    # DebugToolbarExtension(app)
 
 
 

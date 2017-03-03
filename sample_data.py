@@ -30,6 +30,12 @@ from flask_bcrypt import Bcrypt
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
+BATMAN_URL = 'https://mi-od-live-s.legocdn.com/r/www/r/catalogs/-/media/catalogs/characters/dc/mugshots/mugshot%202016/76061_1to1_mf_batman_336.png?l.r2=-798905063'
+
+# Improves runtime to generate the passwords upfront.
+HASHED_PASSWORDS = [bcrypt.generate_password_hash("pswd" + str(i))
+                    for i in range(1, 15 + 1)]
+
 
 def add_sample_users(num):
     """"""
@@ -41,8 +47,7 @@ def add_sample_users(num):
         first_name = "User" + str(i)
         last_name = "Lname" + str(i)
         email = "User" + str(i) + "@gmail.com"
-        password = "pswd" + str(i)
-        hashed_password = bcrypt.generate_password_hash(password)
+        hashed_password = HASHED_PASSWORDS[i - 1]
 
         new_user = User(first_name=first_name,
                         last_name=last_name,
@@ -150,6 +155,32 @@ def add_sample_workouts(num_workouts, num_users):
             user_id = i
             exercise_type = "run"
             workout_time = datetime(2017, 1, j, hour, 0)
+            performance_rating = random.randint(1, 5)
+            distance = random.randint(1, 10)
+            distance_unit = "miles"
+
+            new_workout = Workout(user_id=user_id,
+                                  exercise_type=exercise_type,
+                                  workout_time=workout_time,
+                                  performance_rating=performance_rating,
+                                  distance=distance,
+                                  distance_unit=distance_unit,
+                                  )
+
+            if (j == 1) or (j == num_workouts):
+                print new_workout
+
+            db.session.add(new_workout)
+            db.session.commit()
+
+    # February workouts
+    for i in range(1, num_users + 1):
+        for j in range(1, 28 + 1):
+
+            hour = random.randint(6, 22)
+            user_id = i
+            exercise_type = "run"
+            workout_time = datetime(2017, 2, j, hour, 0)
             performance_rating = random.randint(1, 5)
             distance = random.randint(1, 10)
             distance_unit = "miles"
@@ -314,6 +345,30 @@ def add_sample_groups_pending_users():
     db.session.commit()
 
 
+def rename_user3():
+    user3 = User.by_id(3)
+
+    user3.first_name = "Bruce"
+    user3.last_name = "Wayne"
+    user3.photo_url = BATMAN_URL
+
+    print user3
+    db.session.commit()
+
+
+def give_user3_personal_goals():
+    """add goal of 6 to user3 as of 1/1
+    """
+
+    user3_goal = Personal_Goal(user_id=3,
+                               date_iniciated=date(day=2, month=1, year=2017),
+                               personal_goal=6,
+                               )
+
+    db.session.add(user3_goal)
+    db.session.commit()
+
+
 if __name__ == '__main__':
 
     from server import app
@@ -333,3 +388,5 @@ if __name__ == '__main__':
     add_sample_goals()
     add_my_photo()
     add_sample_groups_pending_users()
+    rename_user3()
+    give_user3_personal_goals()
