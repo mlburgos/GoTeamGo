@@ -12,7 +12,6 @@ from model import (User,
 
 import datetime
 
-import plotly.plotly as py
 import plotly.graph_objs as go
 
 from flask import (Flask,
@@ -44,6 +43,72 @@ X_LABELS_2 = ['Mon',
               ]
 
 COLOR_SCHEME = ['#B3E9FE', '#73D8FF', '#3AC9FF', '#07BAFF']
+
+
+
+by_day_grouped_layout = go.Layout(
+    title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
+    barmode='grouped',
+    legend=dict(orientation="h",
+                font=dict(
+                    # family='sans-serif',
+                    # size=12,
+                    # color='#000',
+                    )
+                ),
+    yaxis=dict(
+        title='# of Workouts',
+        showgrid=False,
+        ticks='outside',
+    ),
+    yaxis2=dict(
+        title="% of Top Workouts",
+        showgrid=False,
+        ticks='outside',
+        range=[0, 110],
+        titlefont=dict(
+            color='rgb(148, 103, 189)'
+        ),
+        tickfont=dict(
+            color='rgb(148, 103, 189)'
+        ),
+        overlaying='y',
+        side='right'),
+    width=1100,
+    height=600,
+    )
+
+by_hour_grouped_layout = go.Layout(
+    title='Workouts by Hour <br> <i>4 and 5 star performances by day</i>',
+    barmode='grouped',
+    legend=dict(orientation="h",
+                font=dict(
+                    # family='sans-serif',
+                    # size=12,
+                    # color='#000',
+                    )
+                ),
+    yaxis=dict(
+        title='# of Workouts',
+        showgrid=False,
+        ticks='outside',
+    ),
+    yaxis2=dict(
+        title="% of Top Workouts",
+        showgrid=False,
+        ticks='outside',
+        range=[0, 110],
+        titlefont=dict(
+            color='rgb(148, 103, 189)'
+        ),
+        tickfont=dict(
+            color='rgb(148, 103, 189)'
+        ),
+        overlaying='y',
+        side='right'),
+    width=1100,
+    height=600,
+    )
 
 
 def generate_bar_graph(user_id):
@@ -80,8 +145,22 @@ def generate_bar_graph(user_id):
                                                                user_workouts=user_workouts,
                                                                )
 
-    return (by_day_bar_graph_grouped_data,
-            by_hour_bar_graph_grouped_data,
+    eight_week_data_by_day = by_day_bar_graph_grouped_data['eight_week_data']
+    four_week_data_by_day = by_day_bar_graph_grouped_data['four_week_data']
+
+    eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout)
+    four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout)
+
+    eight_week_data_by_hour = by_hour_bar_graph_grouped_data['eight_week_data']
+    four_week_data_by_hour = by_hour_bar_graph_grouped_data['four_week_data']
+
+    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
+    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
+
+    return (eight_week_by_day_fig,
+            four_week_by_day_fig,
+            eight_week_by_hour_fig,
+            four_week_by_hour_fig,
             )
 
 

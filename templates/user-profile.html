@@ -5,7 +5,7 @@
 <div class="container" >
   <div class="row">
     <div class="col-xs-4"> 
-        <h1 id="user-heading" value="7">{{ first_name }}'s World</h1>
+        <h1 id="user-heading" value="7">{{ u.first_name }}'s World</h1>
         <img src="{{ user_photo }}" width="300" height="300">
         <br>
         <br>
@@ -52,14 +52,14 @@
       {% endif %}
 
       {% for group_id, group_name, group_goal, progress, formatted_progress in full_group_info %}
-      <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>
-      <label>Goal:</label>
-      {{ group_goal }}
-      <div class="progress">
-        <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%" id="group{{ group_id }}">
-          {{ formatted_progress }}
-        </div><!-- progress-bar -->
-      </div><!-- progress -->
+        <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>
+        <label>Goal:</label>
+        {{ group_goal }}
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%" id="group{{ group_id }}">
+            {{ formatted_progress }}
+          </div><!-- progress-bar -->
+        </div><!-- progress -->
       {% endfor %}
     </div>
   
@@ -149,9 +149,6 @@
 
     var eightWeekByHour = {{ eight_week_by_hour_fig|tojson|safe }};
     var fourWeekByHour = {{ four_week_by_hour_fig|tojson|safe }};
-
-    var groupPbIds = {{ group_ids }};
-
 
 </script>
 

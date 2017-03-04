@@ -30,6 +30,9 @@ from flask_bcrypt import Bcrypt
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
+MONICA_PIC = "http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg"
+
+
 BATMAN_URL = 'https://mi-od-live-s.legocdn.com/r/www/r/catalogs/-/media/catalogs/characters/dc/mugshots/mugshot%202016/76061_1to1_mf_batman_336.png?l.r2=-798905063'
 
 # Improves runtime to generate the passwords upfront.
@@ -37,22 +40,88 @@ HASHED_PASSWORDS = [bcrypt.generate_password_hash("pswd" + str(i))
                     for i in range(1, 15 + 1)]
 
 
+FIRST_NAMES = ['Monica',
+               'Bobby',
+               'Bruce',
+               'Lauren',
+               'Ray',
+               'Jess',
+               'Rachel',
+               'Signe',
+               'Billy',
+               'Evan',
+               'Sam',
+               'Jen',
+               'Rick',
+               'David',
+               'Kianu',
+               ]
+
+LAST_NAMES = ['Burgos',
+              'Dickerson',
+              'Wayne',
+              'Roberts',
+              'Pritchett',
+              'Ziai',
+              'Applestien',
+              'Pritchett',
+              'Johnson',
+              'Dickerson',
+              'Wayne',
+              'Roberts',
+              'Pritchett',
+              'Ziai',
+              'Applestien',
+              ]
+
+# photos
+squinty_guy = "https://images.pexels.com/photos/101584/pexels-photo-101584.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"
+ginger_serious_lady = "https://images.pexels.com/photos/27411/pexels-photo-27411.jpg?w=940&h=650&auto=compress&cs=tinysrgb"
+bearded_blue_eyes = "https://images.pexels.com/photos/119705/pexels-photo-119705.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"
+shades_guy = "https://images.pexels.com/photos/108048/pexels-photo-108048.jpeg?h=350&auto=compress&cs=tinysrgb"
+man_eating_burger = "https://images.pexels.com/photos/78225/pexels-photo-78225.jpeg?h=350&auto=compress&cs=tinysrgb"
+jumping_canyon = "https://images.pexels.com/photos/6496/man-person-jumping-desert.jpg?h=350&auto=compress&cs=tinysrgb"
+cute_smile = "https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?h=350&auto=compress&cs=tinysrgb"
+guy_with_hat = "https://images.pexels.com/photos/173295/pexels-photo-173295.jpeg?h=350&auto=compress&cs=tinysrgb"
+zen_guy = "https://images.pexels.com/photos/107868/pexels-photo-107868.jpeg?h=350&auto=compress&cs=tinysrgb"
+canoe_lady = "https://images.pexels.com/photos/24486/pexels-photo-24486.jpg?h=350&auto=compress&cs=tinysrgb"
+weight_lifter = "https://images.pexels.com/photos/17840/pexels-photo.jpg?h=350&auto=compress&cs=tinysrgb"
+guy_with_lake = "https://images.pexels.com/photos/9692/pexels-photo.jpeg?h=350&auto=compress&cs=tinysrgb"
+superman = "https://images.pexels.com/photos/38630/bodybuilder-weight-training-stress-38630.jpeg?h=350&auto=compress&cs=tinysrgb"
+
+RAY_URL = "https://pbs.twimg.com/profile_images/645893036099158016/C15Eqa7E.jpg"
+
+PHOTOS = [MONICA_PIC,
+          squinty_guy,
+          BATMAN_URL,
+          ginger_serious_lady,
+          RAY_URL,
+          shades_guy,
+          man_eating_burger,
+          jumping_canyon,
+          cute_smile,
+          guy_with_hat,
+          zen_guy,
+          canoe_lady,
+          weight_lifter,
+          guy_with_lake,
+          superman,
+          ]
+
+
 def add_sample_users(num):
     """"""
 
-    # from server import bcrypt
-
     for i in range(1, num + 1):
 
-        first_name = "User" + str(i)
-        last_name = "Lname" + str(i)
         email = "User" + str(i) + "@gmail.com"
         hashed_password = HASHED_PASSWORDS[i - 1]
 
-        new_user = User(first_name=first_name,
-                        last_name=last_name,
+        new_user = User(first_name=FIRST_NAMES[i - 1],
+                        last_name=LAST_NAMES[i - 1],
                         email=email,
                         password=hashed_password,
+                        photo_url=PHOTOS[i - 1],
                         )
 
         print new_user
@@ -149,7 +218,7 @@ def add_sample_workouts(num_workouts, num_users):
     """"""
 
     for i in range(1, num_users + 1):
-        for j in range(1, num_workouts + 1):
+        for j in range(1, 31 + 1):
 
             hour = random.randint(6, 22)
             user_id = i
@@ -167,7 +236,7 @@ def add_sample_workouts(num_workouts, num_users):
                                   distance_unit=distance_unit,
                                   )
 
-            if (j == 1) or (j == num_workouts):
+            if (j == 1) or (j == 31):
                 print new_workout
 
             db.session.add(new_workout)
@@ -309,13 +378,13 @@ def add_sample_goals():
         db.session.commit()
 
 
-def add_my_photo():
-    """Adds my photo to User1"""
+# def add_my_photo():
+#     """Adds my photo to User1"""
 
-    me = User.by_id(1)
-    me.photo_url = "http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg"
+#     me = User.by_id(1)
+#     me.photo_url = "http://fellowship.hackbrightacademy.com/media/CACHE/images/students/IMG_0005/6259c4fbf765821b3b73f6a0964592f9.jpg"
 
-    db.session.commit()
+#     db.session.commit()
 
 
 def add_sample_groups_pending_users():
@@ -386,7 +455,7 @@ if __name__ == '__main__':
     add_sample_workouts(workouts_to_add, users_to_add)
     add_sample_likes(workouts_to_add, users_to_add)
     add_sample_goals()
-    add_my_photo()
+    # add_my_photo()
     add_sample_groups_pending_users()
     rename_user3()
     give_user3_personal_goals()

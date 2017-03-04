@@ -206,6 +206,16 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
     # Returns a list of lists of the form:
     # [[group_id, group_name, goal]
     # ex: [[1, "Group1", 4]]
+
+    # idea:
+    # groups = {
+    #     'group1': {
+    #         id: 1,
+    #         goal: 4,
+    #     }
+    # }
+
+    # groups.keys for each do groups[group].id
     groups = get_groups_and_current_goals(user_id)
 
     group_ids = [group[0] for group in groups]
@@ -220,84 +230,6 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
     if is_admin:
         pending_approval = get_admin_pending_count(user_id)
 
-    by_day_grouped_layout = go.Layout(
-        title='Workouts by Day <br> <i>4 and 5 star performances by day</i>',
-        barmode='grouped',
-        legend=dict(orientation="h",
-                    font=dict(
-                        # family='sans-serif',
-                        # size=12,
-                        # color='#000',
-                        )
-                    ),
-        yaxis=dict(
-            title='# of Workouts',
-            showgrid=False,
-            ticks='outside',
-        ),
-        yaxis2=dict(
-            title="% of Top Workouts",
-            showgrid=False,
-            ticks='outside',
-            range=[0, 110],
-            titlefont=dict(
-                color='rgb(148, 103, 189)'
-            ),
-            tickfont=dict(
-                color='rgb(148, 103, 189)'
-            ),
-            overlaying='y',
-            side='right'),
-        width=1100,
-        height=600,
-        )
-
-    by_hour_grouped_layout = go.Layout(
-        title='Workouts by Hour <br> <i>4 and 5 star performances by day</i>',
-        barmode='grouped',
-        legend=dict(orientation="h",
-                    font=dict(
-                        # family='sans-serif',
-                        # size=12,
-                        # color='#000',
-                        )
-                    ),
-        yaxis=dict(
-            title='# of Workouts',
-            showgrid=False,
-            ticks='outside',
-        ),
-        yaxis2=dict(
-            title="% of Top Workouts",
-            showgrid=False,
-            ticks='outside',
-            range=[0, 110],
-            titlefont=dict(
-                color='rgb(148, 103, 189)'
-            ),
-            tickfont=dict(
-                color='rgb(148, 103, 189)'
-            ),
-            overlaying='y',
-            side='right'),
-        width=1100,
-        height=600,
-        )
-
-    by_day_data_grouped, by_hour_data_grouped = generate_bar_graph(user_id)
-
-    eight_week_data_by_day = by_day_data_grouped['eight_week_data']
-    four_week_data_by_day = by_day_data_grouped['four_week_data']
-
-    eight_week_by_day_fig = go.Figure(data=eight_week_data_by_day, layout=by_day_grouped_layout)
-    four_week_by_day_fig = go.Figure(data=four_week_data_by_day, layout=by_day_grouped_layout)
-
-    eight_week_data_by_hour = by_hour_data_grouped['eight_week_data']
-    four_week_data_by_hour = by_hour_data_grouped['four_week_data']
-
-    eight_week_by_hour_fig = go.Figure(data=eight_week_data_by_hour, layout=by_hour_grouped_layout)
-    four_week_by_hour_fig = go.Figure(data=four_week_data_by_hour, layout=by_hour_grouped_layout)
-
     return {'is_my_profile': is_my_profile,
             'user_photo': user_photo,
             'first_name': first_name,
@@ -311,10 +243,6 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
             'pending_approval': pending_approval,
             'user_id': user_id,
             'group_ids': group_ids,
-            'eight_week_by_day_fig': eight_week_by_day_fig,
-            'four_week_by_day_fig': four_week_by_day_fig,
-            'eight_week_by_hour_fig': eight_week_by_hour_fig,
-            'four_week_by_hour_fig': four_week_by_hour_fig,
             'personal_goal_streak': get_streak(user_id)
             }
 

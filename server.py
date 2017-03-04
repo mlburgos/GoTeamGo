@@ -53,6 +53,7 @@ from helper import (verify_password,
                     handle_update_group_goal_helper,
                     )
 
+from graph_functions import generate_bar_graph
 
 from decorators import (login_required,
                         logout_required,
@@ -226,6 +227,8 @@ def logout():
     """Log out."""
 
     del session["user_id"]
+    del session["is_admin"]
+    del session["user_name"]
     # flash("Logged Out.")
     return redirect("/login")
 
@@ -246,7 +249,11 @@ def user_profile(user_id):
 
     print "workouts_for_board:", user_info['workouts_for_board']
 
+    eight_week_by_day_fig, four_week_by_day_fig,\
+        eight_week_by_hour_fig, four_week_by_hour_fig, = generate_bar_graph(user_id)
+
     return render_template("user-profile.html",
+                           u=user_info,
                            is_my_profile=user_info['is_my_profile'],
                            user_photo=user_info['user_photo'],
                            first_name=user_info['first_name'],
@@ -262,10 +269,10 @@ def user_profile(user_id):
                            group_ids=user_info['group_ids'],
                            navbar_groups=navbar_data['groups'],
                            navbar_pending_approval=navbar_data['pending_approval'],
-                           eight_week_by_day_fig=user_info['eight_week_by_day_fig'],
-                           four_week_by_day_fig=user_info['four_week_by_day_fig'],
-                           eight_week_by_hour_fig=user_info['eight_week_by_hour_fig'],
-                           four_week_by_hour_fig=user_info['four_week_by_hour_fig'],
+                           eight_week_by_day_fig=eight_week_by_day_fig,
+                           four_week_by_day_fig=four_week_by_day_fig,
+                           eight_week_by_hour_fig=eight_week_by_hour_fig,
+                           four_week_by_hour_fig=four_week_by_hour_fig,
                            personal_goal_streak=user_info['personal_goal_streak'],
                            )
 
