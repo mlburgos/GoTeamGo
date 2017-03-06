@@ -1,5 +1,30 @@
-{% extends 'base-workout-log.html' %}
-{% block content %}
+<!doctype html>
+
+<html>
+<head>
+    <title>GoTeamGo Log a Workout</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="../static/css/stylesheet.css">
+
+  <!-- These are for the template -->
+  <!-- Google Fonts -->
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700|Lato:400,100,300,700,900' rel='stylesheet' type='text/css'>
+
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="../static/css/style.css">
+
+
+
+</head>
+<body>
+  <!-- This is where the navbar was -->
+ 
+  <!-- This is where the get_flashed_messages loop was -->
+
+<!-- {% block content %} -->
 
 <div class="container">
   <div class="top">
@@ -16,7 +41,7 @@
     <!-- for javascript driven flash messages -->
     <div id="js-flash" class="alert alert-danger" style="width:90%; margin:0 auto; display: none"></div>
       
-      <form action="/" method="POST" id="new-workout-form">
+      <form action="/register" method="POST" id="new-workout-form">
 
         <div class="form-group">
           <label>Exercise Type:
@@ -32,7 +57,7 @@
         <div class="form-group">
           <label>Workout Time:<br>
             (leaving this blank will default to current date and time)
-            <input type="datetime-local" name="workout-time" >
+            <input type="datetime-local" name="workout-time" class="form-control" >
           </label>
         </div>
 
@@ -88,4 +113,65 @@
   </div>  <!-- .login-box -->
 </div>
 
-{% endblock %}
+<script src="https://code.jquery.com/jquery.js"></script>
+
+<script type="text/javascript">
+
+
+   var password = $("#password"),
+       confirmation = $("#confirm-password");
+
+   function validatePassword(){
+
+      if(password.val() != confirmation.val()) {
+         $("#password-msg").html("Passwords Don't Match");
+         $("#form-submit").prop('disabled', true);
+      } else {
+         $("#password-msg").html("");
+         $("#form-submit").prop('disabled', false);
+      };
+   }
+
+   password.on("change", validatePassword);
+   confirmation.on("keyup", validatePassword);
+
+   function showValidationResults (result) {
+      // result: object with existence boolean, message string
+
+      if (result.existence) {
+         $("#js-flash").html(result.msg)
+         $("#js-flash").show()
+      } else if (password.val().length < 6){
+         $("#js-flash").html("Password is too short. Please make sure password is at least 6 characters.")
+         $("#js-flash").show()
+      } else {
+         $("#new-workout-form").submit()
+      }
+   }
+
+   function verifyEmailExistence (evt) {
+      evt.preventDefault();
+
+      var formInputs = {
+         "email": $("#email").val(),
+      }
+
+      $.post('/verify_email_existence.json',
+             formInputs,
+             showValidationResults
+             );
+   }
+
+   $("#new-workout-form").on("submit", verifyEmailExistence)
+
+
+</script>
+
+<!-- {% endblock %} -->
+
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+
+</body>
+</html>

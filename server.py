@@ -247,8 +247,6 @@ def user_profile(user_id):
                                       is_admin,
                                       )
 
-    print "workouts_for_board:", user_info['workouts_for_board']
-
     eight_week_by_day_fig, four_week_by_day_fig,\
         eight_week_by_hour_fig, four_week_by_hour_fig, = generate_bar_graph(user_id)
 

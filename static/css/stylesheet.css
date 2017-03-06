@@ -16,3 +16,15 @@
 .progress-bar {
     background-color: #3AC9FF;
 }
+
+#user-panel {
+    position: fixed;
+}
+
+.small-photo {
+    max-width: 100px;
+}
+
+#photo {
+    border-radius: 5px; 
+}

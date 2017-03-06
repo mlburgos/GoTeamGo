@@ -5,98 +5,103 @@
 <div class="container" >
   <div class="row">
     <div class="col-xs-4"> 
-        <h1 id="user-heading" value="7">{{ u.first_name }}'s World</h1>
-        <img src="{{ user_photo }}" width="300" height="300">
-        <br>
-        <br>
-        <div class="list-group">
+      <div id="user-panel" class="panel panel-default">
+        <div class="panel-heading">
+          <h1 id="user-heading" value="7">{{ u.first_name }}'s World</h1>
+        </div>
+        <div class="panel-body">
+          <img id="photo" src="{{ user_photo }}" width="300">
+          
           {% if is_my_profile %}
-            <button type="button" class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="/update_photo">Update Photo</a></li>
-                <li><a href="/update_personal_goal">Update personal goal</a></li>
-              </ul>
-            </button>
-
+            <br>
+            <br>
+            <div class="list-group">
+                <button type="button" class="dropdown">
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options<span class="caret"></span></a>
+                  <ul class="dropdown-menu">
+                    <li><a href="/update_photo">Update Photo</a></li>
+                    <li><a href="/update_personal_goal">Update personal goal</a></li>
+                  </ul>
+                </button>
+            </div>    <!-- list-group -->
           {% endif %}
 
-        </div> <!-- list-group -->
-
+        </div>    <!-- pannel-body -->
+      </div>    <!-- pannel -->
     </div> <!-- heading and user_photo col-xs-4 -->
 
     <div class="col-xs-8">
-      <h2>This Week's Progress</h2>
-      <h3>Workout Count:</h3>
-      {{ workout_count }}
-      <br>
-      <h3>Progess toward goals:</h3>
-      <h4>Personal</h4>
-      {% if personal_goal == 0 %}
-        {% if is_my_profile %}
-          <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
-        {% else %}  
-          <h5>{{ first_name }} hasn't set a personal goal yet!</h5>
-        {% endif %}
-      {% else %}  
-        <label>Goal:</label>
-        {{ personal_goal }}
-        <label>Streak:</label>
-        {{ personal_goal_streak }}
-        <br>
-        <div class="progress">
-          <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%" id="personalpb">
-            {{ personal_progress_formatted }}
-          </div><!-- progress-bar -->
-        </div><!-- progress -->
-      {% endif %}
-
-      {% for group_id, group_name, group_goal, progress, formatted_progress in full_group_info %}
-        <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>
-        <label>Goal:</label>
-        {{ group_goal }}
-        <div class="progress">
-          <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%" id="group{{ group_id }}">
-            {{ formatted_progress }}
-          </div><!-- progress-bar -->
-        </div><!-- progress -->
-      {% endfor %}
-    </div>
-  
-    <div class="row">
-      <h2>Your workouts for this week:</h2>
-      {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
-        <div class="col-xs-3">
-          <div class="panel panel-default">
-            <div class="panel-heading">
-              <h3 class="panel-title">{{ exercise_type }}: {{"☆" * performance_rating }}</h3>
-            </div>
-            <div class="panel-body">
-              {{ workout_time }}<br>
-              {% if distance and distance_unit %}
-                Distance: {{ distance }} {{ distance_unit }} <br>
-              {% else %}
-                <br>
-              {% endif %}
-              {% if description %}
-                {{ description }}
-              {% else %}
-                <br>
-              {% endif %}
-            </div>
-          </div>
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2>This Week's Progress</h2>
         </div>
-      {% endfor %}  
-    </div>
+        <div class="panel-body">  
+          <h3>Workout Count:</h3>
+          {{ workout_count }}
+          <br>
+          <h3>Progess toward goals:</h3>
+          <h4>Personal</h4>
+          {% if personal_goal == 0 %}
+            {% if is_my_profile %}
+              <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
+            {% else %}  
+              <h5>{{ first_name }} hasn't set a personal goal yet!</h5>
+            {% endif %}
+          {% else %}  
+            <label>Goal:</label>
+            {{ personal_goal }}
+            <label>Streak:</label>
+            {{ personal_goal_streak }}
+            <br>
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%" id="personalpb">
+                {{ personal_progress_formatted }}
+              </div><!-- progress-bar -->
+            </div><!-- progress -->
+          {% endif %}
 
-  </div><!-- row -->
-
-
-
-  <div class="row">
-
-
-    <h2></h2>
+          {% for group_id, group_name, group_goal, progress, formatted_progress in full_group_info %}
+            <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>
+            <label>Goal:</label>
+            {{ group_goal }}
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100" style="min-width: 2em; width: {{ progress }}%" id="group{{ group_id }}">
+                {{ formatted_progress }}
+              </div><!-- progress-bar -->
+            </div><!-- progress -->
+          {% endfor %}
+        </div> <!-- panel-body -->
+      </div> <!-- panel -->
+  
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h2>Your workouts for this week:</h2>
+        </div>
+        <div class="panel-body">  
+          {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
+            <div class="col-xs-4">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h3 class="panel-title">{{ exercise_type }}: {{"☆" * performance_rating }}</h3>
+                </div>
+                <div class="panel-body">
+                  {{ workout_time }}<br>
+                  {% if distance and distance_unit %}
+                    Distance: {{ distance }} {{ distance_unit }} <br>
+                  {% else %}
+                    <br>
+                  {% endif %}
+                  {% if description %}
+                    {{ description }}
+                  {% else %}
+                    <br>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %} 
+        </div> <!-- panel-body -->
+      </div> <!-- panel -->
 
       <div class="panel panel-default">
         <div class="panel-heading">
@@ -106,8 +111,8 @@
 
           <p>Workout By Day - Quickly identify with DOW yield your best workouts so you can make sure not to skip those days</p>
           <p>Workout By Hour - When does your body like to move? Use these graphs to figure out which times of day you perform the best and most consistently.</p>
-          
         </div>
+
         <div class="panel-body">
           <button type="button" class="dropdown">
 
@@ -120,18 +125,19 @@
             </ul>
           </button>
 
-         <div class="col" id="eight-week-performance-by-day"></div>
+           <div class="col" id="eight-week-performance-by-day"></div>
 
-         <div class="col" id="four-week-performance-by-day"></div>
-         
-         <div class="col" id="eight-week-performance-by-hour"></div>
-         
-         <div class="col" id="four-week-performance-by-hour"></div>
-   
+           <div class="col" id="four-week-performance-by-day"></div>
+           
+           <div class="col" id="eight-week-performance-by-hour"></div>
+           
+           <div class="col" id="four-week-performance-by-hour"></div>
+        </div>
       </div>
-    </div>
 
-   </div>
+   </div> <!-- col-xs-8 -->
+
+  </div><!-- row -->
 
 </div><!-- container-fluid -->
 

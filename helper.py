@@ -187,7 +187,7 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
     workout_count = len(workouts)
 
     workouts_for_board = [(workout.exercise_type,
-                           workout.workout_time,
+                           date_time_formater(workout.workout_time),
                            workout.performance_rating,
                            workout.distance,
                            workout.distance_unit,
@@ -249,6 +249,9 @@ def get_user_profile_data(user_id, session_user_id, is_admin):
 ################################################################################
 # Supporting functions for get_user_profile_data
 
+
+def date_time_formater(datetime_obj):
+    return datetime_obj.strftime('%a, %m/%d %I:%M %p')
 
 def get_weeks_workouts(user_id, eval_date=datetime.date.today()):
     """Returns the workouts done by a user in the week up to the current day.
@@ -357,7 +360,7 @@ def get_users_top_workouts(user_ids):
                             .all()
 
     workouts_for_board = [(workout.exercise_type,
-                           workout.workout_time,
+                           date_time_formater(workout.workout_time),
                            workout.performance_rating,
                            workout.distance,
                            workout.distance_unit,

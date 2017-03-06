@@ -59,6 +59,7 @@ p.small {
 .top {
 	margin: 0;
 	padding: 0;
+	/*width: 1280;*/
 	width: 100%;
 	background: -moz-linear-gradient(top,  rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%); /* FF3.6-15 */
 	background: -webkit-linear-gradient(top,  rgba(0,0,0,0.6) 0%,rgba(0,0,0,0) 100%); /* Chrome10-25,Safari5.1-6 */
@@ -106,6 +107,14 @@ p.small {
 	margin-bottom: 0;
 }
 
+#new-workout-box input {
+	margin-bottom: 2px;
+	padding: 8px;
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	font-size: .9em;
+	color: #888;
+}
 
 .login-box input:focus {
 	outline: none;

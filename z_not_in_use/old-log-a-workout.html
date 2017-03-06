@@ -1,0 +1,82 @@
+<div class="container-fluid">
+<div>
+  <h1>Log a Workout</h1>
+
+    <!-- <div class="rating">
+      <span id="one-star">☆</span><span id="two-star">☆</span><span id="three-star">☆</span><span id="four-star">☆</span><span id="five-star">☆</span>
+    </div> -->
+  
+  <form action="/" method="POST">
+
+    <div class="form-group">
+      <label>Exercise Type:
+        <input type="text" name="exercise-type" required class="form-control" list="exercise-types" placeholder="Tell me what you did!">
+        <datalist id="exercise-types">
+
+          {% for exercise_type, units in types_units %}
+          <option value="{{ exercise_type }}"></option>
+          {% endfor %}
+      </label>
+    </div>
+
+
+    <div class="form-group">
+      <label>Workout Time:<br>
+        (leaving this blank will default to current date and time)
+        <input type="datetime-local" name="workout-time" class="form-control" >
+      </label>
+    </div>
+    
+    <div class="form-group">
+      <label>Performance Rating:
+        <div class="radio">
+          <label><input type="radio" required="required" value="1" name="performance-rating">Showed up: ☆</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" required="required" value="2" name="performance-rating">Good effort: ☆☆</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" required="required" value="3" name="performance-rating">Stuck it out: ☆☆☆</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" required="required" value="4" name="performance-rating">Hit my goal: ☆☆☆☆</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" required="required" value="5" name="performance-rating">Crushed it: &nbsp; ☆☆☆☆☆</label>
+        </div>
+      </label>
+    </div>
+    
+
+
+    <div class="form-group">
+      <label>Distance:
+        <input type="number" name="distance" class="form-control" min="0" placeholder="How far did you go?">
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Distance Unit:
+        <input type="text" name="distance-unit" class="form-control" list="distance-units" placeholder="unit of measurement">
+        <datalist id="distance-units">
+
+          {% for exercise_type, units in types_units %}
+          <option value="{{ units }}"></option>
+          {% endfor %}
+      </label>
+    </div>
+
+    <div class="form-group">
+      <label>Description:
+        <input type="text" name="description" class="form-control" placeholder="(Limit 150 chars)">
+      </label>
+    </div>
+
+    <div class="form-group">
+        <input type="submit" value="Submit" class="btn btn-danger">
+    </div>
+
+  </form>
+
+</div>
+</div>

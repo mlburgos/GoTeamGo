@@ -46,7 +46,9 @@
           </div>
           <div class="panel-body">
             <div class="col-xs-4"> 
-              <img src="{{ photo_url }}" width="100" height="100">
+              <a href="/users/{{ user_id }}">
+                <img class="small-photo" id="photo" src="{{ photo_url }}" height="100">
+              </a>
             </div> <!-- user_photo -->
             <div class="col-xs-8">
               <h5>Workout Count:</h5>
