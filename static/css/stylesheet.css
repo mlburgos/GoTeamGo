@@ -13,9 +13,7 @@
    position: absolute;
 }
 
-.progress-bar {
-    background-color: #3AC9FF;
-}
+
 
 #user-panel {
     position: fixed;
@@ -28,3 +26,122 @@
 #photo {
     border-radius: 5px; 
 }
+
+/*
+brownish color used in login form etc = #665851
+eggshell = #f5f5f5
+other offwhite = #f4f7f6
+
+----------
+navy blue = #18121E
+gunmetal = #233237
+rusty red = #984B43
+warm yellow = #EAC67A
+----------
+cerulean = #4484CE == rgba(68,132,206, 0.5)
+Aluminium = #D9D9D9
+Light (yellow) = #F9CF00
+Tangerine = #F19F4D == rgba(241,159,77, 0.5)
+----------
+sleek grey = #A5A5AF == rgba(165,165,175, 0.5) 
+forest = #015249 == rgba(1,82,73, 0.5)
+Marine = #57BC90 == rgba(87,188,144, 0.5)
+FEATHER = #77C9D4 == rgba(119,201,212, 0.5) 
+---------
+clean and crisp
+
+ice = #99D3DF == rgba(153,211,223, 0.5); 
+Fresh water = #88BBD6 == rgba(136,187,214, 0.5);
+Plaster = #CDCDCD == rgba(205,205,205, 0.5);
+Linen = #E9E9E9 == rgba(233,233,233, 0.5);
+
+*/
+/*
+Notes:
+*/
+
+body {
+    /*background-color: #88BBD6;*/
+    background-color: rgba(136,187,214, 0.15);
+
+}
+
+.container {
+    /*background-color: #88BBD6;*/
+    /*background-color: rgba(136,187,214, 0.5);*/
+
+}
+
+.navbar.navbar-default {
+    background-color: rgba(233,233,233, 1.0);
+}
+
+.navbar.navbar-default a{
+  /*color: rgba(205,205,205, 1);*/
+}
+
+.nav.navbar-nav.navbar-right li a{
+  /*color: rgba(205,205,205, 1);*/
+}
+
+.panel .panel-heading {
+    background-color: rgba(153,211,223, 0.75);
+
+}
+
+.panel-title {
+    color : white;
+
+}
+
+.panel {
+    background-color: rgba(205,205,205, 0.75);
+    border-color: rgba(205,205,205, 0.75);
+}
+
+.progress-bar {
+    background-color: rgba(136,187,214, 1);
+}
+
+h1 {
+  color : white;
+}
+
+h3 {
+  color : white;
+}
+
+h4 {
+  color : white;
+}
+
+.btn.btn-danger {
+  margin-top: 0px;
+  border: 0;
+  border-radius: 2px;
+  color: white;
+  padding: 10px;
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: 0.7em;
+  letter-spacing: 1px;
+  background-color: rgba(153,211,223, 0.75);
+  cursor:pointer;
+  outline: none;
+}
+
+button {
+  margin-top: 0px;
+  border: 0;
+  border-radius: 2px;
+  color: white;
+  padding: 10px;
+  text-transform: uppercase;
+  font-weight: 400;
+  font-size: 0.7em;
+  letter-spacing: 1px;
+  background-color: rgba(153,211,223, 0.75);
+  cursor:pointer;
+  outline: none;
+}
+

@@ -765,7 +765,7 @@ def update_group_goal_helper(group_id, user_id):
 
     group_goal = Goal.get_current_goal(group_id)
 
-    group_name = Group.by_id(group_goal).group_name
+    group_name = Group.by_id(group_id).group_name
 
     return {'group_name': group_name,
             'group_goal': group_goal,
@@ -776,7 +776,7 @@ def handle_update_group_goal_helper(group_id, user_id, group_goal):
 
     new_goal = Goal(group_id=group_id,
                     user_id=user_id,
-                    date_iniciated=datetime.now(),
+                    date_iniciated=datetime.datetime.now(),
                     goal=group_goal,
                     )
 

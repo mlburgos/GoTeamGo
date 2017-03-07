@@ -1,36 +1,40 @@
-{% extends 'base.html' %}
+{% extends 'base-workout-log.html' %}
 {% block content %}
 
 <div class="container-fluid">
-<div>
-  <h1>Register a new group!</h1>
-  <h3>(You will be the admin of the group)</h3>
-  <br>
-  <form action="/new_group" method="POST" id="registration-form">
-    <!-- <div class="form-inline row"> -->
+  <div class="login-box">
+
+    <div class="box-header">
+      <h2>Register a new group!</h2>
+    </div>
+
+    <!-- for javascript driven flash messages -->
+    <div id="js-flash-in-box" class="alert alert-danger" style="width:90%; margin:0 auto; display: none"></div>
+    
+    <label>(You will be the admin of the group)</label>
+
+    <form action="/new_group" method="POST" id="registration-form">
+
       <div class="form-group">
         <label>Desired Group Name:
           <input type="name" name="group-name" id="group-name" required class="form-control">
         </label>
       </div>
-    <!-- </div> -->
-    <!-- <div class="form-inline row"> -->
+
       <div class="form-group">
         <label>Set Group Goal:
           <input type="number" name="group-goal" id="group-goal" required class="form-control">
         </label>
       </div>
-    <!-- </div> -->
-    <br>
-    <div class="form-group">
-        <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
-         <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
-    </div>
 
+      <div class="form-group">
+          <button type="submit">Submit</button>
+          <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+      </div>
 
-  </form>
+    </form>
 
-</div>
+  </div>  <!-- .login-box -->
 </div>
 
 <script src="https://code.jquery.com/jquery.js"></script>
@@ -45,11 +49,9 @@
             $("#registration-form").submit()
 
          } else {
-            $("#js-flash").html(result.msg)
-            $("#js-flash").show()
+            $("#js-flash-in-box").html(result.msg)
+            $("#js-flash-in-box").show()
          }
-
-
 
    }
 

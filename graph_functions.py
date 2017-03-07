@@ -74,7 +74,7 @@ by_day_grouped_layout = go.Layout(
         ),
         overlaying='y',
         side='right'),
-    width=700,
+    width=800,
     height=400,
     )
 
@@ -106,7 +106,7 @@ by_hour_grouped_layout = go.Layout(
         ),
         overlaying='y',
         side='right'),
-    width=700,
+    width=800,
     height=400,
     )
 

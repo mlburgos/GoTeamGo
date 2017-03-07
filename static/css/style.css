@@ -70,7 +70,7 @@ p.small {
 }
 
 .login-box .box-header {
-	background-color: #665851;
+	background-color: rgba(153,211,223, 0.75);
 	margin-top: 0;
 	border-radius: 5px 5px 0 0;
 }
@@ -123,7 +123,7 @@ p.small {
 	font-weight: 400;
 	font-size: 0.7em;
 	letter-spacing: 1px;
-	background-color: #665851;
+	background-color: rgba(153,211,223, 0.75);
 	cursor:pointer;
 	outline: none;
 }

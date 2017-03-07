@@ -63,7 +63,7 @@ LAST_NAMES = ['Burgos',
               'Roberts',
               'Pritchett',
               'Ziai',
-              'Applestien',
+              'Applestein',
               'Pritchett',
               'Johnson',
               'Dickerson',
@@ -71,7 +71,7 @@ LAST_NAMES = ['Burgos',
               'Roberts',
               'Pritchett',
               'Ziai',
-              'Applestien',
+              'Applestein',
               ]
 
 # photos
@@ -88,14 +88,13 @@ canoe_lady = "https://images.pexels.com/photos/24486/pexels-photo-24486.jpg?h=35
 weight_lifter = "https://images.pexels.com/photos/17840/pexels-photo.jpg?h=350&auto=compress&cs=tinysrgb"
 guy_with_lake = "https://images.pexels.com/photos/9692/pexels-photo.jpeg?h=350&auto=compress&cs=tinysrgb"
 superman = "https://images.pexels.com/photos/38630/bodybuilder-weight-training-stress-38630.jpeg?h=350&auto=compress&cs=tinysrgb"
-
-RAY_URL = "https://pbs.twimg.com/profile_images/645893036099158016/C15Eqa7E.jpg"
+guy_tongue_out = "https://images.pexels.com/photos/45882/man-crazy-funny-dude-45882.jpeg?w=940&h=650&auto=compress&cs=tinysrgb"
 
 PHOTOS = [MONICA_PIC,
           squinty_guy,
           BATMAN_URL,
           ginger_serious_lady,
-          RAY_URL,
+          guy_tongue_out,
           shades_guy,
           man_eating_burger,
           jumping_canyon,
@@ -437,6 +436,15 @@ def give_user3_personal_goals():
     db.session.add(user3_goal)
     db.session.commit()
 
+def rename_groups_1_and_4():
+    group1 = Group.by_id(1)
+    group4 = Group.by_id(4)
+
+    group1.group_name = "Can't Beat Our Runtime"
+    group4.group_name = "So QewL"
+
+    db.session.commit()
+
 
 if __name__ == '__main__':
 
@@ -459,3 +467,4 @@ if __name__ == '__main__':
     add_sample_groups_pending_users()
     rename_user3()
     give_user3_personal_goals()
+    rename_groups_1_and_4()

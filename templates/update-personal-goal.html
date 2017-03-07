@@ -1,29 +1,34 @@
-{% extends 'base.html' %}
+{% extends 'base-workout-log.html' %}
 {% block content %}
 
 <div class="container-fluid">
-<div>
-  <h1>Update your personal goal!</h1>
-  <br>
-  <form action="/update_personal_goal" method="POST" id="update-form">
-    <div class="form-inline row">
-      <div class="form-group col-sm-6">
-        <h4>Current Personal Goal: {{ personal_goal }}</h4>
-        <label>New Personal Goal:
-          <input type="number" name="personal-goal" min="0" required class="form-control">
-        </label>
+  <div class="col-xs-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h1 >Update your personal goal!</h1>
       </div>
-    </div>
-    <br>
-    <div class="form-group">
-        <input type="submit" value="Submit" id="form-submit" class="btn btn-danger">
-         <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
-    </div>
+      <div class="panel-body">
 
+        <form action="/update_personal_goal" method="POST" id="update-form">
+          <h3>Current Personal Goal: {{ personal_goal }}</h3>
 
-  </form>
+          <div class="form-group">
+            <label>New Personal Goal
+              <br>
+              <input type="number" name="personal-goal" min="0" required class="form-control">
+            </label>
+          </div>
 
-</div>
+          <div class="form-group">
+              <button type="submit">Submit</button>
+              <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+          </div>
+
+        </form>
+
+      </div> <!-- panel-body -->
+    </div> <!-- panel -->
+  </div><!-- col-xs-6 -->
 </div>
 
 {% endblock %}

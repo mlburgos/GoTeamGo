@@ -1,8 +1,8 @@
-{% extends 'base.html' %}
+{% extends 'base-workout-log.html' %}
+
 {% block content %}
 
-<!-- style="width:40%;" -->
-<div class="container" >
+<div class="container-fluid" >
   <div class="row">
     <div class="col-xs-4"> 
       <div id="user-panel" class="panel panel-default">
@@ -36,11 +36,9 @@
           <h2>This Week's Progress</h2>
         </div>
         <div class="panel-body">  
-          <h3>Workout Count:</h3>
-          {{ workout_count }}
-          <br>
-          <h3>Progess toward goals:</h3>
-          <h4>Personal</h4>
+          <h3>Workout Count: {{ workout_count }}</h3>
+          <!-- <h3>Progess toward goals:</h3> -->
+          <h3>Personal Goal:</h3>
           {% if personal_goal == 0 %}
             {% if is_my_profile %}
               <h5><a href="/update_personal_goal">Set a personal goal here!</a></h5>
@@ -48,10 +46,11 @@
               <h5>{{ first_name }} hasn't set a personal goal yet!</h5>
             {% endif %}
           {% else %}  
-            <label>Goal:</label>
-            {{ personal_goal }}
+            <label>Target:</label>
+            {{ personal_goal }} workouts per week
+            <br>
             <label>Streak:</label>
-            {{ personal_goal_streak }}
+            {{ personal_goal_streak }} weeks!
             <br>
             <div class="progress">
               <div class="progress-bar" role="progressbar" aria-valuenow="{{ personal_progress }}" aria-valuemin="0" aria-valuemax="{{ personal_valuemax }}" style="min-width: 2em; width: {{ personal_progress }}%" id="personalpb">
@@ -59,9 +58,9 @@
               </div><!-- progress-bar -->
             </div><!-- progress -->
           {% endif %}
-
+          <h3>Progess toward group goals:</h3>
           {% for group_id, group_name, group_goal, progress, formatted_progress in full_group_info %}
-            <h4><a href="/groups/{{ group_id }}">{{ group_name }}</a></h4>
+            <h4><a href="/groups/{{ group_id }}">Group: {{ group_name }}</a></h4>
             <label>Goal:</label>
             {{ group_goal }}
             <div class="progress">
@@ -75,7 +74,7 @@
   
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h2>Your workouts for this week:</h2>
+          <h2>Your workouts for this week</h2>
         </div>
         <div class="panel-body">  
           {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description in workouts_for_board %}
@@ -105,15 +104,14 @@
 
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h3 class="panel-title">Analzye your workout history</h3>
-          <br>
-          <p>Select a graph to figure out when you're at your best.</p>
-
-          <p>Workout By Day - Quickly identify with DOW yield your best workouts so you can make sure not to skip those days</p>
-          <p>Workout By Hour - When does your body like to move? Use these graphs to figure out which times of day you perform the best and most consistently.</p>
+          <h2>Analyze your workout history</h2>
         </div>
 
         <div class="panel-body">
+          <p>Select a graph to figure out when you're at your best.</p>
+
+          <p>Workout By Day - Quickly identify which days of the week yield your best workouts so you can make sure not to skip them.</p>
+          <p>Workout By Hour - When does your body like to move? Use these graphs to figure out which times of day you perform the best and most consistently.</p>
           <button type="button" class="dropdown">
 
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Select a Graph<span class="caret"></span></a>

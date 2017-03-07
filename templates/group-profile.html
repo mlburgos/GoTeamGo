@@ -1,11 +1,11 @@
-{% extends 'base.html' %}
+{% extends 'base-workout-log.html' %}
 {% block content %}
 
 <div class="container" >
   <div>
-    <h1>{{ group_name }} rocks!</h1>
-    <h3><label>Goal:</label>
-    {{ group_goal }}</h3>
+    <h1>{{ group_name }}</h1>
+    <h2>Goal:
+    {{ group_goal }}</h2>
     <br>
     {% if is_group_admin %}
       <a href="/update_group_goal/{{ group_id }}" class="btn btn-danger" id="update-btn">Update group goal</a>
@@ -16,29 +16,36 @@
 
   <div class="row">
     <h2>This week's standout workouts:</h2>
-    {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description, name in workouts_for_board %}
-      <div class="col-xs-3">
-        <div class="panel panel-default">
-          <div class="panel-heading">
-            <h3 class="panel-title">{{ name }}</h3>
-          </div>
-          <div class="panel-body">
-            {{ exercise_type }}: {{"☆" * performance_rating }} <br>
-            {{ workout_time }}<br>
-            {% if distance and distance_unit %}
-              Distance: {{ distance }} {{ distance_unit }} <br>
-            {% else %}
-              <br>
-            {% endif %}
-            {% if description %}
-              {{ description }}
-            {% else %}
-              <br>
-            {% endif %}
+    {% if workouts_for_board %}
+      {% for exercise_type, workout_time, performance_rating, distance, distance_unit, description, name in workouts_for_board %}
+        <div class="col-xs-3">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">{{ name }}</h3>
+            </div>
+            <div class="panel-body">
+              {{ exercise_type }}: {{"☆" * performance_rating }} <br>
+              {{ workout_time }}<br>
+              {% if distance and distance_unit %}
+                Distance: {{ distance }} {{ distance_unit }} <br>
+              {% else %}
+                <br>
+              {% endif %}
+              {% if description %}
+                {{ description }}
+              {% else %}
+                <br>
+              {% endif %}
+            </div>
           </div>
         </div>
+      {% endfor %} 
+    {% else %}
+      <div class="row">
+        <div class="col-xs-offset-1"><h4>No workouts to report- get moving team!</h4></div>
       </div>
-    {% endfor %}  
+    {% endif %}
+
   </div>
 
 
@@ -52,7 +59,9 @@
           </div>
           <div class="panel-body">
             <div class="col-xs-4"> 
-              <img src="{{ photo_url }}" width="100" height="100">
+              <a href="/users/{{ user_id }}">
+                <img class="small-photo" id="photo" src="{{ photo_url }}" height="100">
+              </a>
             </div> <!-- user_photo -->
             <div class="col-xs-8">
               <h5>Workout Count:</h5>

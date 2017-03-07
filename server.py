@@ -240,7 +240,7 @@ def user_profile(user_id):
     session_user_id = session.get('user_id')
 
     is_admin = (session.get('is_admin') is not None)
-    navbar_data = get_navbar_data(user_id, is_admin)
+    navbar_data = get_navbar_data(session_user_id, is_admin)
 
     user_info = get_user_profile_data(user_id,
                                       session_user_id,
@@ -395,8 +395,11 @@ def update_photo():
     is_admin = (session.get('is_admin') is not None)
     navbar_data = get_navbar_data(user_id, is_admin)
 
+    user_photo = User.by_id(user_id).photo_url
+
     return render_template("update-photo.html",
                            user_id=user_id,
+                           user_photo=user_photo,
                            navbar_groups=navbar_data['groups'],
                            navbar_pending_approval=navbar_data['pending_approval'],
                            )
