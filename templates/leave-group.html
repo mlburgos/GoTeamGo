@@ -2,41 +2,41 @@
 {% block content %}
 
 <div class="container-fluid">
-<div class="login-box" id="new-workout-box">
-
-    <div class="box-header">
-      <h2>Groups you can leave</h2>
-    </div>
-
-  <!-- for javascript driven flash messages -->
-  <div id="js-flash" class="alert alert-danger" style="width:90%; margin:0 auto; display: none"></div>
-    
-    <form action="/leave_group" method="POST" id="removal-form" name="checks">
-
-      {% if leavable_groups %}
-        <div class="form-group">
-          <label>
-            {% for group in leavable_groups %}
-              <div class="checkbox">
-                <label><input type="checkbox" name="check" value="{{ leavable_groups[group] }}">{{ group }}</label>
-              </div>
-            {% endfor %}
-
-          </label>
-        </div>
-
-      {% else %}
-        <label>You don't have any groups that you can leave.</label>
-      {% endif %}
-
-      <div class="form-group">
-          <button type="submit" id="form-submit">Submit</button>
-          <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+  <div class="col-xs-offset-3 col-xs-6">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h1>Groups you can leave</h1>
       </div>
+      <div class="panel-body">
 
-  </form>
+        <form action="/leave_group" method="POST" id="removal-form" name="checks">
 
-</div>  <!-- .login-box -->
+          {% if leavable_groups %}
+            <div class="form-group">
+              <label>
+                {% for group in leavable_groups %}
+                  <div class="checkbox">
+                    <label><input type="checkbox" name="check" value="{{ leavable_groups[group] }}">{{ group }}</label>
+                  </div>
+                {% endfor %}
+
+              </label>
+            </div>
+
+          {% else %}
+            <label>You don't have any groups that you can leave.</label>
+          {% endif %}
+
+          <div class="form-group">
+              <button type="submit" id="form-submit">Submit</button>
+              <a href="/users/{{ user_id }}" value="Nevermind" class="btn btn-danger">Never mind</a>
+          </div>
+
+        </form>
+
+      </div> <!-- panel-body -->
+    </div> <!-- panel -->
+  </div><!-- col-xs-6 -->
 </div>
 
 
