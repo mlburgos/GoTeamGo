@@ -61,7 +61,7 @@ from decorators import (login_required,
                         )
 
 from datetime import (datetime,
-                      # timedelta,
+                      timedelta,
                       )
 
 app = Flask(__name__)
@@ -205,8 +205,8 @@ def handle_new_workout():
     # Set workout_time to current date and time if no date or time were entered.
     workout_time = request.form["workout-time"]
     if workout_time == "":
-        # workout_time = datetime.now() - timedelta(hours=8)
-        workout_time = datetime.now()
+        workout_time = datetime.now() - timedelta(hours=8)
+        # workout_time = datetime.now()
 
     new_workout = Workout(user_id=user_id,
                           exercise_type=exercise_type,

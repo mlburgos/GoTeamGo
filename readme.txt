@@ -1,5 +1,5 @@
 Requirements
-
+    
     Flask==0.11
     Flask-DebugToolbar==0.10.0
     Flask-SQLAlchemy==2.0
@@ -19,6 +19,8 @@ Setup
 
         $ virtualenv env
         $ source env/bin/activate
+
+    Install Python 2.7
 
     pip install requirements
         

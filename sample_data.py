@@ -10,7 +10,7 @@ from model import (User,
                    db,
                    connect_to_db)
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import math
 
