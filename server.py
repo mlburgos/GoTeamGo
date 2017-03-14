@@ -69,7 +69,10 @@ import os
 app = Flask(__name__)
 
 # Need to modify this later
-app.secret_key = "SECRET_KEY"
+# app.secret_key = "SECRET_KEY"
+
+
+app.config['SECRET_KEY'] = os.environ.get("FLASK_SECRET_KEY", "abcdef")
 
 # Prevent undefined variables from failing silently.
 app.jinja_env.undefined = StrictUndefined
