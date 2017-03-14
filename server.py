@@ -681,16 +681,28 @@ def handle_update_group_goal(group_id):
 ##############################################################################
 
 if __name__ == "__main__":
-    # Set debug=True here, since it has to be True at the
-    # point that we invoke the DebugToolbarExtension
-    app.debug = True
-    app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
+    # # Set debug=True here, since it has to be True at the
+    # # point that we invoke the DebugToolbarExtension
+    # app.debug = True
+    # app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
-    connect_to_db(app)
+    # connect_to_db(app)
 
-    # Use the DebugToolbar
-    # DebugToolbarExtension(app)
+    # # Use the DebugToolbar
+    # # DebugToolbarExtension(app)
 
+    # app.run(port=5000, host='0.0.0.0')
 
+    ########### For Heroku deployment #############
+    connect_to_db(app, os.environ.get("DATABASE_URL"))
 
-    app.run(port=5000, host='0.0.0.0')
+    # Create the tables we need from our models (if they already
+    # exist, nothing will happen here, so it's fine to do this each
+    # time on startup)
+    db.create_all(app=app)
+
+    DEBUG = "NO_DEBUG" not in os.environ
+    PORT = int(os.environ.get("PORT", 5000))
+
+    app.run(host="0.0.0.0", port=PORT, debug=DEBUG)
+
