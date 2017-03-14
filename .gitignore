@@ -3,3 +3,9 @@ env
 Sam*
 secrets.sh
 scrap.py
+*.eddx
+*.mp4
+*.pdf
+*.png
+prettify.txt
+z_not_in_use
