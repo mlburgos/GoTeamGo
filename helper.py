@@ -318,11 +318,18 @@ def get_streak(user_id):
             print "weeks_workouts:", weeks_workouts
             print "streak_counter:", streak_counter
 
+            current_goal_date_iniciated = current_goal.date_iniciated.date()
+            current_goal_days_from_sunday = datetime.timedelta(days=current_goal_date_iniciated.weekday()) 
+            current_goal_starting_sunday = current_goal_date_iniciated - current_goal_days_from_sunday - days_1
+            
             i = goals.index(current_goal)
-            while current_goal.date_iniciated.date() > nearest_sunday:
+            while current_goal_starting_sunday > nearest_sunday:
                 i += 1
-                current_goal = goals[i]
-
+                if i < len(goals):
+                    current_goal = goals[i]
+                else:
+                    break
+                    
             print "current_goal:", current_goal
             print "current_goal.personal_goal:", current_goal.personal_goal
 
