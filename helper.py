@@ -307,32 +307,36 @@ def get_streak(user_id):
     streak_counter = 0
 
     goals = Personal_Goal.get_all_goals_by_user_id(user_id)
-    current_goal = goals[0]
+    
+    print "goals:", goals
 
-    while True:
-        weeks_workouts = len(get_weeks_workouts(user_id, nearest_sunday))
-        print "weeks_workouts:", weeks_workouts
-        print "streak_counter:", streak_counter
+    if len(goals) > 1:
+        current_goal = goals[0]
 
-        i = goals.index(current_goal)
-        while current_goal.date_iniciated.date() > nearest_sunday:
-            i += 1
-            current_goal = goals[i]
+        while True:
+            weeks_workouts = len(get_weeks_workouts(user_id, nearest_sunday))
+            print "weeks_workouts:", weeks_workouts
+            print "streak_counter:", streak_counter
 
-        print "current_goal:", current_goal
-        print "current_goal.personal_goal:", current_goal.personal_goal
+            i = goals.index(current_goal)
+            while current_goal.date_iniciated.date() > nearest_sunday:
+                i += 1
+                current_goal = goals[i]
 
-        if current_goal.personal_goal == 0:
-            break
-        elif weeks_workouts >= current_goal.personal_goal:
-            streak_counter += 1
-            print "added one to streak_counter"
-        else:
-            print "weeks_workouts < current_goal"
-            break
+            print "current_goal:", current_goal
+            print "current_goal.personal_goal:", current_goal.personal_goal
 
-        nearest_sunday = nearest_sunday - days_7
-        print "new nearest_sunday:", nearest_sunday
+            if current_goal.personal_goal == 0:
+                break
+            elif weeks_workouts >= current_goal.personal_goal:
+                streak_counter += 1
+                print "added one to streak_counter"
+            else:
+                print "weeks_workouts < current_goal"
+                break
+
+            nearest_sunday = nearest_sunday - days_7
+            print "new nearest_sunday:", nearest_sunday
 
     return streak_counter
 
