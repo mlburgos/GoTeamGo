@@ -689,7 +689,7 @@ if __name__ == "__main__":
     # app.debug = True
     # app.jinja_env.auto_reload = app.debug  # make sure templates, etc. are not cached in debug mode
 
-    connect_to_db(app)
+    # connect_to_db(app)
 
     # # Use the DebugToolbar
     # # DebugToolbarExtension(app)
@@ -697,11 +697,12 @@ if __name__ == "__main__":
     # app.run(port=5000, host='0.0.0.0')
 
     ########### For Heroku deployment #############
-    # connect_to_db(app, os.environ.get("DATABASE_URL"))
+    connect_to_db(app, os.environ.get("DATABASE_URL", 'postgres:///go_team_go'))
 
     # Create the tables we need from our models (if they already
     # exist, nothing will happen here, so it's fine to do this each
     # time on startup)
+
     db.create_all(app=app)
 
     DEBUG = "NO_DEBUG" not in os.environ
