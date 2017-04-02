@@ -38,16 +38,12 @@
       // result: object with success boolean, message string
 
          if (result.success) {
-
             $("#registration-form").submit()
 
          } else {
             $("#js-flash").html(result.msg)
             $("#js-flash").show()
          }
-
-
-
    }
 
    function validateGroupNameExists (evt) {
